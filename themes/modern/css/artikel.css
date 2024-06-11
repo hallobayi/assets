@@ -1,0 +1,36 @@
+/**
+*	Developed by: Agus Prawoto Hadi
+* 	Modified by : Muchamad Desta Fadilah a.ka. topidesta
+*	Website		: https://topidesta.my.id
+*	Year		: 2023-2024
+*/
+
+.feature-image {
+	width: 100%;
+    border: 2px dashed #CCCCCC;
+    height: 100%;
+    min-height: 125px;
+	cursor: pointer;
+	display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+	position: relative;
+}
+.feature-image img {
+	max-width: 100%;
+    max-height: 150px;
+}
+
+.btn-square-xs {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-top-right {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
