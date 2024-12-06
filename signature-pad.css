@@ -1,0 +1,34 @@
+/* .signature-pad {
+  border: 1px solid #03b509;
+  border-radius: 3%
+} */
+
+/* .m-signature-pad-body
+{
+  border: 1px dashed #ccc;
+  border-radius: 5px;
+  color: #bbbabb;
+  height: 253px;
+  width: 46%;
+  text-align: center;
+  float: right;
+  vertical-align: middle;
+  top: 73px;
+  position: fixed;
+  left: 33px;
+}
+.m-signature-pad-footer
+{
+  bottom: 250px;
+  left: 218px;
+  position: fixed;
+} */
+
+#signature{
+  width:300px;
+  height:200px;
+  /* border: solid 1px red; */
+  border: 1px dashed red;
+  border-radius: 5px;
+  text-align: center;
+}
