@@ -80,8 +80,8 @@
       opacity      : 0,
       overlay      : true,
 	    modal        : true,  //New parameter 
-      loadingImage : '/img/loading.gif',
-      closeImage   : '/img/closelabel.gif',
+      loadingImage : 'https://rawcdn.githack.com/hallobayi/assets/ebd83ffc154bb7e43e072746a4e202775cf8847e/vendors/facebox/img/loading.gif',
+      closeImage   : 'https://rawcdn.githack.com/hallobayi/assets/ebd83ffc154bb7e43e072746a4e202775cf8847e/vendors/facebox/img/closelabel.gif',
       imageTypes   : [ 'png', 'jpg', 'jpeg', 'gif' ],
       faceboxHtml  : '\
     <div id="facebox" style="display:none;"> \
