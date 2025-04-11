@@ -80,8 +80,8 @@
       opacity      : 0,
       overlay      : true,
 	    modal        : true,  //New parameter 
-      loadingImage : '/img/facebox/loading.gif',
-      closeImage   : '/img/facebox/closelabel.gif',
+      loadingImage : '/img/loading.gif',
+      closeImage   : '/img/closelabel.gif',
       imageTypes   : [ 'png', 'jpg', 'jpeg', 'gif' ],
       faceboxHtml  : '\
     <div id="facebox" style="display:none;"> \

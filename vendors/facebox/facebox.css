@@ -1,8 +1,8 @@
-#facebox .b {  background:url(img/facebox/b.png);}
-#facebox .tl {  background:url(img/facebox/tl.png);}
-#facebox .tr {  background:url(img/facebox/tr.png);}
-#facebox .bl {  background:url(img/facebox/bl.png);}
-#facebox .br {  background:url(img/facebox/br.png);}
+#facebox .b {  background:url(img/b.png);}
+#facebox .tl {  background:url(img/tl.png);}
+#facebox .tr {  background:url(img/tr.png);}
+#facebox .bl {  background:url(img/bl.png);}
+#facebox .br {  background:url(img/br.png);}
 #facebox {  position: absolute;  top: 0;  left: 0;  z-index: 100;  text-align: left;}
 #facebox .popup {  position: relative;}
 #facebox table {  border-collapse: collapse;}
@@ -18,7 +18,7 @@
 .facebox_overlayBG {  background-color: #000;  z-index: 99;}
 * html #facebox_overlay { /* ie6 hack */
   position: absolute;
-  height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+  height: 100%;
 }
 .table_loader_content td{ padding:3px !important;}
 .table_loader_content th{ padding:3px !important; text-align:center;}
