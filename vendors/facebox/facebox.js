@@ -80,8 +80,8 @@
       opacity      : 0,
       overlay      : true,
 	    modal        : true,  //New parameter 
-      loadingImage : 'http://192.168.132.2/simrs/assets/img/facebox/loading.gif',
-      closeImage   : 'http://192.168.132.2/simrs/assets/img/facebox/closelabel.gif',
+      loadingImage : '/img/facebox/loading.gif',
+      closeImage   : '/img/facebox/closelabel.gif',
       imageTypes   : [ 'png', 'jpg', 'jpeg', 'gif' ],
       faceboxHtml  : '\
     <div id="facebox" style="display:none;"> \
