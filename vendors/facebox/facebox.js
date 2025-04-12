@@ -84,30 +84,30 @@
       closeImage   : 'https://rawcdn.githack.com/hallobayi/assets/ebd83ffc154bb7e43e072746a4e202775cf8847e/vendors/facebox/img/closelabel.gif',
       imageTypes   : [ 'png', 'jpg', 'jpeg', 'gif' ],
       faceboxHtml  : '\
-    <div id="facebox" style="display:none;"> \
-      <div class="popup"> \
-        <table> \
-          <tbody> \
-            <tr> \
-              <td class="tl"/><td class="b"/><td class="tr"/> \
-            </tr> \
-            <tr> \
-              <td class="b"/> \
-              <td class="body"> \
-                <div class="content"> \
-                </div> \
-                <div class="footer"> \
-                </div> \
-              </td> \
-              <td class="b"/> \
-            </tr> \
-            <tr> \
-              <td class="bl"/><td class="b"/><td class="br"/> \
-            </tr> \
-          </tbody> \
-        </table> \
-      </div> \
-    </div>'
+      <div id="facebox" style="display:none;"> \
+        <div class="popup"> \
+          <table> \
+            <tbody> \
+              <tr> \
+                <td class="tl"/><td class="b"/><td class="tr"/> \
+              </tr> \
+              <tr> \
+                <td class="b"/> \
+                <td class="body"> \
+                  <div class="content-facebox"> \
+                  </div> \
+                  <div class="footer-facebox"> \
+                  </div> \
+                </td> \
+                <td class="b"/> \
+              </tr> \
+              <tr> \
+                <td class="bl"/><td class="b"/><td class="br"/> \
+              </tr> \
+            </tbody> \
+          </table> \
+        </div> \
+      </div>'
     },
 
     loading: function() {
@@ -115,7 +115,7 @@
       if ($('#facebox .loading').length == 1) return true
       showOverlay()
 
-      $('#facebox .content').empty()
+      $('#facebox .content-facebox').empty()
       $('#facebox .body').children().hide().end().
         append('<div class="loading"><img src="'+$.facebox.settings.loadingImage+'"/></div>')
 	  /*
@@ -140,8 +140,8 @@
 
     reveal: function(data, klass) {
       $(document).trigger('beforeReveal.facebox')
-      if (klass) $('#facebox .content').addClass(klass)
-      $('#facebox .content').append(data)
+      if (klass) $('#facebox .content-facebox').addClass(klass)
+      $('#facebox .content-facebox').append(data)
       $('#facebox .loading').remove()
       $('#facebox .body').children().fadeIn('normal')
       $('#facebox').css('left', $(window).width() / 2 - ($('#facebox table').width() / 2))
@@ -319,7 +319,7 @@
   $(document).bind('close.facebox', function() {
     $(document).unbind('keydown.facebox')
     $('#facebox').fadeOut(function() {
-      $('#facebox .content').removeClass().addClass('content')
+      $('#facebox .content-facebox').removeClass().addClass('content-facebox')
       hideOverlay()
       $('#facebox .loading').remove()
     })
