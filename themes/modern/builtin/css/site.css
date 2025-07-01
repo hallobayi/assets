@@ -1337,3 +1337,8 @@ table ol li {
 .apexcharts-svg {
     background: none !important;
 }
+
+.sLoading {
+    background: transparent url('https://cdn.jsdelivr.net/gh/rssariasih/assets@0.5.1/image_crud/images/loading.gif') no-repeat scroll right center content-box;
+    background-size: contain;
+}
