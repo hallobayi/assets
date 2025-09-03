@@ -1,5 +1,25 @@
 $(function() {
 
+    $().click(function(e) {
+        e.preventDefault();
+    })
+
+    // source: https://stackoverflow.com/a/3291856
+    Object.defineProperty(String.prototype, 'capitalize', {
+        value: function() {
+          return this.charAt(0).toUpperCase() + this.slice(1);
+        },
+        enumerable: false
+    });
+
+    $('#status_perokok, #diagnosa_dokter, #riwayat_penyakit, #riwayat_alergi_obat, #keluhan_utama, #riwayat_alergi_lainnya').keyup(function(){
+        this.value = this.value.capitalize();
+    });
+
+    $('#nama_pasien, #alamat, #nama_suami, #keterangan_lain').keyup(function(){
+        this.value = this.value.toUpperCase();
+    });
+
     // source: https://stackoverflow.com/a/67184094
     var tokenHash=$("input[name=csrf_test_name]").val();
 
@@ -42,7 +62,7 @@ $(function() {
                 while (i--) {
                     return_list[i] = {
                         id: data[i].id_pasien,
-                        value: data[i].nomor_rm + " - " + data[i].nama_pasien,
+                        value: data[i].nomor_rm + " - " + data[i].nama_pasien + " - " + data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
                         tgl_lahir_ibu: data[i].tgl_lahir_ibu
@@ -53,7 +73,11 @@ $(function() {
             }
           });
         }
-    }).on('typeahead:selected', onSelectedNomorRmHeader);
+    }).on('typeahead:selected', onSelectedNomorRmHeader).on('typeahead:asyncrequest', function(e) {
+        $(e.target).addClass('sLoading');
+    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+        $(e.target).removeClass('sLoading');
+    });
 
     // source: https://stackoverflow.com/a/19540313
     function onSelectedNomorRmHeader($e, datum) {
@@ -61,6 +85,11 @@ $(function() {
     }
 
     // source: https://stackoverflow.com/a/30340490
+    // TODO:
+    // https://stackoverflow.com/questions/11269439/how-to-include-csrf-from-codeigniter-into-ajax-data
+    // https://stackoverflow.com/questions/25930653/can-i-listen-to-a-specific-element-on-ajaxcomplete-instead-of-document
+    // https://stackoverflow.com/questions/38502548/codeigniter-csrf-valid-for-only-one-time-ajax-request
+    
     $('.no_rm').typeahead({
         hint: true,
         highlight: true,
@@ -74,7 +103,7 @@ $(function() {
         async: true,
         templates: {
             empty: [
-                '<div class="empty">Data Pasien Tidak Ada! ~ <a target="_blank" href="'+base_url+'master/pasien/add">Tambah Pasien</a></div>'
+                '<div class="d-flex justify-content-center">Data Pasien Tidak Ada! .:: <a target="_blank" class="tambah-pasien-off-dulu" href="'+base_url+'master/pasien/add">&nbsp;<i class="fas fa-plus"></i> Tambah Pasien&nbsp;</a>::. </div>'
             ].join('\n'),
             suggestion: function (item){
                 return '<div>' + item.value + '</div>'
@@ -99,10 +128,11 @@ $(function() {
                 while (i--) {
                     return_list[i] = {
                         id: data[i].id_pasien,
-                        value: data[i].nomor_rm + " - " + data[i].nama_pasien,
+                        value: data[i].nomor_rm + " - " + data[i].nama_pasien + " - " + data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
-                        tgl_lahir_ibu: $.date(data[i].tgl_lahir_ibu)
+                        tgl_lahir_ibu: $.date(data[i].tgl_lahir_ibu),
+                        no_wa: data[i].no_wa,
                     };
                 }    
               // in this example, json is simply an array of strings
@@ -110,13 +140,120 @@ $(function() {
             }
           });
         }
-    }).on('typeahead:selected', onSelectedNomorRm);
+    }).on('typeahead:selected', onSelectedNomorRm).on('typeahead:asyncrequest', function(e) {
+        $(e.target).addClass('sLoading');
+    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+        $(e.target).removeClass('sLoading');
+    });
 
     // source: https://stackoverflow.com/a/19540313
     function onSelectedNomorRm($e, datum) {
         $('#nama_ibu').val(datum.nama);
         $('#tanggal_lahir_ibu').val(datum.tgl_lahir_ibu);
+        $('#no_wa').val(datum.no_wa);
+        $("#nama_pasien_span").data('id', datum.nama);
+        $('span[data-id="nama_pasien"]').attr('data-id', datum.nama); 
     }
+
+    // Show Popup Pasien New
+    $('body').delegate('.tambah-pasien', 'click', function(e) {
+        e.preventDefault();
+		showFormPasienBaru();
+    });
+
+	function showFormPasienBaru() {
+        $bootbox = bootbox.dialog({
+            title: 'Tambah Form Pasien Baru',
+            message: '<div class="text-center text-secondary"><div class="spinner-border"></div></div>',
+            buttons: {
+                cancel: {
+                    label: 'Cancel'
+                },
+                success: {
+                    label: 'Submit',
+                    className: 'btn-success submitJanjian',
+                    callback: function() {
+                        $bootbox.find('.alert').remove();
+                        $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
+                        $button.prop('disabled', true);
+
+                        // Submit Form Janjian
+                        form = $bootbox.find('form')[0];
+                        $.ajax({
+                            type: 'POST',
+                            url: base_url+'master/pasien/ajaxUpdateDataPasien',
+                            data: new FormData(form),
+                            processData: false,
+                            contentType: false,
+                            dataType: 'json',
+                            success: function(data) { console.log(data)
+
+                                $bootbox.modal('hide');
+                                if (data.message.status == 'ok') {
+                                    const Toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 2500,
+                                        timerProgressBar: true,
+                                        iconColor: 'white',
+                                        customClass: {
+                                            popup: 'bg-success text-light toast p-2'
+                                        },
+                                        didOpen: (toast) => {
+                                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                        }
+                                    })
+                                    Toast.fire({
+                                        html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil disimpan</div>'
+                                    })
+                                  
+                                    // Load Ajax Datatables 
+                                    // TODO: Masih ada Bugs CSRF Nyangkut
+                                    // settingsPerjanjian.ajax.url = data.message.urlAjax;
+                                    // dataTablesPerjanjian.destroy();
+                                    // len = $('#tabel-perjanjian').find('thead').find('th').length;
+                                    // $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');
+                                    // dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);
+                                    // dataTablesPerjanjian.draw();
+
+                                    location.reload();
+                                    
+                                } else {
+                                    show_alert('Error !!!', data.message, 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                show_alert('Error !!!', xhr.responseText, 'error');
+                                console.log(xhr.responseText);
+                            }
+                        })
+                        return false;
+                    }
+                }
+            }
+        });
+
+        $bootbox.find('.modal-dialog').css('max-width', '950px');
+        var $button = $bootbox.find('button').prop('disabled', true);
+        var $button_submit = $bootbox.find('button.submitJanjian');
+
+        $.get(base_url+'master/pasien/ajaxFormPasienBaru', function(html) {
+            $button.prop('disabled', false);
+            $bootbox.find('.modal-body').empty().append(html);
+            // $('.tglJanjiDatang').flatpickr({
+            //     dateFormat: "d-m-Y",
+            //     minDate: new Date()
+            // });
+            // $('.jamJanjiDatang').flatpickr({
+            //     enableTime: true,
+            //     noCalendar: true,
+            //     dateFormat: "H:i",
+            //     time_24hr: true
+            // });
+        });
+    };
 
     // source: https://stackoverflow.com/a/16958005
     $.date = function(dateObject) {
@@ -183,7 +320,11 @@ $(function() {
             }
           });
         }
-    }).on('typeahead:selected', onSelectedDiagnosa);
+    }).on('typeahead:selected', onSelectedDiagnosa).on('typeahead:asyncrequest', function(e) {
+        $(e.target).addClass('sLoading');
+    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+        $(e.target).removeClass('sLoading');
+    });
 
     // source: https://stackoverflow.com/a/19540313
     function onSelectedDiagnosa($e, datum) {
@@ -240,67 +381,15 @@ $(function() {
             }
             });
         }
-    }).on('typeahead:selected', onSelectedTindakan);
+    }).on('typeahead:selected', onSelectedTindakan).on('typeahead:asyncrequest', function(e) {
+        $(e.target).addClass('sLoading');
+    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+        $(e.target).removeClass('sLoading');
+    });
 
     // source: https://stackoverflow.com/a/19540313
     function onSelectedTindakan($e, datum) {
         $('#nama_tindakan').val(datum.nama_tindakan);
-    }
-
-    // source: https://stackoverflow.com/a/30340490
-    $('.nama_obat').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1
-    },
-    {
-        display: function(item){
-            return item.nama_obat
-        },
-        limit: 12,
-        async: true,
-        templates: {
-            empty: [
-                '<div class="empty">Data Obat Tidak Ada!</div>'
-            ].join('\n'),
-            suggestion: function (item){
-                return '<div>' + item.value + '</div>'
-            }
-        },
-        source: function (query, processSync, processAsync) { //console.log(tokenHash)
-        // processSync(['This suggestion appears immediately', 'This one too']);
-            return $.ajax({
-                url: base_url + 'master/farmasi/obat-typeahead',
-                dataType: "json",
-                type: "POST",
-                data: {
-                    max_rows: 15,
-                    q:query,
-                    csrf_test_name:tokenHash // source: https://stackoverflow.com/a/50541928
-                },
-                beforeSend: function (xhr) {       
-                    xhr.setRequestHeader('X-CSRF-Token' , tokenHash);    
-                },
-                success: function (data) {
-                    var return_list = [], i = data.length;
-                    while (i--) {
-                        return_list[i] = {
-                            id: data[i].id_obat,
-                            value: data[i].id_obat + " - " + data[i].nama_obat,
-                            nama_obat: data[i].nama_obat
-                        };
-                    }    
-                    // in this example, json is simply an array of strings
-                    return processAsync(return_list);
-                }
-            });
-        }
-    }).on('typeahead:selected', onSelectNamaObat);
-
-    // source: https://stackoverflow.com/a/19540313
-    function onSelectNamaObat($e, datum) { //console.log(datum)
-        $('#nama_obat').val(datum.nama_obat);
-        $('#id_obat').val(datum.id);
     }
 
 	$('body').delegate('.tambah-anak', 'click', function(e) {
@@ -384,18 +473,19 @@ $(function() {
 
 !(function($) {
     "use strict";
-    var MainApp = function() {};
-
-    MainApp.prototype.initLoader = function() {
-        // Preloader
-        $(window).on("load", function() {
-            $("#status").fadeOut();
-            $("#preloader").delay(250).fadeOut("slow");
-        });
-    };
-    (MainApp.prototype.init = function() {
-        this.initLoader();
-    }),
+    class MainApp {
+        constructor() { }
+        initLoader() {
+            // Preloader
+            $(window).on("load", function () {
+                $("#status").fadeOut();
+                $("#preloader").delay(250).fadeOut("slow");
+            });
+        }
+        init() {
+            this.initLoader();
+        }
+    }
     //init
     ($.MainApp = new MainApp()),
     ($.MainApp.Constructor = MainApp);
