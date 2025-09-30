@@ -12,10 +12,14 @@ var captcha = sliderCaptcha({
     // onFail: function () {},
     // onRefresh: function () {},
     setSrc: function () {
-    return 'https://picsum.photos/seed/picsum/' + Math.round(Math.random() * 136) + '.jpg';
+        return 'https://cdn.jsdelivr.net/gh/hallobayi/assets@0.1.11/images/capcay/bg' + getRandomInt(1,5) + '.jpg';
     }
     // or use local images instead
     // localImages: function () {
     //   return 'images/Pic' + Math.round(Math.random() * 4) + '.jpg';
     // }
-})
+});
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
