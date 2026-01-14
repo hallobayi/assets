@@ -71,24 +71,6 @@ jQuery(document).ready(function () {
     });
   });
 
-  if ($(".select2").length > 0) {
-    $(".cabang").attr("required", "required").prop("disabled", true);
-
-    $(".select2, .cabang")
-      .select2({
-        placeholder: "Select an option",
-        theme: "bootstrap-5",
-        allowClear: false,
-      })
-      .on("select2:opening", function (e) {
-        $(this)
-          .data("select2")
-          .$dropdown.find(":input.select2-search__field")
-          .attr("placeholder", "Ketik atau Klik Pilihan")
-          .focus();
-      });
-  }
-
   const priceInputs = [{ input: "saldoTampilan", hidden: "saldo" }];
 
   priceInputs.forEach((item) => {
