@@ -79,7 +79,7 @@ jQuery(document).ready(function () {
 
     if (inputEl && hiddenEl) {
       // Set initial value only if hiddenEl has a value
-      const initialValue = hiddenEl.value || "0";
+      const initialValue = hiddenEl.value || " ";
       $("#" + item.input).val("Rp. " + initialValue);
 
       inputEl.addEventListener("keyup", function (e) {
