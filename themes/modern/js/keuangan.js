@@ -10,8 +10,63 @@ jQuery(document).ready(function () {
     dateFormat: "Y-m-d",
   });
 
+  // DataTables Logic
+  let dataTablesKas = "";
+  const settings = {
+    processing: true,
+    serverSide: true,
+    scrollX: true,
+    ajax: {
+      url: base_url + "keuangan/kas/getDataKas",
+      type: "POST",
+      data: function (d) {
+        d.csrf_test_name = $("input[name=csrf_test_name]").val();
+        d.startDate = $("input[name=startDate]").val();
+        d.endDate = $("input[name=endDate]").val();
+        d.kategori = $("select[name=kategori]").val();
+        d.lokasi = $("select[name=lokasi]").val();
+        d.status = $("select[name=status]").val();
+      },
+    },
+    order: [1, "desc"], // Order by Tanggal (index 1)
+    columnDefs: [
+      { targets: [0, 7], orderable: false }, // Disable sort for No and Action
+    ],
+    columns: [
+      { data: "ignore_search_urut" },
+      { data: "tanggal" },
+      {
+        data: "keterangan",
+        render: function (data, type, row) {
+          return data ? data.replace(/\n/g, "<br>") : "";
+        },
+      },
+      { data: "kategori" },
+      { data: "nama_cabang" },
+      { data: "status" },
+      {
+        data: "saldo",
+        className: "text-end",
+        render: function (data, type, row) {
+          return formatRupiah(data.toString(), "Rp. ");
+        },
+      },
+      { data: "ignore_search_action" },
+    ],
+  };
+
+  if ($("#tabel-kas").length > 0) {
+    dataTablesKas = $("#tabel-kas").DataTable(settings);
+  }
+
+  // Filter Form Submit
+  $("#form-filter").submit(function (e) {
+    e.preventDefault();
+    dataTablesKas.ajax.reload();
+  });
+
   // Handle form submission with AJAX using jQuery
-  $("form").on("submit", function (e) {
+  $("form:not(#form-filter)").on("submit", function (e) {
     e.preventDefault();
 
     const $form = $(this);
