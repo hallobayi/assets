@@ -23,7 +23,9 @@ jQuery(document).ready(function () {
     $.ajax({
       url: $form.attr("action"),
       type: "POST",
-      data: $form.serialize(),
+      data: new FormData($form[0]),
+      processData: false,
+      contentType: false,
       dataType: "json",
       success: function (data) {
         $submitBtn.prop("disabled", false).text(originalText);
