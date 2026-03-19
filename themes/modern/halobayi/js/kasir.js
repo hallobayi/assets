@@ -1,48 +1,31 @@
 $(document).ready(function() {
 
-    var diskonKlinik = document.getElementById("diskonKlinik");
-    var diskonDokter = document.getElementById("diskonDokter");
+    function hitungTotalDiskon() {
+        var valKlinik = parseFloat($("#diskonKlinikKalkulasi").val()) || 0;
+        var valDokter = parseFloat($("#diskonDokterKalkulasi").val()) || 0;
+        var totalDiskon = valKlinik + valDokter;
+        var totalTagihan = parseFloat($("#totalTagihan").val()) || 0;
+        var totalBayar = totalTagihan - totalDiskon;
 
-    // Format To Rupiah
-    diskonKlinik.addEventListener("keyup", function(e) {
-      diskonKlinik.value = formatRupiah(this.value, "Rp. ");
-    });
-    diskonDokter.addEventListener("keyup", function(e) {
-        diskonDokter.value = formatRupiah(this.value, "Rp. ");
-    });
+        $("#totale").text(totalDiskon > 0 ? formatRupiah(String(totalDiskon), "Rp. ") : "0");
+        $("#footerDiskon").text(totalDiskon > 0 ? formatRupiah(String(totalDiskon), "Rp. ") : "0");
+        $("#totalBayar").text(formatRupiah(String(totalBayar), "Rp. "));
+    }
 
-    // Unformat
-    diskonKlinik.addEventListener("keyup", function(e) {
-        var repl = diskonKlinik.value.replace(/\Rp.|\./g,'');
-        $("#diskonKlinikKalkulasi").val(repl);
-    });
-    diskonDokter.addEventListener("keyup", function(e) {
-        var repl = diskonDokter.value.replace(/\Rp.|\./g,''); // source: https://stackoverflow.com/a/28593538
-        $("#diskonDokterKalkulasi").val(repl);
+    $("#diskonKlinik").on("keyup", function() {
+        this.value = formatRupiah(this.value, "Rp. ");
+        $("#diskonKlinikKalkulasi").val(this.value.replace(/[^0-9]/g, '') || '0');
+        hitungTotalDiskon();
     });
 
-    $('.diskonKlinik').on('input',function(){
-        var valTotal = parseFloat($("#diskonKlinikKalkulasi").val()) + parseFloat($("#diskonDokterKalkulasi").val());
-        $("#totale").text(valTotal);
+    $("#diskonDokter").on("keyup", function() {
+        this.value = formatRupiah(this.value, "Rp. ");
+        $("#diskonDokterKalkulasi").val(this.value.replace(/[^0-9]/g, '') || '0');
+        hitungTotalDiskon();
     });
-
-    // source: https://jsfiddle.net/qjoqmgcm/
-    // $(".diskonKlinik").keyup(function(){
-    //     var repl1 = diskonKlinik.value.replace(/\Rp.|\./g, '');
-    //     var repl2 = diskonDokter.value.replace(/\Rp.|\./g, ''); // source: https://stackoverflow.com/a/28593538
-    //     var valTotal = parseFloat($("#diskonKlinikKalkulasi").val(repl1)) + parseFloat($("#diskonDokterKalkulasi").val(repl2));
-    //     $("#totale").text(valTotal);
-    // });
 
 });
 
-var tTotal = function(){
-    var total = parseFloat($("#diskonKlinikKalkulasi").val()) + parseFloat($("#diskonDokterKalkulasi").val());
-    $("#totale").text(total);
-}
-
-document.getElementById('diskonKlinikKalkulasi').onInput = function(){tTotal()}
-document.getElementById('diskonDokterKalkulasi').onInput = function(){tTotal()}
 
 
 /* Fungsi formatRupiah 

@@ -1,0 +1,13 @@
+dt {
+  float: left;
+  clear: left;
+  width: 80px;
+  border-bottom: solid 1px #000;
+  font-size: small;
+}
+dd {
+  float: left;
+  width: 50px;
+  border-bottom: solid 1px #000;
+  margin: 0;
+}
