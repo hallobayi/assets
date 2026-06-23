@@ -24,6 +24,68 @@ $(document).ready(function() {
         hitungTotalDiskon();
     });
 
+    $("#konfirmasi-pembayaran").on("click", function() {
+        var no_reg = $("#noreg_hidden").val();
+        var id_pasien = $("#id_pasien_hidden").val();
+        var diskonKlinik = $("#diskonKlinikKalkulasi").val() || 0;
+        var diskonDokter = $("#diskonDokterKalkulasi").val() || 0;
+
+        var csrfName = $('.csrf_token').attr('name');
+        var csrfHash = $('.csrf_token').val();
+
+        var requestData = {
+            no_reg: no_reg,
+            id_pasien: id_pasien,
+            diskonKlinik: diskonKlinik,
+            diskonDokter: diskonDokter
+        };
+        requestData[csrfName] = csrfHash;
+
+        Swal.fire({
+            title: 'Konfirmasi Pembayaran',
+            text: "Apakah Anda yakin ingin memproses pembayaran ini?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Proses',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: window.location.origin + "/kasir/konfirmasipembayaran",
+                    data: requestData,
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status) {
+                            Swal.fire(
+                                'Berhasil!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                kembali();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Gagal!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire(
+                            'Error!',
+                            'Terjadi kesalahan saat memproses pembayaran.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
+
 });
 
 
