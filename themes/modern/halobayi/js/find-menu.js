@@ -4,6 +4,66 @@ document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
   const resultsContainer = document.getElementById("searchResults");
 
+  // Key penyimpanan index submenu (isi modul) di localStorage
+  const SUBMENU_STORE_KEY = "sidebar_submenu_index";
+
+  // --- SUBMENU (ISI SIDEBAR) ---------------------------------------------
+  // Sidebar Simhai bersifat "flat": tiap modul (mis. Rekam Medis) hanya 1 link,
+  // sedangkan isinya (Pasien, Tarif Tindakan, ICD 9, dst) dirender sebagai kartu
+  // pada halaman modul. Kartu-kartu itu kita rekam ke localStorage supaya tetap
+  // bisa dicari dari halaman manapun (single source of truth = kartu yg dirender).
+
+  function loadSubmenuStore() {
+    try {
+      return JSON.parse(localStorage.getItem(SUBMENU_STORE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveSubmenuStore(store) {
+    try {
+      localStorage.setItem(SUBMENU_STORE_KEY, JSON.stringify(store));
+    } catch (e) {
+      /* storage penuh / diblokir: abaikan */
+    }
+  }
+
+  // Rekam kartu (isi modul) pada halaman saat ini ke localStorage.
+  function indexPageCards() {
+    const cards = document.querySelectorAll(
+      "#cardSearchList .card-search-item a.card-icon-link, .card-icon-link",
+    );
+    if (!cards.length) return;
+
+    // Nama modul diambil dari judul kartu halaman (mis. "Modul Master Data Rekam Medis")
+    const titleEl = document.querySelector(
+      ".content-wrapper .card .card-title, .content .card-title",
+    );
+    const moduleName = titleEl ? titleEl.textContent.trim() : "Isi Modul";
+
+    const store = loadSubmenuStore();
+    let changed = false;
+
+    cards.forEach((a) => {
+      const href = a.getAttribute("href");
+      if (!href || href === "#" || href === "javascript:void(0)") return;
+      const name = (a.getAttribute("title") || a.textContent).trim();
+      if (!name) return;
+
+      const prev = store[href];
+      if (!prev || prev.name !== name || prev.category !== moduleName) {
+        store[href] = { name: name, category: moduleName };
+        changed = true;
+      }
+    });
+
+    if (changed) saveSubmenuStore(store);
+  }
+
+  // Rekam kartu halaman ini sesegera mungkin (tidak bergantung pada modal)
+  indexPageCards();
+
   // Check if elements exist
   if (!searchModalEl || !searchInput || !resultsContainer) {
     console.error("Find Menu: Required elements not found", {
@@ -67,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ".nav-header a, .dropdown-menu .dropdown-item, .sidebar a";
 
     const links = document.querySelectorAll(selectors);
+    const seenHref = new Set();
 
     links.forEach((link) => {
       // Abaikan link disabled, kosong, atau yang hanya berfungsi sebagai toggle (bukan link navigasi nyata)
@@ -92,10 +153,25 @@ document.addEventListener("DOMContentLoaded", function () {
         name = textSpan.textContent.trim();
       }
 
+      seenHref.add(href);
       menuItems.push({
         name: name,
         category: category,
         href: href,
+      });
+    });
+
+    // Gabungkan submenu (isi modul) yang sudah terekam di localStorage,
+    // sehingga isi sidebar tetap bisa dicari dari halaman manapun.
+    const store = loadSubmenuStore();
+    Object.keys(store).forEach((href) => {
+      if (seenHref.has(href)) return; // sudah ada sebagai link nyata di halaman
+      seenHref.add(href);
+      menuItems.push({
+        name: store[href].name,
+        category: store[href].category,
+        href: href,
+        isSubmenu: true,
       });
     });
   }
@@ -124,9 +200,12 @@ document.addEventListener("DOMContentLoaded", function () {
       a.href = item.href;
       a.className = "list-group-item list-group-item-action";
       // Styling badge kategori
-      let badgeClass = item.category.includes("Sidebar")
-        ? "bg-primary"
-        : "bg-secondary";
+      let badgeClass = "bg-secondary";
+      if (item.isSubmenu) {
+        badgeClass = "bg-success";
+      } else if (item.category.includes("Sidebar")) {
+        badgeClass = "bg-primary";
+      }
 
       a.innerHTML = `
                 <div class="d-flex w-100 justify-content-between align-items-center">
