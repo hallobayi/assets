@@ -54,7 +54,7 @@ jQuery(document).ready(function () {
         d.endDate = $("input[name=endDate]").val();
       },
     },
-    order: [4, "desc"],
+    order: [3, "desc"],
     oLanguage: {
       sLengthMenu: "_MENU_ records per page",
       sSearch: "Cari <span style='color:#F00;'>(Tekan Enter)</span>: _INPUT_",
@@ -83,7 +83,7 @@ jQuery(document).ready(function () {
             '</span><br/><span class="label label-success">WA: ' +
             aoData["nomorhp"] +
             "</span>",
-          nRow
+          nRow,
         )
         .css("color", "#da8d5e")
         .css("font-weight", "Bold");
@@ -94,30 +94,17 @@ jQuery(document).ready(function () {
         .html(
           '<b><i style="color: rgba(235, 75, 176, 1) !important" class="fa-solid fa-server"></i> ' +
             aoData["HC_pasien#nomor_rm"] +
-            '</b><br /><i style="color: rgba(235, 75, 176, 1) !important" class="fa-solid fa-user-pen"></i><span class="label label-success"> ' +
-            aoData["HC_pasien#nomor_rm_lama"] +
-            '</span><br /><i style="color: rgba(235, 75, 176, 1) !important" class="fa-solid fa-bars"></i><span class="label label-success"> ' +
-            aoData["HC_pasien#nomor_rm_mesin"] +
-            "</span>",
-          nRow
-        );
-
-      // Kolom Petugas
-      $("td", nRow)
-        .eq(3)
-        .html(
-          "<b>" +
+            '</b><br /><i style="color: rgba(235, 75, 176, 1) !important" class="fa-solid fa-bars"></i><span class="label label-success"> ' +
             aoData["no_reg"] +
-            " </b><br /> Petugas: " +
-            aoData["user_input"],
-          nRow
-        )
-        .css("color", "#da8d5e")
-        .css("font-weight", "Bold");
+            '</span><br /><i style="color: rgba(235, 75, 176, 1) !important" class="fa-solid fa-user-pen"></i><span class="label label-success"> ' +
+            aoData["user_input"] +
+            "</span>",
+          nRow,
+        );
 
       // Kolom "Dokter"
       $("td", nRow)
-        .eq(5)
+        .eq(4)
         .html(
           '<b><i style="color: #00a65a !important" class="fa-solid fa-user-doctor"></i> ' +
             aoData["HC_pegawai#nama_pegawai"] +
@@ -126,46 +113,70 @@ jQuery(document).ready(function () {
             '</span><br /><i style="color: #00a65a !important" class="fa-solid fa-dollar"></i><span class="label label-success"> ' +
             aoData["nama_carabayar"] +
             "</span>",
-          nRow
+          nRow,
         );
 
-      switch (aoData["status_layanan"]) {
-        case "daftar":
-          $("td", nRow)
-            .eq(6)
-            .text("Registrasi", nRow)
-            .css("color", "Sienna")
-            .css("font-weight", "Bold")
-            .addClass("kantongRelase")
-            .on("click", function () {
-              klikDetail(aoData["no_reg"]);
-            })
-            .css("cursor", "pointer");
-          break;
-        case "satset":
-          $("td", nRow)
-            .eq(6)
-            .text("Terkirim", nRow)
-            .css("color", "Black")
-            .css("font-weight", "Bold");
-          break;
-        case "selesai":
-          $("td", nRow)
-            .eq(6)
-            .text("Antrian Dikirim", nRow)
-            .css("color", "Green")
-            .css("font-weight", "Bold");
-          break;
-        case "failed":
-          $("td", nRow)
-            .eq(6)
-            .text("Gagal Terkirim!", nRow)
-            .css("color", "Red")
-            .css("font-weight", "Bold");
-          break;
-        default:
-          break;
-      }
+      // Kolom Tgl Masuk
+      $("td", nRow)
+        .eq(3)
+        .html(
+          '<b><i style="color: #024e2cff !important" class="fa-solid fa-arrow-up"></i> ' +
+            aoData["tgl_masuk"] +
+            '</b><br /><i style="color: #024e2cff !important" class="fa-solid fa-arrow-down"></i><span class="label label-success"> ' +
+            (aoData["tgl_selesai"] || "Masih Periksa") +
+            "</span>",
+          nRow,
+        );
+
+      // Kolom Status
+      $("td", nRow)
+        .eq(5)
+        .html(
+          '<b><i style="color: #024e2cff !important" class="fa-solid fa-stethoscope"></i> ' +
+            aoData["status_layanan"] +
+            '</b><br /><i style="color: #024e2cff !important" class="fa-solid fa-credit-card"></i><span class="label label-success"> ' +
+            (aoData["status_bayar"] || "Belum Bayar") +
+            "</span>",
+          nRow,
+        );
+
+      // switch (aoData["status_layanan"]) {
+      //   case "daftar":
+      //     $("td", nRow)
+      //       .eq(5)
+      //       .text("Registrasi", nRow)
+      //       .css("color", "Sienna")
+      //       .css("font-weight", "Bold")
+      //       .addClass("kantongRelase")
+      //       .on("click", function () {
+      //         klikDetail(aoData["no_reg"]);
+      //       })
+      //       .css("cursor", "pointer");
+      //     break;
+      //   case "satset":
+      //     $("td", nRow)
+      //       .eq(5)
+      //       .text("Terkirim", nRow)
+      //       .css("color", "Black")
+      //       .css("font-weight", "Bold");
+      //     break;
+      //   case "selesai":
+      //     $("td", nRow)
+      //       .eq(5)
+      //       .text("Antrian Dikirim", nRow)
+      //       .css("color", "Green")
+      //       .css("font-weight", "Bold");
+      //     break;
+      //   case "failed":
+      //     $("td", nRow)
+      //       .eq(5)
+      //       .text("Gagal Terkirim!", nRow)
+      //       .css("color", "Red")
+      //       .css("font-weight", "Bold");
+      //     break;
+      //   default:
+      //     break;
+      // }
     },
   };
 
@@ -196,7 +207,7 @@ jQuery(document).ready(function () {
           '<td colspan="' +
           len +
           '" class="text-center">Loading data...</td>' +
-          "</tr>"
+          "</tr>",
       );
     dataTablesPendaftaran = $("#tabel-pendaftaran").DataTable(settings);
   });
@@ -216,7 +227,7 @@ jQuery(document).ready(function () {
           callback: function () {
             $bootbox.find(".alert").remove();
             $button_submit.prepend(
-              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>'
+              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>',
             );
             $button.prop("disabled", true);
 
@@ -287,7 +298,7 @@ jQuery(document).ready(function () {
       function (html) {
         $button.prop("disabled", false);
         $bootbox.find(".modal-body").empty().append(html);
-      }
+      },
     );
   };
 
@@ -358,7 +369,7 @@ jQuery(document).ready(function () {
     }
 
     $spinner = $(
-      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>'
+      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>',
     );
 
     $wrapper = $("<div>").css("position", "relative");
@@ -406,7 +417,7 @@ jQuery(document).ready(function () {
     }
 
     $spinner = $(
-      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>'
+      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>',
     );
 
     $wrapper = $("<div>").css("position", "relative");
@@ -458,7 +469,7 @@ jQuery(document).ready(function () {
     }
 
     $spinner = $(
-      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>'
+      '<div class="spinner-border spinner-border-md" role="status" style="width: 1.5rem; height: 1.5rem; position:absolute; right: -27px; top:5px"></div>',
     );
 
     $wrapper = $("<div>").css("position", "relative");
@@ -512,7 +523,7 @@ jQuery(document).ready(function () {
     var d1 = new Date(
       Number(parts[2]) + 1,
       Number(parts[1]) - 3,
-      Number(parts[0]) + 7
+      Number(parts[0]) + 7,
     );
 
     // Format dd-mm-yyyy di Kolom TP
@@ -537,7 +548,7 @@ jQuery(document).ready(function () {
       "=> today:",
       today,
       " = usia kehamilan:",
-      days
+      days,
     );
 
     // source: https://stackoverflow.com/a/49423808
@@ -548,10 +559,10 @@ jQuery(document).ready(function () {
         diff.weeks() +
         " pekan, " +
         (diff.days() % 7) +
-        " hari."
+        " hari.",
     );
     console.log(
-      Math.floor(diff.asWeeks()) + " pekan, " + (diff.days() % 7) + " hari."
+      Math.floor(diff.asWeeks()) + " pekan, " + (diff.days() % 7) + " hari.",
     );
 
     $(".usia_kehamilan").val(days);
@@ -563,7 +574,7 @@ jQuery(document).ready(function () {
     var d1 = new Date(
       Number(parts[2]) - 1,
       Number(parts[1]) + 3,
-      Number(parts[0]) - 7
+      Number(parts[0]) - 7,
     );
     // console.log('value: ',value, 'parts: ', parts, 'd1: ', d1);
 
@@ -589,7 +600,7 @@ jQuery(document).ready(function () {
       "=> today:",
       todayTp,
       " = usia kehamilan:",
-      daysTp
+      daysTp,
     );
 
     // source: https://stackoverflow.com/a/49423808
@@ -600,14 +611,14 @@ jQuery(document).ready(function () {
         diff.weeks() +
         " pekan, " +
         (diff.days() % 7) +
-        " hari."
+        " hari.",
     );
     console.log(
       40 +
         Math.floor(diff.asWeeks()) +
         " pekan, " +
         (diff.days() % 7) +
-        " hari."
+        " hari.",
     );
 
     $(".usia_kehamilan").val(40 + daysTp);
@@ -654,7 +665,7 @@ jQuery(document).ready(function () {
           callback: function () {
             $bootbox.find(".alert").remove();
             $button_submit.prepend(
-              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>'
+              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>',
             );
             $button.prop("disabled", true);
             $form_filled = $bootbox.find("form");
@@ -699,7 +710,7 @@ jQuery(document).ready(function () {
                     .prepend(
                       '<div class="alert alert-dismissible alert-danger" role="alert">' +
                         data.message +
-                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>',
                     );
                 }
               },
@@ -738,7 +749,7 @@ jQuery(document).ready(function () {
           callback: function () {
             $bootbox.find(".alert").remove();
             $button_submit.prepend(
-              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>'
+              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>',
             );
             $button.prop("disabled", true);
             $form_filled = $bootbox.find("form");
@@ -783,7 +794,7 @@ jQuery(document).ready(function () {
                     .prepend(
                       '<div class="alert alert-dismissible alert-danger" role="alert">' +
                         data.message +
-                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>',
                     );
                 }
               },
@@ -895,7 +906,7 @@ jQuery(document).ready(function () {
       .then((response) => {
         if (!response.ok) {
           throw new Error(
-            "Harap Refresh Halaman Ini Kembali!, Service WA Down!"
+            "Harap Refresh Halaman Ini Kembali!, Service WA Down!",
           );
         }
         return response.json(); // or response.text() if not JSON
