@@ -894,4 +894,127 @@ jQuery(document).ready(function () {
       $("#nama_obat_ya").prop("disabled", $(this).val() !== "ya");
     })
     .trigger("change");
+
+  $(document).on("click", ".btn.gantiTindakan", function () {
+    id = $(this).attr("data-id");
+    $bootbox = bootbox.dialog({
+      title: "Ganti Layanan",
+      message:
+        '<div class="text-center text-secondary"><div class="spinner-border"></div></div>',
+      buttons: {
+        cancel: {
+          label: "Batal",
+        },
+        success: {
+          label: "Simpan",
+          className: "btn-success submitGantiTindakan",
+          callback: function () {
+            $bootbox.find(".alert").remove();
+            
+            // Validasi form
+            form = $bootbox.find("form")[0];
+            var kode_tindakan = $bootbox.find("select[name='kode_tindakan']").val();
+            
+            if(!kode_tindakan || kode_tindakan === '') {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  'Status Layanan wajib dipilih!' +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            $button_submit.prepend(
+              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>',
+            );
+            $button.prop("disabled", true);
+
+            // Submit Form
+            $.ajax({
+              type: "POST",
+              url: base_url + "tindakandokter/updateLayanan",
+              data: new FormData(form),
+              processData: false,
+              contentType: false,
+              dataType: "json",
+              success: function (data) {
+                console.log(data);
+
+                if (data.message.status == "ok") {
+                  $bootbox.modal("hide");
+                  const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    iconColor: "white",
+                    customClass: {
+                      popup: "bg-success text-light toast p-2",
+                    },
+                    didOpen: (toast) => {
+                      toast.addEventListener("mouseenter", Swal.stopTimer);
+                      toast.addEventListener("mouseleave", Swal.resumeTimer);
+                    },
+                  });
+                  Toast.fire({
+                    html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' + data.message.message + '</div>',
+                  });
+
+                  location.reload();
+                } else {
+                  $button_submit.find("i").remove();
+                  $button.prop("disabled", false);
+                  $bootbox.find(".modal-body").prepend(
+                    '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                      data.message.message +
+                      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+                  );
+                }
+              },
+              error: function (xhr) {
+                console.log(xhr.responseText);
+                $button_submit.find("i").remove();
+                $button.prop("disabled", false);
+                
+                var errorMsg = "Terjadi kesalahan pada server";
+                try {
+                  var response = JSON.parse(xhr.responseText);
+                  if(response.message && response.message.message) {
+                    errorMsg = response.message.message;
+                  }
+                } catch(e) {
+                  errorMsg = xhr.responseText || errorMsg;
+                }
+                
+                $bootbox.find(".modal-body").prepend(
+                  '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                    errorMsg +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+                );
+              },
+            });
+            return false;
+          },
+        },
+      },
+    });
+
+    $bootbox.find(".modal-dialog").css("max-width", "500px");
+    var $button = $bootbox.find("button").prop("disabled", true);
+    var $button_submit = $bootbox.find("button.submitGantiTindakan");
+
+    $.get(
+      base_url + "tindakandokter/ajaxKlikDetailKonfirmasiLayanan?no_reg=" + id,
+      function (html) {
+        $button.prop("disabled", false);
+        $bootbox.find(".modal-body").empty().append(html);
+      },
+    ).fail(function(xhr) {
+      $bootbox.find(".modal-body").html(
+        '<div class="alert alert-danger">Gagal memuat form: ' + xhr.statusText + '</div>'
+      );
+      $button.prop("disabled", false);
+    });
+  });
 });
