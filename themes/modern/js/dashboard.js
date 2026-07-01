@@ -272,20 +272,32 @@ $(document).ready(function() {
     };
 
     /* Penjualan perbulan */
-    var ctx = document.getElementById('bar-container').getContext('2d');
-    chartPenjualan = new Chart(ctx, configChartPenjualan);
+    var barContainer = document.getElementById('bar-container');
+    if (barContainer) {
+        var ctx = barContainer.getContext('2d');
+        chartPenjualan = new Chart(ctx, configChartPenjualan);
+    }
 
     /* Penjualan total */
-    var ctx = document.getElementById('chart-total-penjualan').getContext('2d');
-    chartTotalPenjualan = new Chart(ctx, configChartTotalPenjualan);
+    var chartTotalEl = document.getElementById('chart-total-penjualan');
+    if (chartTotalEl) {
+        var ctx = chartTotalEl.getContext('2d');
+        chartTotalPenjualan = new Chart(ctx, configChartTotalPenjualan);
+    }
 
     /* Item Terjual */
-    var ctx = document.getElementById('pie-container').getContext('2d');
-    chartItemTerjual = new Chart(ctx, configChartItemTerjual);
+    var pieContainer = document.getElementById('pie-container');
+    if (pieContainer) {
+        var ctx = pieContainer.getContext('2d');
+        chartItemTerjual = new Chart(ctx, configChartItemTerjual);
+    }
 
     /* Kategori */
-    var ctx = document.getElementById('chart-kategori').getContext('2d');
-    chartKategori = new Chart(ctx, configChartKategori);
+    var chartKategoriEl = document.getElementById('chart-kategori');
+    if (chartKategoriEl) {
+        var ctx = chartKategoriEl.getContext('2d');
+        chartKategori = new Chart(ctx, configChartKategori);
+    }
 
     $('body').delegate('.nav-theme-option button', 'click', function() {
         theme_value = $(this).attr('data-theme-value');
