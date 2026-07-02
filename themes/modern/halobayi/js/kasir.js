@@ -59,12 +59,20 @@ $(document).ready(function() {
                     dataType: "json",
                     success: function(response) {
                         if (response.status) {
-                            Swal.fire(
-                                'Berhasil!',
-                                response.message,
-                                'success'
-                            ).then(() => {
-                                kembali();
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: response.message,
+                                icon: 'success',
+                                showCancelButton: !!response.url_nota,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: response.url_nota ? '<i class="fa fa-print"></i> Cetak Nota' : 'OK',
+                                cancelButtonText: 'Selesai'
+                            }).then((result) => {
+                                // Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker
+                                if (result.isConfirmed && response.url_nota) {
+                                    window.open(response.url_nota, '_blank');
+                                }
                             });
                         } else {
                             Swal.fire(
