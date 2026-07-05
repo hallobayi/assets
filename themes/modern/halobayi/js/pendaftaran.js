@@ -546,8 +546,9 @@ jQuery(document).ready(function () {
     var hari = totalHari % 7;
 
     $(".usia_kehamilan").val(pekan);
-    document.getElementById("nilaiKalkulasi").innerHTML =
-      pekan + " pekan, " + hari + " hari.";
+    document.getElementById("nilaiKalkulasi").innerHTML = pekan + " pekan, " + hari + " hari.";
+    document.getElementById("nilaiKalkulasiSend").value = pekan + " pekan," + hari + " hari.";
+
   }
 
   function set_usiaKehamilan($elm) {
@@ -919,9 +920,9 @@ jQuery(document).ready(function () {
               max_rows: 15,
               q:query
           },
-          beforeSend: function (xhr)
-          {
-          xhr.setRequestHeader('X-CSRF-Token' , tokenHash);
+          beforeSend: function (xhr) 
+          {       
+          xhr.setRequestHeader('X-CSRF-Token' , tokenHash);       
           },
           success: function (data) {
               var return_list = [], i = data.length;
@@ -933,7 +934,7 @@ jQuery(document).ready(function () {
                       nik: data[i].nik,
 
                   };
-              }
+              }    
             // in this example, json is simply an array of strings
             return processAsync(return_list);
           }
@@ -945,13 +946,13 @@ jQuery(document).ready(function () {
       $(e.target).removeClass('sLoading');
   });
 
-  // Kosongkan nik tersembunyi saat input dokter dikosongkan
+    // Kosongkan nik tersembunyi saat input dokter dikosongkan
   $('.cariDokter').on('input typeahead:change', function() {
       if ($(this).val().trim() === '') {
           $('#nik').val('');
       }
   });
-
+  
   // source: https://stackoverflow.com/a/19540313
   function onSelectedNamaDokter($e, datum) {
       $('#nama_pegawai').val(datum.nama_pegawai);
