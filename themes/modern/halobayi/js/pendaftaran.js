@@ -989,6 +989,13 @@ jQuery(document).ready(function () {
       $(e.target).removeClass('sLoading');
   });
 
+  // Kosongkan nik tersembunyi saat input dokter dikosongkan
+  $('.cariDokter').on('input typeahead:change', function() {
+      if ($(this).val().trim() === '') {
+          $('#nik').val('');
+      }
+  });
+
   // source: https://stackoverflow.com/a/19540313
   function onSelectedNamaDokter($e, datum) {
       $('#nama_pegawai').val(datum.nama_pegawai);
