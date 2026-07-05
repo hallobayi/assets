@@ -521,117 +521,73 @@ jQuery(document).ready(function () {
     }
   }
 
+  // Parse tanggal format "dd-mm-yyyy" -> moment (month di moment 0-indexed)
+  function parseTanggal(value) {
+    var parts = value.split("-");
+    return moment([
+      Number(parts[2]), // tahun
+      Number(parts[1]) - 1, // bulan (0-indexed)
+      Number(parts[0]), // tanggal
+    ]);
+  }
+
+  // Hitung & tampilkan usia kehamilan dari HPHT sampai hari ini
+  function tampilkanUsiaKehamilan(hpht) {
+    var today = moment().startOf("day");
+    var totalHari = today.diff(hpht, "days");
+
+    if (totalHari < 0) {
+      $(".usia_kehamilan").val("");
+      document.getElementById("nilaiKalkulasi").innerHTML = "";
+      return;
+    }
+
+    var pekan = Math.floor(totalHari / 7);
+    var hari = totalHari % 7;
+
+    $(".usia_kehamilan").val(pekan);
+    document.getElementById("nilaiKalkulasi").innerHTML =
+      pekan + " pekan, " + hari + " hari.";
+  }
+
   function set_usiaKehamilan($elm) {
     const value = $elm.val();
-    var parts = value.split("-");
-    var d1 = new Date(
-      Number(parts[2]) + 1,
-      Number(parts[1]) - 3,
-      Number(parts[0]) + 7,
-    );
+    if (!value) return;
+
+    var hpht = parseTanggal(value);
+    if (!hpht.isValid()) return;
+
+    // Rumus Naegele: TP = HPHT + 1 tahun - 3 bulan + 7 hari
+    var tp = hpht
+      .clone()
+      .add(1, "years")
+      .subtract(3, "months")
+      .add(7, "days");
 
     // Format dd-mm-yyyy di Kolom TP
-    $(".tp").val(d1.toLocaleDateString("es-CL"));
+    $(".tp").val(tp.format("DD-MM-YYYY"));
 
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, "0");
-    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    var yyyy = today.getFullYear();
-
-    // Moment Format
-    newHpHt = parts[2] + "-" + parts[1] + "-" + parts[0];
-    today = yyyy + "-" + mm + "-" + dd;
-
-    var a = moment(newHpHt);
-    var b = moment(today);
-    days = b.diff(a, "week");
-
-    console.log(
-      "hpht:",
-      newHpHt,
-      "=> today:",
-      today,
-      " = usia kehamilan:",
-      days,
-    );
-
-    // source: https://stackoverflow.com/a/49423808
-    var diff = moment.duration(b.diff(a));
-    console.log(
-      diff.months() +
-        " bulan, " +
-        diff.weeks() +
-        " pekan, " +
-        (diff.days() % 7) +
-        " hari.",
-    );
-    console.log(
-      Math.floor(diff.asWeeks()) + " pekan, " + (diff.days() % 7) + " hari.",
-    );
-
-    $(".usia_kehamilan").val(days);
+    tampilkanUsiaKehamilan(hpht);
   }
 
   function set_usiaHpHt($elm) {
     const value = $elm.val();
-    var parts = value.split("-");
-    var d1 = new Date(
-      Number(parts[2]) - 1,
-      Number(parts[1]) + 3,
-      Number(parts[0]) - 7,
-    );
-    // console.log('value: ',value, 'parts: ', parts, 'd1: ', d1);
+    if (!value) return;
+
+    var tp = parseTanggal(value);
+    if (!tp.isValid()) return;
+
+    // Kebalikan rumus Naegele: HPHT = TP - 1 tahun + 3 bulan - 7 hari
+    var hpht = tp
+      .clone()
+      .subtract(1, "years")
+      .add(3, "months")
+      .subtract(7, "days");
 
     // Format dd-mm-yyyy di Kolom HPHT
-    $(".hpht").val(d1.toLocaleDateString("es-CL"));
+    $(".hpht").val(hpht.format("DD-MM-YYYY"));
 
-    var todayTp = new Date();
-    var dd = String(todayTp.getDate()).padStart(2, "0");
-    var mm = String(todayTp.getMonth() + 1).padStart(2, "0"); //January is 0!
-    var yyyy = todayTp.getFullYear();
-
-    // Moment Format
-    newTp = parts[2] + "-" + parts[1] + "-" + parts[0];
-    todayTp = yyyy + "-" + mm + "-" + dd;
-
-    var a = moment(newTp);
-    var b = moment(todayTp);
-    daysTp = b.diff(a, "week");
-
-    console.log(
-      "TP:",
-      newTp,
-      "=> today:",
-      todayTp,
-      " = usia kehamilan:",
-      daysTp,
-    );
-
-    // source: https://stackoverflow.com/a/49423808
-    var diff = moment.duration(b.diff(a));
-    console.log(
-      diff.months() +
-        " bulan, " +
-        diff.weeks() +
-        " pekan, " +
-        (diff.days() % 7) +
-        " hari.",
-    );
-    console.log(
-      40 +
-        Math.floor(diff.asWeeks()) +
-        " pekan, " +
-        (diff.days() % 7) +
-        " hari.",
-    );
-
-    $(".usia_kehamilan").val(40 + daysTp);
-    document.getElementById("nilaiKalkulasi").innerHTML =
-      40 +
-      Math.floor(diff.asWeeks()) +
-      " pekan, " +
-      Math.abs(diff.days() % 7) +
-      " hari.";
+    tampilkanUsiaKehamilan(hpht);
   }
 
   $(".prosedur_masuk").change(function () {
