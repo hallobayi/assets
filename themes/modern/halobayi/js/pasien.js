@@ -184,7 +184,16 @@ jQuery(document).ready(function() {
             });
         },
         "fnRowCallback": function(nRow, aoData) { //console.log(aoData)
-            
+
+            // Baris riwayat kunjungan dapat diklik, membuka resume di tab baru
+            if (aoData['no_reg']) {
+                var urlResume = base_url + 'resume/list?no_reg=' + encodeURIComponent(aoData['no_reg']) + '&form=resume';
+                $(nRow).css('cursor', 'pointer').attr('title', 'Buka resume di tab baru');
+                $(nRow).off('click.resume').on('click.resume', function() {
+                    window.open(urlResume, '_blank');
+                });
+            }
+
             // if (aoData['status_layanan'] === 'daftar') {
             //     // $(nRow).css('color', '#0072c6').css("font-weight", "Bold");
 			// 	$('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('kantongRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
