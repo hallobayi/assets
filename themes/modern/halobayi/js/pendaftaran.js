@@ -52,6 +52,7 @@ jQuery(document).ready(function () {
         d.csrf_test_name = tokenHash;
         d.startDate = $("input[name=startDate]").val();
         d.endDate = $("input[name=endDate]").val();
+        d.nik = $("input[name=nik]").val();
       },
     },
     order: [3, "desc"],
@@ -189,6 +190,7 @@ jQuery(document).ready(function () {
     let startDate = $("#startDate").val();
     let endDate = $("#endDate").val();
     let lokasi = $("#cabang :selected").val();
+    let nik = $("#nik").val();
 
     settings.ajax.url =
       base_url +
@@ -197,7 +199,9 @@ jQuery(document).ready(function () {
       "&endDate=" +
       endDate +
       "&lokasi=" +
-      lokasi;
+      lokasi +
+      "&nik=" +
+      nik;
     dataTablesPendaftaran.destroy();
     len = $("#tabel-pendaftaran").find("thead").find("th").length;
     $("#tabel-pendaftaran")
@@ -987,7 +991,7 @@ jQuery(document).ready(function () {
 
   // source: https://stackoverflow.com/a/19540313
   function onSelectedNamaDokter($e, datum) {
-      $('#nama_pegawai').val(datum.value);
+      $('#nama_pegawai').val(datum.nama_pegawai);
       $('#nik').val(datum.nik);
   }
 
