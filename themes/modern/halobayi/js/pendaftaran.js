@@ -928,4 +928,67 @@ jQuery(document).ready(function () {
         loadingIndicator.style.display = "none"; // Hide the loading indicator
       });
   });
+
+  // Cari Dokter
+  $('.cariDokter').typeahead({
+      hint: true,
+      highlight: true,
+      minLength: 1
+  },
+  {
+      display: function(item){
+          return item.value
+      },
+      limit: 12,
+      async: true,
+      templates: {
+          empty: [
+              '<div class="d-flex justify-content-center">Data Dokter Tidak Ada!</div>'
+          ].join('\n'),
+          suggestion: function (item){
+              return '<div>' + item.value + '</div>'
+          }
+      },
+      source: function (query, processSync, processAsync) {
+      // processSync(['This suggestion appears immediately', 'This one too']);
+        return $.ajax({
+          url: base_url + 'master/dokter/typeahead',
+          dataType: "json",
+          type: "POST",
+          data: {
+              max_rows: 15,
+              q:query
+          },
+          beforeSend: function (xhr)
+          {
+          xhr.setRequestHeader('X-CSRF-Token' , tokenHash);
+          },
+          success: function (data) {
+              var return_list = [], i = data.length;
+              while (i--) {
+                  return_list[i] = {
+                      id: data[i].nik,
+                      value: data[i].nik + " - " + data[i].nama_pegawai,
+                      nama_pegawai: data[i].nama_pegawai,
+                      nik: data[i].nik,
+
+                  };
+              }
+            // in this example, json is simply an array of strings
+            return processAsync(return_list);
+          }
+        });
+      }
+  }).on('typeahead:selected', onSelectedNamaDokter).on('typeahead:asyncrequest', function(e) {
+      $(e.target).addClass('sLoading');
+  }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+      $(e.target).removeClass('sLoading');
+  });
+
+  // source: https://stackoverflow.com/a/19540313
+  function onSelectedNamaDokter($e, datum) {
+      $('#nama_pegawai').val(datum.value);
+      $('#nik').val(datum.nik);
+  }
+
 });
