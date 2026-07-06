@@ -1,1 +1,314 @@
-<h1>Hi</h1>
+<h1> Halo Bayi</h1>
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Halo Bayi - Assets CDN Documentation</title>
+    
+    <!-- 
+    =================================================================================
+    CDN CONFIGURATION NOTES
+    =================================================================================
+    
+    Project ini menggunakan beberapa CDN untuk delivery assets. Berikut perbandingan
+    dukungan Content Security Policy (CSP) dari masing-masing CDN:
+    
+    1. JSDELIVR (✓ CSP SUPPORT)
+       - URL: https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997
+       - Status: MENDUKUNG CSP dengan baik
+       - Keunggulan: 
+         * Kompatibel dengan strict CSP headers
+         * Cache optimal dengan versioning
+         * Fallback otomatis ke multiple mirrors
+       - Rekomendasi: Gunakan untuk production dengan CSP aktif
+    
+    2. GH-Pages (✗ NOT SUPPORT CSP)
+       - URL: https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
+       - Status: TIDAK mendukung CSP
+       - Keterbatasan:
+         * Blocked oleh strict CSP policies
+         * Tidak ada integrity hash support
+       - Penggunaan: Hanya untuk development/testing tanpa CSP
+    
+    3. STATICDELIVR (✗ NOT SUPPORT CSP)
+       - URL: https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.18/vendors/jquery/jquery.min.js
+       - Status: TIDAK mendukung CSP
+       - Keterbatasan:
+         * Similar dengan GH-Pages
+         * Blocked oleh CSP strict-dynamic
+       - Penggunaan: Fallback alternatif untuk non-CSP environments
+    
+    =================================================================================
+    REKOMENDASI IMPLEMENTASI
+    =================================================================================
+    
+    Untuk Production (dengan CSP):
+    - Gunakan JSDELIVR sebagai primary CDN
+    - Set CSP headers: script-src 'self' https://cdn.jsdelivr.net
+    
+    Untuk Development (tanpa CSP):
+    - Bisa menggunakan GH-Pages atau StaticDelivr
+    - Lebih cepat untuk testing lokal
+    
+    =================================================================================
+    -->
+    
+    <!-- PRIMARY CDN (CSP-Compatible) - PRODUCTION USE -->
+    <!-- 
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"></script>
+    -->
+    
+    <!-- ALTERNATIVE CDN #1 (Non-CSP) - DEVELOPMENT ONLY -->
+    <!-- 
+    <script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"></script>
+    -->
+    
+    <!-- ALTERNATIVE CDN #2 (Non-CSP) - FALLBACK -->
+    <!-- 
+    <script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.18/vendors/jquery/jquery.min.js"></script>
+    -->
+    
+    <style>
+        /* Basic styling untuk dokumentasi */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .cdn-info {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .cdn-info h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .cdn-option {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .cdn-option.support {
+            border-left-color: #28a745;
+        }
+        
+        .cdn-option.no-support {
+            border-left-color: #dc3545;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge.success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .badge.danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .url-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        
+        .recommendation {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .recommendation strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍼 Halo Bayi</h1>
+        <p>Assets CDN - Dokumentasi & Konfigurasi</p>
+    </div>
+    
+    <div class="cdn-info">
+        <h2>📦 Pilihan CDN untuk Assets</h2>
+        <p>Dokumentasi lengkap tentang Content Delivery Network (CDN) yang tersedia untuk project Halo Bayi, termasuk informasi dukungan Content Security Policy (CSP).</p>
+        
+        <!-- Option 1: JSDELIVR -->
+        <div class="cdn-option support">
+            <h3>
+                1. jsDelivr 
+                <span class="badge success">✓ CSP SUPPORT</span>
+            </h3>
+            <p><strong>Status:</strong> MENDUKUNG Content Security Policy</p>
+            <p><strong>Rekomendasi:</strong> Primary CDN untuk production</p>
+            
+            <p><strong>Keunggulan:</strong></p>
+            <ul>
+                <li>Kompatibel penuh dengan strict CSP headers</li>
+                <li>Sistem cache optimal dengan versioning</li>
+                <li>Fallback otomatis ke multiple mirrors</li>
+                <li>CORS headers yang tepat</li>
+                <li>Support Subresource Integrity (SRI)</li>
+            </ul>
+            
+            <p><strong>URL Pattern:</strong></p>
+            <div class="url-box">
+https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997
+            </div>
+            
+            <p><strong>Contoh CSP Header:</strong></p>
+            <div class="url-box">
+Content-Security-Policy: script-src 'self' https://cdn.jsdelivr.net
+            </div>
+        </div>
+        
+        <!-- Option 2: GitHub Pages -->
+        <div class="cdn-option no-support">
+            <h3>
+                2. GitHub Pages 
+                <span class="badge danger">✗ NOT SUPPORT CSP</span>
+            </h3>
+            <p><strong>Status:</strong> TIDAK mendukung Content Security Policy</p>
+            <p><strong>Rekomendasi:</strong> Development/testing only</p>
+            
+            <p><strong>Keterbatasan:</strong></p>
+            <ul>
+                <li>Akan di-block oleh strict CSP policies</li>
+                <li>Tidak ada integrity hash support</li>
+                <li>CORS headers terbatas</li>
+                <li>Tidak cocok untuk production dengan security ketat</li>
+            </ul>
+            
+            <p><strong>URL Pattern:</strong></p>
+            <div class="url-box">
+https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
+            </div>
+            
+            <p><strong>Use Case:</strong> Development lokal, testing tanpa CSP, prototyping</p>
+        </div>
+        
+        <!-- Option 3: StaticDelivr -->
+        <div class="cdn-option no-support">
+            <h3>
+                3. StaticDelivr 
+                <span class="badge danger">✗ NOT SUPPORT CSP</span>
+            </h3>
+            <p><strong>Status:</strong> TIDAK mendukung Content Security Policy</p>
+            <p><strong>Rekomendasi:</strong> Fallback untuk non-CSP environments</p>
+            
+            <p><strong>Keterbatasan:</strong></p>
+            <ul>
+                <li>Similar dengan GitHub Pages - blocked by CSP</li>
+                <li>Tidak support strict-dynamic directive</li>
+                <li>Kurang optimal untuk modern security policies</li>
+            </ul>
+            
+            <p><strong>URL Pattern:</strong></p>
+            <div class="url-box">
+https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.18/vendors/jquery/jquery.min.js
+            </div>
+            
+            <p><strong>Use Case:</strong> Alternative CDN untuk environment tanpa CSP requirements</p>
+        </div>
+        
+        <!-- Recommendation Box -->
+        <div class="recommendation">
+            <strong>💡 Rekomendasi Implementasi:</strong>
+            <ul>
+                <li><strong>Production Environment:</strong> Gunakan jsDelivr sebagai primary CDN. Pastikan CSP headers di-set dengan benar di server.</li>
+                <li><strong>Development Environment:</strong> Bisa menggunakan GitHub Pages atau StaticDelivr untuk kemudahan testing.</li>
+                <li><strong>Staging Environment:</strong> Gunakan jsDelivr untuk simulasi kondisi production yang akurat.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="cdn-info">
+        <h2>⚙️ Contoh Implementasi</h2>
+        
+        <h3>Cara 1: Pilih CDN Sesuai Environment (Recommended)</h3>
+        <div class="url-box">
+&lt;!-- Production: CSP-Compatible --&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"&gt;&lt;/script&gt;
+
+&lt;!-- Development: Non-CSP --&gt;
+&lt;!-- &lt;script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"&gt;&lt;/script&gt; --&gt;
+        </div>
+        
+        <h3>Cara 2: Fallback Chain</h3>
+        <div class="url-box">
+&lt;script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"&gt;&lt;/script&gt;
+&lt;script&gt;
+    // Fallback jika primary CDN gagal
+    if (typeof jQuery === 'undefined') {
+        document.write('&lt;script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"&gt;&lt;\/script&gt;');
+    }
+&lt;/script&gt;
+        </div>
+    </div>
+    
+    <div class="cdn-info">
+        <h2>📝 Notes</h2>
+        <ul>
+            <li>Version saat ini: <strong>1.1.18</strong></li>
+            <li>Parameter <code>?r=1782870997</code> pada jsDelivr adalah cache buster untuk force refresh</li>
+            <li>Selalu test CSP compatibility di staging sebelum deploy ke production</li>
+            <li>Untuk assets custom lainnya, gunakan pattern URL yang sama sesuai CDN pilihan</li>
+        </ul>
+    </div>
+    
+    <footer style="text-align: center; margin-top: 40px; color: #666; font-size: 0.9em;">
+        <p>Halo Bayi Assets CDN - 2026</p>
+    </footer>
+    
+    <!-- Script placeholder - uncomment untuk testing -->
+    <!-- <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"></script> -->
+</body>
+</html>
