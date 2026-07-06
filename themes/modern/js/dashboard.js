@@ -172,23 +172,23 @@ $(document).ready(function() {
         }
     }
 
-    // Chart Item Terjual
-    let item_terjual_bg = [];
-    item_terjual.map(() => {
-        item_terjual_bg.push(dynamicColors());
+    // Chart Dokter Favorite
+    let dokter_favorite_bg = [];
+    dokter_favorite.map(() => {
+        dokter_favorite_bg.push(dynamicColors());
     })
 
     theme_value = $('html').attr('data-bs-theme');
     border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
-    var configChartItemTerjual = {
+    var configChartDokterFavorite = {
         type: 'pie',
         data: {
             datasets: [{
-                data: item_terjual,
-                backgroundColor: item_terjual_bg,
+                data: dokter_favorite,
+                backgroundColor: dokter_favorite_bg,
                 borderColor: border_color
             }],
-            labels: item_terjual_label
+            labels: dokter_favorite_label
         },
         options: {
             responsive: false,
@@ -206,7 +206,7 @@ $(document).ready(function() {
                 },
                 title: {
                     display: false,
-                    text: 'Item Terjual'
+                    text: 'Dokter Favorite'
                 }
             },
             elements: {
@@ -220,7 +220,7 @@ $(document).ready(function() {
     data_kategori = JSON.parse(jumlah_item_kategori)
 
     let background_kategori = [];
-    item_terjual.map(() => {
+    dokter_favorite.map(() => {
         background_kategori.push(dynamicColors());
     })
 
@@ -285,18 +285,18 @@ $(document).ready(function() {
         chartTotalPenjualan = new Chart(ctx, configChartTotalPenjualan);
     }
 
-    /* Item Terjual */
+    /* Dokter Favorite */
     var pieContainer = document.getElementById('pie-container');
     if (pieContainer) {
         var ctx = pieContainer.getContext('2d');
-        chartItemTerjual = new Chart(ctx, configChartItemTerjual);
+        chartDokterFavorite = new Chart(ctx, configChartDokterFavorite);
     }
 
     /* Kategori */
     var chartKategoriEl = document.getElementById('chart-kategori');
     if (chartKategoriEl) {
         var ctx = chartKategoriEl.getContext('2d');
-        chartKategori = new Chart(ctx, configChartKategori);
+        chartKategori = new Chart(ctx, configChartKategoriEl);
     }
 
     $('body').delegate('.nav-theme-option button', 'click', function() {
@@ -319,11 +319,11 @@ $(document).ready(function() {
         chartTotalPenjualan.options.plugins.legend.labels.color = font_color;
         chartTotalPenjualan.update();
 
-        chartItemTerjual.options.plugins.legend.labels.color = font_color;
-        chartItemTerjual.data.datasets.map(function(v) {
+        chartDokterFavorite.options.plugins.legend.labels.color = font_color;
+        chartDokterFavorite.data.datasets.map(function(v) {
             v.borderColor = border_color
         })
-        chartItemTerjual.update();
+        chartDokterFavorite.update();
 
         chartKategori.options.plugins.legend.labels.color = font_color;
         chartKategori.data.datasets.map(function(v) {
@@ -352,7 +352,18 @@ $(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            // Kirim token CSRF terbaru pada setiap request (token dirotasi tiap POST — regenerate = true).
+            "data": function (d) {
+                d.csrf_test_name = tokenHash;
+            },
+            // Perbarui token dari response agar request berikutnya (mis. ganti tahun) tidak 403.
+            "dataSrc": function (json) {
+                if (json.csrf && json.csrf.value) {
+                    tokenHash = json.csrf.value;
+                    $('input[name=csrf_test_name]').val(tokenHash);
+                }
+                return json.data;
+            }
         },
         "columns": column
     }
@@ -407,36 +418,36 @@ $(document).ready(function() {
         dataTablesPenjualanTerbesar = $('#tabel-penjualan-terbesar').DataTable(settings);
     })
 
-    // Update Chart Item Terjual
+    // Update Chart Dokter Favorite
     $('#tahun-item-terjual').change(function() {
         $this = $(this);
         $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
             '<div class="spinner-border spinner-border-sm"></div>' +
             '</div>').prependTo($this.parent());
 
-        $.get(base_url + 'dashboard/ajaxGetItemTerjual?tahun=' + $(this).val(), function(data) {
+        $.get(base_url + 'dashboard/ajaxGetDokterFavorite?tahun=' + $(this).val(), function(data) {
             $spinner.remove();
             if (data) {
                 data = JSON.parse(data);
-                data_item_terjual = data.total;
-                item_terjual_label = data.nama_item;
+                dokter_favorite = data.total;
+                dokter_favorite_label = data.nama_dokter;
 
                 randomBackground = [];
-                data_item_terjual.map(() => {
+                dokter_favorite.map(() => {
                     randomBackground.push(dynamicColors());
                 })
 
                 theme_value = $('html').attr('data-bs-theme');
                 border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
-                configChartItemTerjual.data = {
+                configChartDokterFavorite.data = {
                     datasets: [{
-                        data: item_terjual,
+                        data: dokter_favorite,
                         backgroundColor: randomBackground,
                         borderColor: border_color
                     }],
-                    labels: item_terjual_label
+                    labels: dokter_favorite_label
                 }
-                chartItemTerjual.update();
+                chartDokterFavorite.update();
             }
         });
     })
