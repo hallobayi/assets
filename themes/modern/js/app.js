@@ -340,7 +340,7 @@ $(function() {
     },
     {
         display: function(item){
-            return item.id 
+            return item.value
         },
         limit: 12,
         async: true,
