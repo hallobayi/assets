@@ -296,7 +296,7 @@ $(document).ready(function() {
     var chartKategoriEl = document.getElementById('chart-kategori');
     if (chartKategoriEl) {
         var ctx = chartKategoriEl.getContext('2d');
-        chartKategori = new Chart(ctx, configChartKategoriEl);
+        chartKategori = new Chart(ctx, configChartKategori);
     }
 
     $('body').delegate('.nav-theme-option button', 'click', function() {
