@@ -329,7 +329,7 @@ $(function() {
     // source: https://stackoverflow.com/a/19540313
     function onSelectedDiagnosa($e, datum) {
         $('#nama_diagnosa').val(datum.nama_diagnosa);
-        $('#diagnosa_utama').val(datum.id);
+        // $('#diagnosa_utama').val(datum.id);
     }
 
     // source: https://stackoverflow.com/a/30340490
