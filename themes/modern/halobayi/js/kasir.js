@@ -1,5 +1,15 @@
 $(document).ready(function() {
 
+    // Perbarui token CSRF setiap kali selesai AJAX. Server mengirim token baru
+    // lewat header X-CSRF-TOKEN karena regenerate=true di Config\Security,
+    // sehingga token lama di halaman menjadi tidak valid setelah 1x POST.
+    $(document).ajaxComplete(function(event, xhr) {
+        var newToken = xhr.getResponseHeader('X-CSRF-TOKEN');
+        if (newToken) {
+            $('.csrf_token').val(newToken);
+        }
+    });
+
     function hitungTotalDiskon() {
         var valKlinik = parseFloat($("#diskonKlinikKalkulasi").val()) || 0;
         var valDokter = parseFloat($("#diskonDokterKalkulasi").val()) || 0;
@@ -23,6 +33,65 @@ $(document).ready(function() {
         $("#diskonDokterKalkulasi").val(this.value.replace(/[^0-9]/g, '') || '0');
         hitungTotalDiskon();
     });
+
+    // Memuat detail komponen tagihan (#tb_komponen_tagihan) via AJAX
+    function loadKomponenTagihan() {
+        var $table = $("#tb_komponen_tagihan");
+        if (!$table.length) return;
+
+        var $tbody = $table.find("tbody");
+        var no_reg = $("#noreg_hidden").val();
+
+        var requestData = { no_reg: no_reg };
+        var csrfName = $('.csrf_token').attr('name');
+        var csrfHash = $('.csrf_token').val();
+        if (csrfName) {
+            requestData[csrfName] = csrfHash;
+        }
+
+        $tbody.html('<tr><td colspan="7" class="text-center"><i class="fa fa-spin fa-spinner"></i> Memuat data tagihan...</td></tr>');
+
+        $.ajax({
+            type: "POST",
+            url: window.location.origin + "/kasir/ajaxdatabayar",
+            data: requestData,
+            dataType: "json",
+            success: function(response) {
+                $tbody.empty();
+                var totalGround = 0;
+
+                if (!response || !response.length) {
+                    $tbody.html('<tr><td colspan="7" class="text-center">Tidak ada data tagihan.</td></tr>');
+                } else {
+                    $.each(response, function(i, row) {
+                        var hargaJual = parseFloat(row.harga_jual) || 0;
+                        var total = parseFloat(row.total) || 0;
+                        totalGround += total;
+
+                        var tr = '<tr>' +
+                            '<td>' + (i + 1) + '</td>' +
+                            '<td>' + (row.nama_order || '-') + '</td>' +
+                            '<td>' + (row.nama_dokter || '-') + '</td>' +
+                            '<td>' + (row.satuan || '-') + '</td>' +
+                            '<td>' + (row.jml_order || 0) + '</td>' +
+                            '<td>' + formatRupiah(String(hargaJual), "Rp. ") + '</td>' +
+                            '<td>' + formatRupiah(String(total), "Rp. ") + '</td>' +
+                            '</tr>';
+                        $tbody.append(tr);
+                    });
+                }
+
+                $("#totalTagihan").val(totalGround);
+                $("#footerTagihan").text(formatRupiah(String(totalGround), "Rp. "));
+                hitungTotalDiskon();
+            },
+            error: function(xhr, status, error) {
+                $tbody.html('<tr><td colspan="7" class="text-center text-danger">Gagal memuat data tagihan.</td></tr>');
+            }
+        });
+    }
+
+    loadKomponenTagihan();
 
     $("#konfirmasi-pembayaran").on("click", function() {
         var no_reg = $("#noreg_hidden").val();

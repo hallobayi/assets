@@ -817,23 +817,55 @@ jQuery(document).ready(function () {
       .then((response) => {
         console.log(response);
         if (response.status === "success") {
+          // URL tujuan setelah hitung mundur (tindakan dokter / evaluasi awal)
+          const urlTindakan = response.no_reg
+            ? base_url +
+              "tindakandokter/add?no_reg=" +
+              encodeURIComponent(response.no_reg) +
+              "&form=evaluasi-awal"
+            : null;
+          const detikMundur = 10; // durasi hitung mundur (detik)
+          let timerInterval;
+
           Swal.fire({
             title: "Pasien Berhasil Disimpan!",
-            text: "Pilih Langkah Selanjutnya..",
+            html: urlTindakan
+              ? 'Otomatis diarahkan ke <b>Tindakan Dokter</b> dalam <b class="sisa-detik">' +
+                detikMundur +
+                "</b> detik.<br>Atau pilih langkah lain di bawah."
+              : "Pilih Langkah Selanjutnya..",
             icon: "success",
+            timer: urlTindakan ? detikMundur * 1000 : undefined,
+            timerProgressBar: !!urlTindakan,
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
             confirmButtonText: "Ya, Input Lagi!",
             cancelButtonText: "Kembali Ke List!",
+            allowOutsideClick: false,
+            didOpen: () => {
+              if (!urlTindakan) return;
+              const el = Swal.getHtmlContainer().querySelector(".sisa-detik");
+              timerInterval = setInterval(() => {
+                if (el) {
+                  el.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
+                }
+              }, 200);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            },
           }).then((result) => {
             console.log(result);
             if (result.isConfirmed) {
-              //console.log(result.isConfirmed);
-              location.reload(); // Reload the page after successful deletion and alert
+              location.reload(); // Input lagi: muat ulang form
             } else if (result.dismiss === Swal.DismissReason.cancel) {
-              //console.log(result.isConfirmed);
-              window.location.href = base_url + "pendaftaran"; // Redirect to desired page
+              window.location.href = base_url + "pendaftaran"; // Kembali ke list
+            } else if (
+              result.dismiss === Swal.DismissReason.timer &&
+              urlTindakan
+            ) {
+              window.location.href = urlTindakan; // Timeout: ke tindakan dokter
             }
           });
         } else {
