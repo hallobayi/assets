@@ -66,7 +66,7 @@ jQuery(document).ready(function () {
         $iframe_content
           .find("head")
           .append(
-            '<style id="theme-style">::-webkit-scrollbar { width: 15px; height: 3px;}::-webkit-scrollbar-button {  background-color: #141925;height: 0; }::-webkit-scrollbar-track {  background-color: #646464;}::-webkit-scrollbar-track-piece { background-color: #202632;}::-webkit-scrollbar-thumb { height: 35px; background-color: #181c26;border-radius: 0;}::-webkit-scrollbar-corner { background-color: #646464;}}::-webkit-resizer { background-color: #666;}</style>'
+            '<style id="theme-style">::-webkit-scrollbar { width: 15px; height: 3px;}::-webkit-scrollbar-button {  background-color: #141925;height: 0; }::-webkit-scrollbar-track {  background-color: #646464;}::-webkit-scrollbar-track-piece { background-color: #202632;}::-webkit-scrollbar-thumb { height: 35px; background-color: #181c26;border-radius: 0;}::-webkit-scrollbar-corner { background-color: #646464;}}::-webkit-resizer { background-color: #666;}</style>',
           );
       }
     });
@@ -213,7 +213,7 @@ jQuery(document).ready(function () {
   };
 
   dataTablesRiwayatEvaluasi = $("#tabel-riwayatevaluasi").DataTable(
-    settingsEvaluasi
+    settingsEvaluasi,
   );
   dataTablesRiwayatEvaluasi.columns.adjust().draw();
 
@@ -453,12 +453,12 @@ jQuery(document).ready(function () {
   });
 
   var frmSoap = $(".simpan-tindakan-soap");
-  frmSoap.on("click", "button", function (ev) {
+  frmSoap.on("click", "button[data-id]", function (ev) {
     // source: https://stackoverflow.com/a/70750965
     ev.preventDefault();
     let kolomSoap = $(this).data("id");
 
-    var postData = $(".simpan-tindakan-soap").serializeArray();
+    var postData = $(".simpan-tindakan-soap").serializeArray(); console.log(postData);
     postData.push({ name: "csrf_test_name", value: tokenHash });
 
     switch (kolomSoap) {
@@ -584,7 +584,7 @@ jQuery(document).ready(function () {
                 '<td colspan="' +
                 len +
                 '" class="text-center">Loading data...</td>' +
-                "</tr>"
+                "</tr>",
             );
           dataTablesRiwayatSoap = $("#tabel-riwayatsoap").DataTable(settings);
 
@@ -694,10 +694,10 @@ jQuery(document).ready(function () {
                 '<td colspan="' +
                 len +
                 '" class="text-center">Loading data...</td>' +
-                "</tr>"
+                "</tr>",
             );
           dataTablesRiwayatEvaluasi = $("#tabel-riwayatevaluasi").DataTable(
-            settingsEvaluasi
+            settingsEvaluasi,
           );
           // Alert
           Toast.fire({
@@ -710,19 +710,6 @@ jQuery(document).ready(function () {
         console.log("ERRORS: " + textStatus + " - " + errorThrown);
       },
     });
-    // $.ajax({
-    //     type: frm.attr('method'),
-    //     url: frm.attr('action'),
-    //     data: frm.serialize(),
-    //     success: function (data) {
-    //         console.log('Submission was successful.');
-    //         console.log(data);
-    //     },
-    //     error: function (data) {
-    //         console.log('An error occurred.');
-    //         console.log(data);
-    //     },
-    // });
   });
 
   var frmObat = $(".simpan-tindakan-obat");
@@ -765,7 +752,7 @@ jQuery(document).ready(function () {
               '<td colspan="' +
               len +
               '" class="text-center">Loading data...</td>' +
-              "</tr>"
+              "</tr>",
           );
         dataTablesRiwayatObat = $("#tabel-riwayatobat").DataTable(settingsObat);
 
@@ -895,6 +882,11 @@ jQuery(document).ready(function () {
     })
     .trigger("change");
 
+  // Catatan: handler klik referensi ICD (.hint-icd9/.hint-icd10/.hint-kewanitaan)
+  // + relokasi modal #modalIcdRef ke <body> ditangani di view a-halaman.php
+  // (satu sumber, mencegah handler ganda & backdrop nyangkut).
+
+  // Ganti Tindakan
   $(document).on("click", ".btn.gantiTindakan", function () {
     id = $(this).attr("data-id");
     $bootbox = bootbox.dialog({
@@ -910,15 +902,18 @@ jQuery(document).ready(function () {
           className: "btn-success submitGantiTindakan",
           callback: function () {
             $bootbox.find(".alert").remove();
-            
+
             // Validasi form
             form = $bootbox.find("form")[0];
-            var kode_tindakan = $bootbox.find("select[name='kode_tindakan']").val();
-            
-            if(!kode_tindakan || kode_tindakan === '') {
+
+            var kode_tindakan = $bootbox
+              .find("select[name='kode_tindakan']")
+              .val();
+
+            if (!kode_tindakan || kode_tindakan === "") {
               $bootbox.find(".modal-body").prepend(
                 '<div class="alert alert-dismissible alert-danger" role="alert">' +
-                  'Status Layanan wajib dipilih!' +
+                  "Layanan wajib dipilih!" +
                   '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
               );
               return false;
@@ -958,40 +953,47 @@ jQuery(document).ready(function () {
                     },
                   });
                   Toast.fire({
-                    html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' + data.message.message + '</div>',
+                    html:
+                      '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
+                      data.message.message +
+                      "</div>",
                   });
 
                   location.reload();
                 } else {
                   $button_submit.find("i").remove();
                   $button.prop("disabled", false);
-                  $bootbox.find(".modal-body").prepend(
-                    '<div class="alert alert-dismissible alert-danger" role="alert">' +
-                      data.message.message +
-                      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
-                  );
+                  $bootbox
+                    .find(".modal-body")
+                    .prepend(
+                      '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                        data.message.message +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+                    );
                 }
               },
               error: function (xhr) {
                 console.log(xhr.responseText);
                 $button_submit.find("i").remove();
                 $button.prop("disabled", false);
-                
+
                 var errorMsg = "Terjadi kesalahan pada server";
                 try {
                   var response = JSON.parse(xhr.responseText);
-                  if(response.message && response.message.message) {
+                  if (response.message && response.message.message) {
                     errorMsg = response.message.message;
                   }
-                } catch(e) {
+                } catch (e) {
                   errorMsg = xhr.responseText || errorMsg;
                 }
-                
-                $bootbox.find(".modal-body").prepend(
-                  '<div class="alert alert-dismissible alert-danger" role="alert">' +
-                    errorMsg +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
-                );
+
+                $bootbox
+                  .find(".modal-body")
+                  .prepend(
+                    '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                      errorMsg +
+                      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+                  );
               },
             });
             return false;
@@ -1010,11 +1012,242 @@ jQuery(document).ready(function () {
         $button.prop("disabled", false);
         $bootbox.find(".modal-body").empty().append(html);
       },
-    ).fail(function(xhr) {
-      $bootbox.find(".modal-body").html(
-        '<div class="alert alert-danger">Gagal memuat form: ' + xhr.statusText + '</div>'
-      );
+    ).fail(function (xhr) {
+      $bootbox
+        .find(".modal-body")
+        .html(
+          '<div class="alert alert-danger">Gagal memuat form: ' +
+            xhr.statusText +
+            "</div>",
+        );
       $button.prop("disabled", false);
+    });
+  });
+
+  // Update Pasien
+  $(document).on("click", ".btn.updatePasien", function () {
+    id = $(this).attr("data-id");
+    $bootbox = bootbox.dialog({
+      title: "Update Pasien",
+      message:
+        '<div class="text-center text-secondary"><div class="spinner-border"></div></div>',
+      buttons: {
+        cancel: {
+          label: "Batal",
+        },
+        success: {
+          label: "Simpan",
+          className: "btn-success submitUpdatePasien",
+          callback: function () {
+            $bootbox.find(".alert").remove();
+
+            // Validasi form
+            form = $bootbox.find("form")[0];
+
+            var nama_pasien = $bootbox.find("input[name='nama_pasien']").val();
+            var nik = $bootbox.find("input[name='nik']").val();
+            var tempat_lahir_ibu = $bootbox.find("input[name='tempat_lahir_ibu']").val();
+            var tgl_lahir_ibu = $bootbox.find("input[name='tgl_lahir_ibu']").val();
+            var no_hape_ibu = $bootbox.find("input[name='no_hape_ibu']").val();
+            var id_wilayah_kelurahan = $bootbox.find("input[name='id_wilayah_kelurahan']").val();
+            var status_nikah = $bootbox.find("select[name='status_nikah']").val();
+            var status_negara = $bootbox.find("select[name='status_negara']").val();
+            var alamat = $bootbox.find("textarea[name='alamat']").val() || $bootbox.find("input[name='alamat']").val();
+            var kode_cabang = $bootbox.find("input[name='cabang_input']").val();
+
+            if (!nama_pasien || nama_pasien.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Nama Pasien wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!nik || nik.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "NIK wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!tempat_lahir_ibu || tempat_lahir_ibu.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Tempat Lahir Ibu wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!tgl_lahir_ibu || tgl_lahir_ibu.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Tanggal Lahir Ibu wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!no_hape_ibu || no_hape_ibu.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "No HP Ibu wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!id_wilayah_kelurahan || id_wilayah_kelurahan.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Kelurahan wajib dipilih!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!status_nikah || status_nikah === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Status Pernikahan wajib dipilih!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!status_negara || status_negara === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Status Negara wajib dipilih!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!alamat || alamat.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Alamat wajib diisi!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            if (!kode_cabang || kode_cabang.trim() === "") {
+              $bootbox.find(".modal-body").prepend(
+                '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                  "Kode Cabang wajib dipilih!" +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+              );
+              return false;
+            }
+
+            $buttonPasien_submit.prepend(
+              '<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>',
+            );
+            $buttonPasien.prop("disabled", true);
+
+            // Submit Form
+            $.ajax({
+              type: "POST",
+              url: base_url + "master/pasien/ajaxUpdateDataPasien",
+              data: new FormData(form),
+              processData: false,
+              contentType: false,
+              dataType: "json",
+              success: function (data) {
+                console.log(data);
+
+                if (data.message.status == "ok") {
+                  $bootbox.modal("hide");
+                  const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    iconColor: "white",
+                    customClass: {
+                      popup: "bg-success text-light toast p-2",
+                    },
+                    didOpen: (toast) => {
+                      toast.addEventListener("mouseenter", Swal.stopTimer);
+                      toast.addEventListener("mouseleave", Swal.resumeTimer);
+                    },
+                  });
+                  Toast.fire({
+                    html:
+                      '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
+                      data.message.message +
+                      "</div>",
+                  });
+
+                  location.reload();
+                } else {
+                  $buttonPasien_submit.find("i").remove();
+                  $buttonPasien.prop("disabled", false);
+                  $bootbox
+                    .find(".modal-body")
+                    .prepend(
+                      '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                        data.message.message +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+                    );
+                }
+              },
+              error: function (xhr) {
+                console.log(xhr.responseText);
+                $buttonPasien_submit.find("i").remove();
+                $buttonPasien.prop("disabled", false);
+
+                var errorMsg = "Terjadi kesalahan pada server";
+                try {
+                  var response = JSON.parse(xhr.responseText);
+                  if (response.message && response.message.message) {
+                    errorMsg = response.message.message;
+                  }
+                } catch (e) {
+                  errorMsg = xhr.responseText || errorMsg;
+                }
+
+                $bootbox
+                  .find(".modal-body")
+                  .prepend(
+                    '<div class="alert alert-dismissible alert-danger" role="alert">' +
+                      errorMsg +
+                      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+                  );
+              },
+            });
+            return false;
+          },
+        },
+      },
+    });
+
+    $bootbox.find(".modal-dialog").css("max-width", "100%");
+    var $buttonPasien = $bootbox.find("button").prop("disabled", true);
+    var $buttonPasien_submit = $bootbox.find("button.submitUpdatePasien");
+
+    // Show Form Pasien
+    $.get(
+      base_url + "master/pasien/ajaxFormPasienBaru?id=" + id,
+      function (html) {
+        $buttonPasien.prop("disabled", false);
+        $bootbox.find(".modal-body").empty().append(html);
+      },
+    ).fail(function (xhr) {
+      $bootbox
+        .find(".modal-body")
+        .html(
+          '<div class="alert alert-danger">Gagal memuat form: ' +
+            xhr.statusText +
+            "</div>",
+        );
+      $buttonPasien.prop("disabled", false);
     });
   });
 });
