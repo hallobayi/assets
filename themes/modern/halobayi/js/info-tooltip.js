@@ -20,4 +20,8 @@ $(function() {
     $('#Integrasi_Sistem').tooltip({title: "Module Master Data Integrasi Sistem", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#Absensi').tooltip({title: "Module Laporan Absensi", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
 
+    // Pendaftaran Form
+    $('#gravida').tooltip({title: "Kehamilan Keberapa?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
+    $('#para').tooltip({title: "Berapa Kali Kelahiran?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
+    $('#abortus').tooltip({title: "Berapa Kali Abortus?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
 });
