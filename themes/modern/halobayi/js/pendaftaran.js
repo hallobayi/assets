@@ -784,14 +784,15 @@ jQuery(document).ready(function () {
 
   // Rencana datang
   $("#rencana_datang, #tp, #hpht").datepicker({
-    format: "dd-mm-yyyy",
+    format: "dd-mm-yyyy hh:ii", // Added time format
     weekStart: 1,
     locale: "id",
     language: "id",
     autoclose: true,
     todayHighlight: true,
-    // daysOfWeekDisabled: "0,1,2,3,4,5",
-    // daysOfWeekHighlighted: "6",
+    // Add these lines to enable time selection if the datepicker supports it
+    // startView: 2, // Start with month view
+    // minView: 0,   // Allow selection down to minutes
   });
 
   $("#collapseOne").collapse({
@@ -824,7 +825,7 @@ jQuery(document).ready(function () {
               encodeURIComponent(response.no_reg) +
               "&form=evaluasi-awal"
             : null;
-          const detikMundur = 10; // durasi hitung mundur (detik)
+          const detikMundur = 5; // durasi hitung mundur (detik)
           let timerInterval;
 
           Swal.fire({

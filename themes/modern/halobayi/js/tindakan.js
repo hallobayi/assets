@@ -1250,4 +1250,70 @@ jQuery(document).ready(function () {
       $buttonPasien.prop("disabled", false);
     });
   });
+
+  // Collapse Riwayat Pendaftaran Pasien
+  $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
+    const nomor_rm_sistem = $(this).data('nomor_rm_sistem'); console.log(nomor_rm_sistem);
+    $.ajax({
+        url: base_url + "tindakandokter/ajaxRiwayatPendaftaranPasien",
+        type: 'GET',
+        data: { nomor_rm: nomor_rm_sistem },
+        dataType: 'json',
+        beforeSend: function() {
+            $('#loadingRiwayat').show();
+            $('#listRiwayatPasien').hide().empty();
+            $('#emptyRiwayat').hide();
+        },
+        success: function(response) {
+            console.log("AJAX Success Response:", response);
+            $('#loadingRiwayat').hide();
+            if (response.data && response.data.length > 0) {
+                var html = '';
+                $.each(response.data, function(i, item) {
+                    var statusBadge = '';
+                    switch(item.status_layanan) {
+                        case 'daftar': statusBadge = '<span class="badge bg-warning text-dark">Daftar</span>'; break;
+                        case 'dokter': statusBadge = '<span class="badge bg-info">Dokter</span>'; break;
+                        case 'selesai': statusBadge = '<span class="badge bg-success">Selesai</span>'; break;
+                        default: statusBadge = '<span class="badge bg-secondary">' + (item.nama_dokter || '-') + '</span>';
+                    }
+                    html += '<div class="accordion-item">';
+                    html += '<h2 class="accordion-header" id="headingRiwayat' + i + '">';
+                    html += '<button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRiwayat' + i + '" aria-expanded="false" aria-controls="collapseRiwayat' + i + '">';
+                    html += '<div class="d-flex flex-wrap align-items-center gap-2 w-100 small">';
+                    html += '<span class="fw-semibold text-primary">' + (item.no_reg || '-') + '</span>';
+                    html += '<span class="text-muted">' + (item.tgl_masuk || '-') + '</span>';
+                    html += '<span class="badge bg-light text-dark border">' + (item.nama_tindakan || '-') + '</span>';
+                    html += '<span class="badge bg-light text-dark border">' + (item.nama_dokter || '-') + '</span>';
+                    html += '</div>';
+                    html += '</button>';
+                    html += '</h2>';
+                    html += '<div id="collapseRiwayat' + i + '" class="accordion-collapse collapse" aria-labelledby="headingRiwayat' + i + '" data-bs-parent="#listRiwayatPasien">';
+                    html += '<div class="accordion-body p-3">';
+                    html += '<div class="row g-2 small">';
+                    html += '<div class="col-6"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + (item.no_reg || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Tanggal Daftar</span><div class="fw-medium">' + (item.tgl_masuk || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Layanan</span><div class="fw-medium">' + (item.nama_tindakan || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Jenis Periksa</span><div class="fw-medium">' + (item.jenis_periksa || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Dokter</span><div class="fw-medium">' + (item.nama_dokter || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Cabang</span><div class="fw-medium">' + (item.nama_cabang || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Status</span><div>' + statusBadge + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">Riwayat</span><div class="fw-medium">' + (item.jam_daftar || '-') + '</div></div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+                $('#listRiwayatPasien').html(html).show();
+            } else {
+                $('#emptyRiwayat').show();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX Error:", status, error, xhr);
+            $('#loadingRiwayat').hide();
+            $('#emptyRiwayat').show();
+        }
+    });  
+  });
+
 });
