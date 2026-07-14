@@ -1253,7 +1253,7 @@ jQuery(document).ready(function () {
 
   // Collapse Riwayat Pendaftaran Pasien
   $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
-    const nomor_rm_sistem = $(this).data('nomor_rm_sistem'); console.log(nomor_rm_sistem);
+    const nomor_rm_sistem = $(this).data('nomor_rm_sistem');
     $.ajax({
         url: base_url + "tindakandokter/ajaxRiwayatPendaftaranPasien",
         type: 'GET',
@@ -1281,7 +1281,7 @@ jQuery(document).ready(function () {
                     html += '<h2 class="accordion-header" id="headingRiwayat' + i + '">';
                     html += '<button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRiwayat' + i + '" aria-expanded="false" aria-controls="collapseRiwayat' + i + '">';
                     html += '<div class="d-flex flex-wrap align-items-center gap-2 w-100 small">';
-                    html += '<span class="fw-semibold text-primary">' + (item.no_reg || '-') + '</span>';
+                    html += '<span class="fw-semibold text-primary">' + (item.nomor_register || '-') + '</span>';
                     html += '<span class="text-muted">' + (item.tgl_masuk || '-') + '</span>';
                     html += '<span class="badge bg-light text-dark border">' + (item.nama_tindakan || '-') + '</span>';
                     html += '<span class="badge bg-light text-dark border">' + (item.nama_dokter || '-') + '</span>';
@@ -1291,7 +1291,7 @@ jQuery(document).ready(function () {
                     html += '<div id="collapseRiwayat' + i + '" class="accordion-collapse collapse" aria-labelledby="headingRiwayat' + i + '" data-bs-parent="#listRiwayatPasien">';
                     html += '<div class="accordion-body p-3">';
                     html += '<div class="row g-2 small">';
-                    html += '<div class="col-6"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + (item.no_reg || '-') + '</div></div>';
+                    html += '<div class="col-6"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + (item.nomor_register || '-') + '</div></div>';
                     html += '<div class="col-6"><span class="text-muted">Tanggal Daftar</span><div class="fw-medium">' + (item.tgl_masuk || '-') + '</div></div>';
                     html += '<div class="col-6"><span class="text-muted">Layanan</span><div class="fw-medium">' + (item.nama_tindakan || '-') + '</div></div>';
                     html += '<div class="col-6"><span class="text-muted">Jenis Periksa</span><div class="fw-medium">' + (item.jenis_periksa || '-') + '</div></div>';
