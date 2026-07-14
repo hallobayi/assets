@@ -189,11 +189,11 @@ function formatRupiah(angka, prefix){
 
 
 function kembali() {
-    window.location.href = ("https://sim.halobayi.co.id/admin/penjualan/index");
+    window.location.href = (base_url + "/penjualan/index");
 }
 
 function kembalikasir() {
-    window.location.href = ("https://sim.halobayi.co.id/k/home/index");
+    window.location.href = (base_url + "/kasir/home");
 }
 
 function tampildatatemppenjualan() {
