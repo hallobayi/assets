@@ -332,9 +332,9 @@ $(document).ready(function() {
         chartKategori.update();
 
         if (theme_value == 'dark') {
-            $('#penjualan-terbaru_wrapper').find('.buttons-html5').removeClass('btn-light');
+            $('#tindakan-terbesar_wrapper').find('.buttons-html5').removeClass('btn-light');
         } else {
-            $('#penjualan-terbaru_wrapper').find('.buttons-html5').addClass('btn-light');
+            $('#tindakan-terbesar_wrapper').find('.buttons-html5').addClass('btn-light');
         }
     });
 
@@ -515,7 +515,7 @@ $(document).ready(function() {
     })
 
     // Update Penjualan Terbaru
-    $('#tahun-penjualan-terbaru').change(function() {
+    $('#tahun-tindakan-terbesar').change(function() {
 
         $this = $(this);
         $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
@@ -531,7 +531,7 @@ $(document).ready(function() {
         html = '<tr><td colspan="' + len + '">Loading data...</td></tr>';
         $tbody.html(html);
 
-        $.get(base_url + 'dashboard/ajaxGetPenjualanTerbaru?tahun=' + $(this).val(), function(data) {
+        $.get(base_url + 'dashboard/ajaxGetTindakanTerbesar?tahun=' + $(this).val(), function(data) {
             $spinner.remove();
             if (data) {
                 data = JSON.parse(data);
@@ -548,7 +548,7 @@ $(document).ready(function() {
                 })
 
                 $tbody.html(html);
-                initDataTablesPenjualanTerbaru();
+                initDataTablesTindakanTerbesar();
             }
         });
     })
@@ -581,7 +581,7 @@ $(document).ready(function() {
 
     let dataTablesPenjualanTerbaru = '';
 
-    function initDataTablesPenjualanTerbaru() {
+    function initDataTablesTindakanTerbesar() {
         let settings = {
             "order": [4, "desc"],
             "columnDefs": [{
@@ -601,7 +601,7 @@ $(document).ready(function() {
                 },
                 {
                     "extend": "excel",
-                    "title": "Data Penjualan Terbaru",
+                    "title": "Data Tindakan Terbesar",
                     "text": "<i class='far fa-file-excel'></i> Excel",
                     "exportOptions": {
                         columns: [0, 1, 2, 3, 4],
@@ -613,7 +613,7 @@ $(document).ready(function() {
                 },
                 {
                     "extend": "pdf",
-                    "title": "Data Penjualan Terbaru",
+                    "title": "Data Tindakan Terbesar",
                     "text": "<i class='far fa-file-pdf'></i> PDF",
                     "exportOptions": {
                         columns: [0, 1, 2, 3, 4],
@@ -634,16 +634,16 @@ $(document).ready(function() {
         };
 
         // settings['buttons'] = [ 'copy', 'excel', 'pdf', 'colvis' ];
-        dataTablesPenjualanTerbaru = $('#penjualan-terbaru').DataTable(settings);
+        dataTablesPenjualanTerbaru = $('#tindakan-terbesar').DataTable(settings);
         dataTablesPenjualanTerbaru.buttons().container()
-            .appendTo('#penjualan-terbaru_wrapper .col-md-6:eq(0)');
+            .appendTo('#tindakan-terbesar_wrapper .col-md-6:eq(0)');
 
-        $('#penjualan-terbaru_wrapper').find('.row').eq(1).css('overflow', 'auto');
+        $('#tindakan-terbesar_wrapper').find('.row').eq(1).css('overflow', 'auto');
 
         if (cookie_jwd_adm_theme == 'dark') {
-            $('#penjualan-terbaru_wrapper').find('.buttons-html5').removeClass('btn-light');
+            $('#tindakan-terbesar_wrapper').find('.buttons-html5').removeClass('btn-light');
         } else {
-            $('#penjualan-terbaru_wrapper').find('.buttons-html5').addClass('btn-light');
+            $('#tindakan-terbesar_wrapper').find('.buttons-html5').addClass('btn-light');
         }
 
         // No urut
@@ -657,5 +657,5 @@ $(document).ready(function() {
         }).draw();
     }
 
-    $('#tahun-penjualan-terbaru').trigger('change');
+    $('#tahun-tindakan-terbesar').trigger('change');
 });
