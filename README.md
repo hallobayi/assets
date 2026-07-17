@@ -19,7 +19,7 @@ Repository untuk mengelola dan mendistribusikan assets statis project Halo Bayi 
 
 Repository ini menyediakan assets statis (JavaScript libraries, CSS frameworks, fonts, images) untuk aplikasi Halo Bayi dengan akses melalui multiple CDN untuk reliability dan performance optimization.
 
-**Version:** 1.1.18
+**Version:** 1.1.27
 
 **Tech Stack:**
 - jQuery
@@ -38,7 +38,7 @@ Project ini tersedia melalui 3 (tiga) CDN berbeda dengan karakteristik masing-ma
 **Status:** ✅ **CSP SUPPORT**
 
 ```
-https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997
+https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/jquery/jquery.min.js?r=1782870997
 ```
 
 **Keunggulan:**
@@ -76,7 +76,7 @@ https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
 **Status:** ✅ **CSP SUPPORT**
 
 ```
-https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.18/vendors/jquery/jquery.min.js
+https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.27/vendors/jquery/jquery.min.js
 ```
 
 **Keunggulan:**
@@ -191,11 +191,11 @@ assets_halobayi/
 <html>
 <head>
     <!-- CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/bootstrap/css/bootstrap.min.css">
     
     <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"></script>
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/jquery/jquery.min.js?r=1782870997"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <!-- Your content -->
@@ -229,7 +229,7 @@ assets_halobayi/
 <html>
 <head>
     <!-- Primary: jsDelivr -->
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/jquery/jquery.min.js?r=1782870997"></script>
     
     <!-- Fallback jika primary gagal -->
     <script>
@@ -254,11 +254,11 @@ assets_halobayi/
 - Global CDN dengan multiple mirrors
 - Auto-fallback antar mirrors
 - Aktifkan CSP headers di server
-- Gunakan versioning (`@1.1.18`)
+- Gunakan versioning (`@1.1.27`)
 - Tambahkan cache buster parameter (`?r=timestamp`)
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js?r=1782870997"></script>
+<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/jquery/jquery.min.js?r=1782870997"></script>
 ```
 
 ✅ **Pilihan 2: StaticDelivr (Alternative)**
@@ -268,7 +268,7 @@ assets_halobayi/
 - CSP compatible dengan consistent domain
 
 ```html
-<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.18/vendors/jquery/jquery.min.js"></script>
+<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.1.27/vendors/jquery/jquery.min.js"></script>
 ```
 
 ### Development Environment
@@ -319,7 +319,7 @@ MAJOR.MINOR.PATCH
 <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@latest/vendors/jquery/jquery.min.js"></script>
 
 <!-- Version spesifik (recommended for production) -->
-<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.18/vendors/jquery/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.1.27/vendors/jquery/jquery.min.js"></script>
 
 <!-- Major version -->
 <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1/vendors/jquery/jquery.min.js"></script>
