@@ -304,11 +304,11 @@ Project ini menggunakan semantic versioning:
 MAJOR.MINOR.PATCH
 ```
 
-**Current Version:** `1.1.21`
+**Current Version:** `1.1.27`
 
 ### Version History
 
-- `1.1.21` - Current stable version
+- `1.1.27` - Current stable version
 - `1.1.x` - Minor updates & bug fixes
 - `1.x.x` - Feature updates
 
