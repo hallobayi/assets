@@ -306,8 +306,8 @@ jQuery(document).ready(function () {
   });
 
   // Detail SOAP
-  var dataTablesSoap = $("#riwayat-soap");
-  dataTablesSoap.on("click", "button", function (ev) {
+  var dataTablesSoap = $("#tabel-riwayatsoap");
+  dataTablesSoap.on("click", "button.detail-soap", function (ev) {
     ev.preventDefault();
     ev.stopPropagation();
 
