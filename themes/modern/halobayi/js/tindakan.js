@@ -452,6 +452,91 @@ jQuery(document).ready(function () {
     });
   });
 
+  // Cek Riwayat BB & TB dari pendaftaran sebelumnya (tampilkan data dulu, isi manual)
+  $(document).on("click", ".cek-riwayat-bbtb", function (ev) {
+    ev.preventDefault();
+
+    var $btn = $(this);
+    var noReg = $btn.data("no_reg");
+    var $info = $btn.siblings(".info-riwayat-bbtb");
+
+    $btn.prop("disabled", true);
+    $info
+      .removeClass("text-danger text-success")
+      .addClass("text-muted")
+      .html("Mengecek riwayat...");
+
+    $.ajax({
+      url:
+        base_url +
+        "tindakandokter/ajaxCekRiwayatBbTb?no_reg=" +
+        encodeURIComponent(noReg),
+      dataType: "json",
+      type: "GET",
+      success: function (res) {
+        if (res && res.found) {
+          var bb = res.berat_badan || "";
+          var tb = res.tinggi_badan || "";
+
+          $info
+            .removeClass("text-muted text-danger")
+            .addClass("text-success")
+            .html(
+              "Ditemukan dari Reg " +
+                res.no_reg +
+                " (" +
+                res.tanggal +
+                ") &mdash; BB: <b>" +
+                (bb || "-") +
+                "</b> kg, TB: <b>" +
+                (tb || "-") +
+                '</b> cm &nbsp;<button type="button" class="btn btn-xs btn-success isi-riwayat-bbtb" ' +
+                'data-bb="' +
+                bb +
+                '" data-tb="' +
+                tb +
+                '"><i class="fa fa-check pe-1"></i>Isi ke Form</button>'
+            );
+        } else {
+          $info
+            .removeClass("text-muted text-success")
+            .addClass("text-danger")
+            .text("Tidak ada riwayat BB/TB pada pendaftaran sebelumnya.");
+        }
+      },
+      error: function () {
+        $info
+          .removeClass("text-muted text-success")
+          .addClass("text-danger")
+          .text("Gagal mengambil data riwayat.");
+      },
+      complete: function () {
+        $btn.prop("disabled", false);
+      },
+    });
+  });
+
+  // Isi hasil pengecekan riwayat ke form Objective (dijalankan saat tombol diklik)
+  $(document).on("click", ".isi-riwayat-bbtb", function (ev) {
+    ev.preventDefault();
+
+    var bb = "" + $(this).data("bb");
+    var tb = "" + $(this).data("tb");
+
+    if (bb !== "") {
+      $("input[name='objective|berat_badan']").val(bb);
+    }
+    if (tb !== "") {
+      $("input[name='objective|tinggi_badan']").val(tb);
+    }
+
+    $(this)
+      .removeClass("btn-success")
+      .addClass("btn-secondary")
+      .prop("disabled", true)
+      .html('<i class="fa fa-check pe-1"></i>Terisi');
+  });
+
   var frmSoap = $(".simpan-tindakan-soap");
   frmSoap.on("click", "button[data-id]", function (ev) {
     // source: https://stackoverflow.com/a/70750965
