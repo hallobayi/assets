@@ -1375,6 +1375,33 @@ jQuery(document).ready(function () {
   });
 
   // Collapse Riwayat Pendaftaran Pasien
+  // Escape HTML agar aman ditampilkan dan tampil '-' jika kosong
+  function esc(val) {
+    if (val === null || val === undefined || String(val).trim() === '') return '-';
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Bangun satu section SOAP (Subjective/Assessment/Plan) — rapi, teks berlabel
+  function soapSection(title, subtitle, fields) {
+    var s = '';
+    s += '<div class="mb-3">';
+    s += '<div class="fw-bold text-uppercase small border-bottom pb-1 mb-2">' + esc(title);
+    if (subtitle) s += ' <span class="text-muted">· ' + esc(subtitle) + '</span>';
+    s += '</div>';
+    for (var k = 0; k < fields.length; k++) {
+      s += '<div class="mb-2 small">';
+      s += '<div class="text-muted">' + esc(fields[k][0]) + '</div>';
+      s += '<div class="fw-medium" style="white-space:pre-wrap;word-break:break-word;">' + esc(fields[k][1]) + '</div>';
+      s += '</div>';
+    }
+    s += '</div>';
+    return s;
+  }
+
   $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
     const nomor_rm_sistem = $(this).data('nomor_rm_sistem');
     $.ajax({
@@ -1423,15 +1450,34 @@ jQuery(document).ready(function () {
                     html += '</h2>';
                     html += '<div id="collapseRiwayat' + i + '" class="accordion-collapse collapse" aria-labelledby="headingRiwayat' + i + '" data-bs-parent="#listRiwayatPasien">';
                     html += '<div class="accordion-body p-3">';
-                    html += '<div class="row g-2 small">';
-                    html += '<div class="col-6"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + (item.nomor_register || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Tanggal Daftar</span><div class="fw-medium">' + (item.tgl_masuk || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Layanan</span><div class="fw-medium">' + (item.nama_tindakan || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Jenis Periksa</span><div class="fw-medium">' + (item.jenis_periksa || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Dokter</span><div class="fw-medium">' + (item.nama_dokter || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Cabang</span><div class="fw-medium">' + (item.nama_cabang || '-') + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Status</span><div>' + statusBadge + '</div></div>';
-                    html += '<div class="col-6"><span class="text-muted">Riwayat</span><div class="fw-medium">' + (item.jam_daftar || '-') + '</div></div>';
+
+                    // --- Ringkasan Pendaftaran ---
+                    html += '<div class="row g-2 small mb-3">';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + esc(item.nomor_register) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Tanggal Daftar</span><div class="fw-medium">' + esc(item.tgl_masuk) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Layanan</span><div class="fw-medium">' + esc(item.nama_tindakan) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Jenis Periksa</span><div class="fw-medium">' + esc(item.jenis_periksa) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Dokter</span><div class="fw-medium">' + esc(item.nama_dokter) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Cabang</span><div class="fw-medium">' + esc(item.nama_cabang) + '</div></div>';
+                    html += '<div class="col-6 col-md-3"><span class="text-muted">Status</span><div>' + statusBadge + '</div></div>';
+                    html += '</div>';
+
+                    // --- SOAP: Subjective / Assessment / Plan (3 kolom sejajar) ---
+                    html += '<div class="row g-3">';
+                    html += '<div class="col-12 col-md-4">' + soapSection('Subjective', 'ANAMNESA', [
+                        ['Keluhan Utama', item.keluhan_utama],
+                        ['Riwayat Penyakit', item.riwayat_penyakit]
+                    ]) + '</div>';
+                    html += '<div class="col-12 col-md-4">' + soapSection('Assessment', '', [
+                        ['ICD 10 (Diagnosa)', item.icd10],
+                        ['ICD 9 (Tindakan)', item.icd9],
+                        ['Diagnosa Primer', item.diagnosa_primer]
+                    ]) + '</div>';
+                    html += '<div class="col-12 col-md-4">' + soapSection('Plan', '', [
+                        ['Keterangan Lain', item.keterangan_lain]
+                    ]) + '</div>';
+                    html += '</div>';
+
                     html += '</div>';
                     html += '</div>';
                     html += '</div>';
