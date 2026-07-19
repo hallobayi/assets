@@ -1354,6 +1354,12 @@ jQuery(document).ready(function () {
             $('#loadingRiwayat').hide();
             if (response.data && response.data.length > 0) {
                 var html = '';
+                // no_reg yang sedang dibuka (dari hidden input; fallback ke query URL)
+                var currentNoReg = ($('#no_reg').val() || $('input[name=no_reg]').val() || '').toString().trim();
+                if (currentNoReg === '') {
+                    var mNoReg = window.location.search.match(/[?&]no_reg=([^&]+)/);
+                    if (mNoReg) currentNoReg = decodeURIComponent(mNoReg[1]).trim();
+                }
                 $.each(response.data, function(i, item) {
                     var statusBadge = '';
                     switch(item.status_layanan) {
@@ -1362,14 +1368,18 @@ jQuery(document).ready(function () {
                         case 'selesai': statusBadge = '<span class="badge bg-success">Selesai</span>'; break;
                         default: statusBadge = '<span class="badge bg-secondary">' + (item.nama_dokter || '-') + '</span>';
                     }
-                    html += '<div class="accordion-item">';
+                    // Tandai baris yang no_reg-nya sedang dibuka sebagai 'active'
+                    var isActive = currentNoReg !== '' && (item.nomor_register || '').toString().trim() === currentNoReg;
+                    var activeBadge = isActive ? '<span class="badge bg-success ms-auto">Active</span>' : '';
+                    html += '<div class="accordion-item' + (isActive ? ' border border-success' : '') + '">';
                     html += '<h2 class="accordion-header" id="headingRiwayat' + i + '">';
-                    html += '<button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRiwayat' + i + '" aria-expanded="false" aria-controls="collapseRiwayat' + i + '">';
+                    html += '<button class="accordion-button collapsed py-2 px-3' + (isActive ? ' bg-success bg-opacity-10' : '') + '" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRiwayat' + i + '" aria-expanded="false" aria-controls="collapseRiwayat' + i + '">';
                     html += '<div class="d-flex flex-wrap align-items-center gap-2 w-100 small">';
                     html += '<span class="fw-semibold text-primary">' + (item.nomor_register || '-') + '</span>';
                     html += '<span class="text-muted">' + (item.tgl_masuk || '-') + '</span>';
                     html += '<span class="badge bg-light text-dark border">' + (item.nama_tindakan || '-') + '</span>';
                     html += '<span class="badge bg-light text-dark border">' + (item.nama_dokter || '-') + '</span>';
+                    html += activeBadge;
                     html += '</div>';
                     html += '</button>';
                     html += '</h2>';
