@@ -1298,6 +1298,44 @@ jQuery(document).ready(function () {
                   errorMsg = xhr.responseText || errorMsg;
                 }
 
+                try {
+                  // Hapus event listener scroll yang sebelumnya
+                  window.removeEventListener('scroll', tabScrollHandler);
+
+                  // Tambahkan styling untuk form
+                  const form = document.querySelector('.soap-form');
+                  if (form) {
+                      form.style.display = 'grid';
+                      form.style.gap = '20px';
+                      form.style.maxWidth = '100%';
+                      form.style.overflow = 'visible';
+                  }
+
+                  // Tambahkan class untuk section-form
+                  document.querySelectorAll('.form-section').forEach(section => {
+                      section.style.padding = '20px';
+                      section.style.border = '1px solid #ddd';
+                      section.style.borderRadius = '8px';
+                      section.style.backgroundColor = '#f9f9f9';
+                  });
+
+                  // Tambahkan styling untuk judul section
+                  document.querySelectorAll('.form-section h3').forEach(h3 => {
+                      h3.style.marginTop = '0';
+                      h3.style.color = '#333';
+                      h3.style.fontSize = '1.2rem';
+                  });
+
+                  // Tambahkan styling untuk form-group
+                  document.querySelectorAll('.form-group').forEach(group => {
+                      group.style.marginBottom = '15px';
+                  });
+
+                  console.log('Form styling updated successfully');
+              } catch (e) {
+                  console.error('Error updating form styling:', e);
+              }
+
                 $bootbox
                   .find(".modal-body")
                   .prepend(
@@ -1408,7 +1446,48 @@ jQuery(document).ready(function () {
             $('#loadingRiwayat').hide();
             $('#emptyRiwayat').show();
         }
-    });  
+    });
   });
+
+  // ===== SOAP: navigasi scroll (pengganti tab) =====
+  (function initSoapScrollNav() {
+    var $scroll = $("#soapScroll");
+    if (!$scroll.length) return;
+
+    var $links = $(".soap-quicknav-link");
+
+    // Klik quick-nav: smooth scroll ke section terkait
+    $links.on("click", function (e) {
+      e.preventDefault();
+      var targetId = $(this).attr("href");
+      var $target = $(targetId);
+      if (!$target.length) return;
+
+      var top = $target.offset().top - 80; // offset agar tidak ketutup navbar/quicknav
+      $("html, body").animate({ scrollTop: top }, 350);
+    });
+
+    // Highlight quick-nav sesuai section yang sedang terlihat
+    var blocks = $(".soap-block").toArray();
+    if ("IntersectionObserver" in window && blocks.length) {
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var id = entry.target.getAttribute("id");
+              $links.removeClass("active");
+              $links
+                .filter('[href="#' + id + '"]')
+                .addClass("active");
+            }
+          });
+        },
+        { rootMargin: "-40% 0px -55% 0px", threshold: 0 }
+      );
+      blocks.forEach(function (b) {
+        observer.observe(b);
+      });
+    }
+  })();
 
 });
