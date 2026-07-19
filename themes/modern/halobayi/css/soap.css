@@ -1,0 +1,88 @@
+/**
+* 	Modified by : Muchamad Desta Fadilah a.ka. topidesta
+*	Website		: https://topidesta.my.id
+*	Year		: 2026
+*/
+
+.soap-form {
+    display: grid;
+    gap: 20px;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.form-section {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.form-section h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* SOAP: layout scroll (pengganti tab) */
+.soap-scroll { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.soap-block { scroll-margin-top: 90px; }
+
+.soap-block .soap-block-header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem .9rem;
+    border-left: 4px solid #e36bd7;
+    background: #f1f6ff;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.soap-block .soap-block-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background:  #68d4d4;
+    color: #fff;
+    font-weight: 700;
+    font-size: .95rem;
+    flex: 0 0 auto;
+}
+
+.soap-block .soap-block-title { font-weight: 600; color: #02b875; margin: 0; }
+
+/* Quick-nav sticky (loncat ke section, bukan tab) */
+.soap-quicknav {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    padding: .5rem 0;
+    background: #fff;
+    margin-bottom: .75rem;
+}
+
+.soap-quicknav a {
+    text-decoration: none;
+    font-size: .82rem;
+    padding: .3rem .7rem;
+    border-radius: 20px;
+    border: 1px solid #cfe0ff;
+    color: #e033cf;
+    background: #fff;
+    transition: all .15s ease;
+}
+
+.soap-quicknav a:hover,
+.soap-quicknav a.active { background: #e033cf; color: #fff; border-color: #e033cf; }
