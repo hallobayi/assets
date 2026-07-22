@@ -60,10 +60,21 @@
     var reconnectMax = 30000;       // maksimal 30 detik
     var activityTimer = null;
 
+    // Broadcast status koneksi realtime supaya UI (mis. badge di dashboard)
+    // bisa menampilkannya. State: connecting | connected | disconnected.
+    function setStatus(state) {
+        window.SOCKUDO_STATE = state;
+        try {
+            document.dispatchEvent(new CustomEvent('sockudo:status', { detail: { state: state } }));
+        } catch (e) {}
+    }
+
     function connect() {
+        setStatus('connecting');
         try {
             ws = new WebSocket(url);
         } catch (e) {
+            setStatus('disconnected');
             scheduleReconnect();
             return;
         }
@@ -90,6 +101,7 @@
                 case 'pusher:connection_established':
                     subscribeAll();
                     keepAlive(data);
+                    setStatus('connected');
                     break;
 
                 case 'pusher:ping':
@@ -109,6 +121,7 @@
         };
 
         ws.onclose = function () {
+            setStatus('disconnected');
             scheduleReconnect();
         };
 
