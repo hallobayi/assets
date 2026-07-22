@@ -100,3 +100,16 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
     justify-content: center;
 }
+
+/* Kartu identitas selalu selebar kontainer supaya link SOAP (Subjective/
+   Objective/Assessment/Plan) turun ke baris sendiri sebagai baris horizontal,
+   bukan kolom vertikal yang meregang di samping kartu pada layar lebar. */
+.soap-quicknav-side > .card {
+    flex: 1 1 100%;
+    width: 100%;
+    margin-bottom: .5rem;
+}
+
+.soap-quicknav-side > a {
+    align-self: center;
+}
