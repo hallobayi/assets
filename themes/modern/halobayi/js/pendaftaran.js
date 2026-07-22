@@ -71,7 +71,7 @@ jQuery(document).ready(function () {
       });
     },
     fnRowCallback: function (nRow, aoData, c) {
-      console.log("nRow:", nRow, "\naoData:", aoData, "\naoKolom:", c);
+      //console.log("nRow:", nRow, "\naoData:", aoData, "\naoKolom:", c);
 
       // Kolom "Pasien"
       $("td", nRow)
