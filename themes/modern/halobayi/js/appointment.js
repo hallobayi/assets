@@ -117,14 +117,16 @@ jQuery(document).ready(function() {
                                         html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil disimpan</div>'
                                     })
                                   
-                                    // Load Ajax Datatables 
-                                    // TODO: Masih ada Bugs CSRF Nyangkut
-                                    // settingsPerjanjian.ajax.url = data.message.urlAjax;
-                                    // dataTablesPerjanjian.destroy();
-                                    // len = $('#tabel-perjanjian').find('thead').find('th').length;
-                                    // $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');
-                                    // dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);
-                                    // dataTablesPerjanjian.draw();
+                                    /*
+                                    Load Ajax Datatables 
+                                    TODO: Masih ada Bugs CSRF Nyangkut
+                                    settingsPerjanjian.ajax.url = data.message.urlAjax;
+                                    dataTablesPerjanjian.destroy();
+                                    len = $('#tabel-perjanjian').find('thead').find('th').length;
+                                    $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');
+                                    dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);
+                                    dataTablesPerjanjian.draw();
+                                    */
 
                                     location.reload();
                                     
@@ -160,6 +162,20 @@ jQuery(document).ready(function() {
                 dateFormat: "H:i",
                 time_24hr: true
             });
+
+            var $jenisPasien = $bootbox.find('.jenisPasien');
+            function toggleNoRm() {
+                var isLama = $jenisPasien.val() === 'lama';
+                var $row = $bootbox.find('.rowNoRm');
+                var $input = $row.find('.noRm');
+                $row.toggle(isLama);
+                $input.prop('disabled', !isLama);
+                if (!isLama) {
+                    $input.val('');
+                }
+            }
+            $jenisPasien.on('change', toggleNoRm);
+            toggleNoRm();
         });
     };
 
