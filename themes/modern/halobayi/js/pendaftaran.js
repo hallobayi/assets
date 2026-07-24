@@ -515,10 +515,20 @@ jQuery(document).ready(function () {
       $(".tp").val("");
       $(".usia_kehamilan").val("");
       $(".tp").prop("required", false);
+      // wajib: kolom tersembunyi yang masih invalid bikin submit diblokir diam-diam
+      resetValidasi($(".tp").add(".hpht"));
     } else {
       $(".hamil").show();
       $(".tp").attr("required", "required");
     }
+  }
+
+  // Hapus pesan custom validity; nilai yang diisi datepicker/otomatis tidak
+  // memicu event input/change, jadi pesan "invalid" bisa nyangkut permanen
+  function resetValidasi($elm) {
+    $elm.each(function () {
+      if (this.setCustomValidity) this.setCustomValidity("");
+    });
   }
 
   // Parse tanggal format "dd-mm-yyyy" -> moment (month di moment 0-indexed)
@@ -567,6 +577,7 @@ jQuery(document).ready(function () {
 
     // Format dd-mm-yyyy di Kolom TP
     $(".tp").val(tp.format("DD-MM-YYYY"));
+    resetValidasi($(".tp").add($elm));
 
     tampilkanUsiaKehamilan(hpht);
   }
@@ -587,6 +598,7 @@ jQuery(document).ready(function () {
 
     // Format dd-mm-yyyy di Kolom HPHT
     $(".hpht").val(hpht.format("DD-MM-YYYY"));
+    resetValidasi($(".hpht").add($elm));
 
     tampilkanUsiaKehamilan(hpht);
   }
