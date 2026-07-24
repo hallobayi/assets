@@ -10,11 +10,18 @@
  * Kirim pesan lewat server (POST ke sendUrl) — client Pusher tidak bisa
  * broadcast antar-client tanpa lewat server (SockudoService::trigger()).
  *
+ * RIWAYAT: pesan disimpan server ke Redis (App\Libraries\ChatHistory) dengan
+ * retensi 24 jam. Saat widget dimuat, riwayat diambil sekali lewat GET
+ * historyUrl lalu dirender sebelum pesan realtime — jadi percakapan tidak
+ * hilang setelah reload / pindah halaman. Pesan yang masuk lewat WebSocket
+ * selagi riwayat masih di-fetch ditahan di buffer, lalu di-flush setelah
+ * riwayat tampil, dan didedup memakai field `id` dari server.
+ *
  * Konfigurasi dibaca dari atribut data-* pada #chatWidget yang dirender
  * server (footer.php):
  *   data-key, data-ws-host, data-ws-port, data-force-tls, data-channel,
- *   data-event, data-send-url, data-csrf-header, data-csrf-token, data-me,
- *   data-title, data-welcome
+ *   data-event, data-send-url, data-history-url, data-csrf-header,
+ *   data-csrf-token, data-me, data-title, data-welcome
  */
 (function () {
     'use strict';
@@ -33,6 +40,7 @@
         channel: d.channel,
         event: d.event,
         sendUrl: d.sendUrl,
+        historyUrl: d.historyUrl,
         csrfHeader: d.csrfHeader,
         me: d.me,
         title: d.title,
@@ -56,6 +64,12 @@
     var unread = 0;
     var welcomed = false;
 
+    /* Dedup: id pesan yang sudah tampil (dari riwayat Redis maupun realtime). */
+    var seenIds = Object.create(null);
+    /* Pesan realtime yang datang sebelum riwayat selesai dimuat. */
+    var pendingMsgs = [];
+    var historyReady = false;
+
     /* --- Buka / tutup ----------------------------------------------------- */
     function isOpen() {
         return root.classList.contains('cw--open');
@@ -66,10 +80,7 @@
         root.classList.remove('cw--closed');
         unread = 0;
         renderBadge();
-        if (!welcomed && cfg.welcome) {
-            welcomed = true;
-            addSystem(cfg.welcome);
-        }
+        showWelcome();
         body.scrollTop = body.scrollHeight;
         input.focus();
     }
@@ -106,20 +117,64 @@
             '<span class="cw__time">' + escapeHtml(time) + '</span>', 'cw__msg--sys');
     }
 
-    function addMessage(msg) {
+    function showWelcome() {
+        if (welcomed || !cfg.welcome) return;
+        welcomed = true;
+        addSystem(cfg.welcome);
+    }
+
+    /*
+     * Render satu pesan.
+     * opts.silent -> jangan menaikkan badge unread (dipakai saat memuat
+     * riwayat lama dari Redis, supaya tidak terlihat sebagai pesan baru).
+     */
+    function addMessage(msg, opts) {
+        if (!msg) return;
+        opts = opts || {};
+
+        /* Dedup: pesan yang sama bisa datang dua kali (riwayat Redis +
+           broadcast WebSocket) bila keduanya beririsan waktu. */
+        if (msg.id) {
+            if (seenIds[msg.id]) return;
+            seenIds[msg.id] = true;
+        }
+
         var mine = (msg.username || '') === cfg.me;
         var html = '';
         if (!mine) {
             html += '<div class="cw__name">' + escapeHtml(msg.username || '') + '</div>';
         }
         html += escapeHtml(msg.message || '');
-        html += '<span class="cw__time">' + escapeHtml(msg.time || currentTime()) + '</span>';
+        html += '<span class="cw__time">' + escapeHtml(formatStamp(msg)) + '</span>';
         appendBubble(html, mine ? 'cw__msg--self' : '');
 
-        if (!isOpen() && !mine) {
+        if (!opts.silent && !isOpen() && !mine) {
             unread += 1;
             renderBadge();
         }
+    }
+
+    /*
+     * Label waktu pesan. Riwayat bisa berisi pesan kemarin (retensi 24 jam),
+     * jadi tanggal ikut ditampilkan bila bukan hari ini. `ts` berupa unix
+     * timestamp detik (float) dari server; bila tidak ada, pakai msg.time.
+     */
+    function formatStamp(msg) {
+        var ts = parseFloat(msg.ts);
+        if (!isFinite(ts) || ts <= 0) {
+            return msg.time || currentTime();
+        }
+
+        var when = new Date(ts * 1000);
+        var now = new Date();
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+        var clock = pad(when.getHours()) + ':' + pad(when.getMinutes());
+        if (when.toDateString() === now.toDateString()) {
+            return clock;
+        }
+
+        return pad(when.getDate()) + '/' + pad(when.getMonth() + 1) + ' ' + clock;
     }
 
     function renderBadge() {
@@ -220,7 +275,7 @@
                     break;
                 default:
                     if (payload.event === cfg.event && data) {
-                        addMessage(data);
+                        receiveLive(data);
                     }
                     break;
             }
@@ -234,6 +289,60 @@
         ws.onerror = function () {
             try { ws.close(); } catch (e) {}
         };
+    }
+
+    /* --- Riwayat 24 jam (Redis, lewat GET historyUrl) --------------------- */
+    /*
+     * Pesan realtime yang tiba sebelum riwayat selesai dimuat ditahan dulu,
+     * supaya urutannya tidak terbalik (pesan baru muncul di atas pesan lama).
+     */
+    function receiveLive(msg) {
+        if (!historyReady) {
+            pendingMsgs.push(msg);
+            /* Badge tetap jalan meski render-nya ditunda. */
+            if (!isOpen() && (msg.username || '') !== cfg.me) {
+                unread += 1;
+                renderBadge();
+            }
+            return;
+        }
+        addMessage(msg);
+    }
+
+    function flushPending() {
+        historyReady = true;
+        var queued = pendingMsgs;
+        pendingMsgs = [];
+        for (var i = 0; i < queued.length; i++) {
+            /* silent: badge sudah dihitung saat pesan masuk ke buffer. */
+            addMessage(queued[i], { silent: true });
+        }
+    }
+
+    function loadHistory() {
+        if (!cfg.historyUrl) {
+            flushPending();
+            return;
+        }
+
+        fetch(cfg.historyUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        }).then(function (res) {
+            return res.json();
+        }).then(function (json) {
+            if (json && json.status === 'success' && json.data && json.data.length) {
+                for (var i = 0; i < json.data.length; i++) {
+                    addMessage(json.data[i], { silent: true });
+                }
+            }
+        }).catch(function () {
+            /* Riwayat gagal dimuat (Redis mati / offline) -> chat realtime
+               tetap jalan, cukup diam supaya tidak mengganggu. */
+        }).then(function () {
+            flushPending();
+            body.scrollTop = body.scrollHeight;
+        });
     }
 
     /* --- Kirim pesan (lewat server) --------------------------------------- */
@@ -274,5 +383,8 @@
         sendMessage();
     });
 
+    /* Sapaan dulu (paling atas), lalu riwayat, baru koneksi realtime. */
+    showWelcome();
+    loadHistory();
     connect();
 })();
