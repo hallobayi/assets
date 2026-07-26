@@ -1,6 +1,3 @@
-<h1> Halo Bayi</h1>
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -54,8 +51,10 @@
     - Set CSP headers: script-src 'self' https://cdn.jsdelivr.net
     
     Untuk Development (tanpa CSP):
-    - Bisa menggunakan GH-Pages atau StaticDelivr
-    - Lebih cepat untuk testing lokal
+    - Bisa menggunakan GH-Pages untuk testing lokal tanpa CSP
+
+    Untuk Production Alternative (dengan CSP):
+    - StaticDelivr sebagai alternatif dengan Multi-CDN Architecture dan Auto Fallback System
     
     =================================================================================
     -->
@@ -70,7 +69,7 @@
     <script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"></script>
     -->
     
-    <!-- ALTERNATIVE CDN #2 (Non-CSP) - FALLBACK -->
+    <!-- ALTERNATIVE CDN #2 (CSP-Compatible) - PRODUCTION FALLBACK -->
     <!-- 
     <script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.7/vendors/jquery/jquery.min.js"></script>
     -->
@@ -262,6 +261,11 @@ https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.7/vendors/jquery/jquery.min
             </div>
             
             <p><strong>Use Case:</strong> Production alternative dengan CSP support dan fallback capability</p>
+            
+            <p><strong>Contoh CSP Header:</strong></p>
+            <div class="url-box">
+Content-Security-Policy: script-src 'self' https://cdn.staticdelivr.com
+            </div>
         </div>
         
         <!-- Recommendation Box -->
@@ -269,7 +273,8 @@ https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.7/vendors/jquery/jquery.min
             <strong>💡 Rekomendasi Implementasi:</strong>
             <ul>
                 <li><strong>Production Environment:</strong> Gunakan jsDelivr sebagai primary CDN. Pastikan CSP headers di-set dengan benar di server.</li>
-                <li><strong>Development Environment:</strong> Bisa menggunakan GitHub Pages atau StaticDelivr untuk kemudahan testing.</li>
+                <li><strong>Development Environment:</strong> Bisa menggunakan GitHub Pages untuk kemudahan testing tanpa CSP.</li>
+                <li><strong>Production Alternative:</strong> Gunakan StaticDelivr jika membutuhkan Multi-CDN Architecture, WordPress Integration, atau Auto Fallback System.</li>
                 <li><strong>Staging Environment:</strong> Gunakan jsDelivr untuk simulasi kondisi production yang akurat.</li>
             </ul>
         </div>
