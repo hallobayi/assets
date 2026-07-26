@@ -1358,12 +1358,12 @@ jQuery(document).ready(function () {
       .replace(/"/g, '&quot;');
   }
 
-  // Bangun satu section SOAP (Subjective/Assessment/Plan) — rapi, teks berlabel
+  // Bangun satu section SOAP (Subjective/Assessment/Plan) â€” rapi, teks berlabel
   function soapSection(title, subtitle, fields) {
     var s = '';
     s += '<div class="mb-3">';
     s += '<div class="fw-bold text-uppercase small border-bottom pb-1 mb-2">' + esc(title);
-    if (subtitle) s += ' <span class="text-muted">· ' + esc(subtitle) + '</span>';
+    if (subtitle) s += ' <span class="text-muted">Â· ' + esc(subtitle) + '</span>';
     s += '</div>';
     for (var k = 0; k < fields.length; k++) {
       s += '<div class="mb-2 small">';
