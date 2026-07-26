@@ -296,9 +296,6 @@ jQuery(document).ready(function () {
       url: urlSoap,
       dataType: "json",
       type: "POST",
-      // data: {
-      //     'csrf_test_name': tokenHash
-      // },
       success: function (data) {
         console.log(data);
       },
@@ -306,141 +303,105 @@ jQuery(document).ready(function () {
   });
 
   // Detail SOAP
+  // Controller mengirim data yang sudah dinormalisasi:
+  // { status, no_reg, kolom_label, inputan_ke, status_data, nama_petugas, date_created,
+  //   total_field, groups: [ { title, fields: [ { label, value } ] } ] }
+  // Isian dirender apa adanya sesuai kolom yang terisi, jadi tidak perlu lagi
+  // menebak nama field per panel di sisi JavaScript.
+
+  // Baris info ringkas di header dialog
+  function soapInfoRow(label, value) {
+    return (
+      '<div class="col-md-4 col-sm-6 mb-2">' +
+      '<div class="text-muted small text-uppercase">' +
+      esc(label) +
+      "</div>" +
+      '<div class="fw-bold">' +
+      esc(value) +
+      "</div>" +
+      "</div>"
+    );
+  }
+
+  // Satu grup isian (Subjective / Objective / USG / Assessment / Plan)
+  function soapDetailGroup(group) {
+    var html = '<div class="mb-3">';
+    html +=
+      '<div class="fw-bold text-uppercase small border-bottom pb-1 mb-2">' +
+      esc(group.title) +
+      "</div>";
+    html +=
+      '<table class="table table-sm table-striped table-hover mb-0"><tbody>';
+
+    $.each(group.fields || [], function (i, field) {
+      html += "<tr>";
+      html +=
+        '<td class="text-muted" style="width:40%">' +
+        esc(field.label) +
+        "</td>";
+      html +=
+        '<td style="white-space:pre-wrap">' + esc(field.value) + "</td>";
+      html += "</tr>";
+    });
+
+    html += "</tbody></table></div>";
+    return html;
+  }
+
   var dataTablesSoap = $("#tabel-riwayatsoap");
   dataTablesSoap.on("click", "button.detail-soap", function (ev) {
     ev.preventDefault();
     ev.stopPropagation();
 
-    let idSoap = $(this).data("id");
+    var $btnDetail = $(this);
+    var idSoap = $btnDetail.data("id");
+
+    $btnDetail.prop("disabled", true);
+
     $.ajax({
       url: base_url + "tindakandokter/ajaxDetailSoap/" + idSoap,
       dataType: "json",
       type: "GET",
       success: function (v) {
-        // source: https://stackoverflow.com/a/36460527
-        var table =
-          '<table class="table display table-striped table-hover dataTable no-footer"> ';
-        var vv = $.parseJSON(v.detail_soap);
-        console.log(vv);
+        if (!v || v.status !== "success") {
+          bootbox.alert({
+            title: "Detail S.O.A.P",
+            message:
+              '<div class="alert alert-warning mb-0">' +
+              esc((v && v.message) || "Data detail SOAP tidak dapat dimuat.") +
+              "</div>",
+          });
+          return;
+        }
 
-        switch (v.kolom_soap) {
-          case "s":
-            console.log(vv);
-            var tr = "<tr> ";
-            tr +=
-              "<td>No. Reg</td><td>Kolom</td><td>BB</td><td>TB</td><td>Kesadaran</td><td>Status</td>";
-            tr += "</tr>";
-            tr += "<tr>";
-            tr += "<td>";
-            tr += "<label> " + vv.no_reg;
-            tr += "</label>" + "</td> ";
-            tr += "<td>";
-            tr += "Subjective";
-            tr += "</td>";
-            tr += "<td>";
-            tr += "" + vv.berat_badan + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.tinggi_badan + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.kesadaran + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.status_pulang + "";
-            tr += "</td> ";
-            tr += "</tr> ";
-            table += tr;
-            table += "</table>";
-            break;
-          case "o":
-            var tr = "<tr> ";
-            tr +=
-              "<td>No. Reg</td><td>Kolom</td><td>BB</td><td>TB</td><td>Freq. Nafas</td><td>Status</td>";
-            tr += "</tr>";
-            tr += "<tr>";
-            tr += "<td>";
-            tr += "<label> " + vv.no_reg;
-            tr += "</label>" + "</td> ";
-            tr += "<td>";
-            tr += "Objective";
-            tr += "</td>";
-            tr += "<td>";
-            tr += "" + vv.berat_badan + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.tinggi_badan + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.frekuensi_napas + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.status_pulang + "";
-            tr += "</td> ";
-            tr += "</tr> ";
-            table += tr;
-            table += "</table>";
-            break;
-          case "a":
-            var tr = "<tr> ";
-            tr +=
-              "<td>No. Reg</td><td>Kolom</td><td>Diagnosa</td><td>Tindakan</td><td>Perokok</td><td>Status</td>";
-            tr += "</tr>";
-            tr += "<tr>";
-            tr += "<td>";
-            tr += "<label> " + vv.no_reg;
-            tr += "</label>" + "</td> ";
-            tr += "<td>";
-            tr += "Assesstment";
-            tr += "</td>";
-            tr += "<td>";
-            tr += "" + vv.nama_diagnosa + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.nama_tindakan + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.status_perokok + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.status_pulang + "";
-            tr += "</td> ";
-            tr += "</tr> ";
-            table += tr;
-            table += "</table>";
-            break;
-          case "p":
-            var tr = "<tr> ";
-            tr +=
-              "<td>No. Reg</td><td>Kolom</td><td>Status Pulang</td><td>Tgl Datang Kembali</td><td>Keterangan</td>";
-            tr += "</tr>";
-            tr += "<tr>";
-            tr += "<td>";
-            tr += "<label> " + vv.no_reg;
-            tr += "</label>" + "</td> ";
-            tr += "<td>";
-            tr += "Planning";
-            tr += "</td>";
-            tr += "<td>";
-            tr += "" + vv.status_pulang + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.tgl_datang_kembali + "";
-            tr += "</td> ";
-            tr += "<td> ";
-            tr += "" + vv.keterangan_lain + "";
-            tr += "</td> ";
-            tr += "</tr> ";
-            table += tr;
-            table += "</table>";
-            break;
-          default:
-            break;
+        var message = "";
+
+        // Informasi baris SOAP yang dibuka
+        message += '<div class="card mb-3"><div class="card-body py-3">';
+        message += '<div class="row">';
+        message += soapInfoRow("No. Registrasi", v.no_reg);
+        message += soapInfoRow("Panel", v.kolom_label);
+        message += soapInfoRow("Input Ke", v.inputan_ke);
+        message += soapInfoRow("Status Data", v.status_data);
+        message += soapInfoRow("Diinput Oleh", v.nama_petugas);
+        message += soapInfoRow("Waktu Input", v.date_created);
+        message += soapInfoRow("Kolom Terisi", v.total_field);
+        message += "</div></div></div>";
+
+        // Isian per grup
+        if (!v.groups || v.groups.length === 0) {
+          message +=
+            '<div class="alert alert-info mb-0">Tidak ada kolom yang terisi pada panel ini.</div>';
+        } else {
+          $.each(v.groups, function (i, group) {
+            message += soapDetailGroup(group);
+          });
         }
 
         bootbox.dialog({
-          title: "Detail S.O.A.P",
-          message: table,
+          title: "Detail S.O.A.P &mdash; " + esc(v.kolom_label),
+          message: message,
+          size: "large",
           buttons: {
             cancel: {
               label: "Close",
@@ -448,6 +409,18 @@ jQuery(document).ready(function () {
             },
           },
         });
+      },
+      error: function (xhr) {
+        bootbox.alert({
+          title: "Detail S.O.A.P",
+          message:
+            '<div class="alert alert-danger mb-0">Gagal mengambil detail SOAP: ' +
+            esc(xhr.status + " " + xhr.statusText) +
+            "</div>",
+        });
+      },
+      complete: function () {
+        $btnDetail.prop("disabled", false);
       },
     });
   });
