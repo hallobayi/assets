@@ -296,6 +296,9 @@ jQuery(document).ready(function () {
       url: urlSoap,
       dataType: "json",
       type: "POST",
+      // data: {
+      //     'csrf_test_name': tokenHash
+      // },
       success: function (data) {
         console.log(data);
       },
@@ -303,124 +306,167 @@ jQuery(document).ready(function () {
   });
 
   // Detail SOAP
-  // Controller mengirim data yang sudah dinormalisasi:
-  // { status, no_reg, kolom_label, inputan_ke, status_data, nama_petugas, date_created,
-  //   total_field, groups: [ { title, fields: [ { label, value } ] } ] }
-  // Isian dirender apa adanya sesuai kolom yang terisi, jadi tidak perlu lagi
-  // menebak nama field per panel di sisi JavaScript.
-
-  // Baris info ringkas di header dialog
-  function soapInfoRow(label, value) {
-    return (
-      '<div class="col-md-4 col-sm-6 mb-2">' +
-      '<div class="text-muted small text-uppercase">' +
-      esc(label) +
-      "</div>" +
-      '<div class="fw-bold">' +
-      esc(value) +
-      "</div>" +
-      "</div>"
-    );
-  }
-
-  // Satu grup isian (Subjective / Objective / USG / Assessment / Plan)
-  function soapDetailGroup(group) {
-    var html = '<div class="mb-3">';
-    html +=
-      '<div class="fw-bold text-uppercase small border-bottom pb-1 mb-2">' +
-      esc(group.title) +
-      "</div>";
-    html +=
-      '<table class="table table-sm table-striped table-hover mb-0"><tbody>';
-
-    $.each(group.fields || [], function (i, field) {
-      html += "<tr>";
-      html +=
-        '<td class="text-muted" style="width:40%">' +
-        esc(field.label) +
-        "</td>";
-      html +=
-        '<td style="white-space:pre-wrap">' + esc(field.value) + "</td>";
-      html += "</tr>";
-    });
-
-    html += "</tbody></table></div>";
-    return html;
-  }
-
   var dataTablesSoap = $("#tabel-riwayatsoap");
   dataTablesSoap.on("click", "button.detail-soap", function (ev) {
     ev.preventDefault();
     ev.stopPropagation();
 
-    var $btnDetail = $(this);
-    var idSoap = $btnDetail.data("id");
-
-    $btnDetail.prop("disabled", true);
-
+    let idSoap = $(this).data("id");
     $.ajax({
       url: base_url + "tindakandokter/ajaxDetailSoap/" + idSoap,
       dataType: "json",
       type: "GET",
       success: function (v) {
+        // Controller mengembalikan { status, no_reg, kolom_label, inputan_ke,
+        // status_data, nama_petugas, date_created, groups:[{title, fields:[{label,value}]}] }
         if (!v || v.status !== "success") {
-          bootbox.alert({
-            title: "Detail S.O.A.P",
-            message:
-              '<div class="alert alert-warning mb-0">' +
-              esc((v && v.message) || "Data detail SOAP tidak dapat dimuat.") +
-              "</div>",
-          });
+          bootbox.alert(
+            (v && v.message) || "Data SOAP tidak dapat ditampilkan."
+          );
           return;
         }
 
-        var message = "";
+        var esc = function (s) {
+          return $("<div>").text(s == null ? "" : s).html();
+        };
 
-        // Informasi baris SOAP yang dibuka
-        message += '<div class="card mb-3"><div class="card-body py-3">';
-        message += '<div class="row">';
-        message += soapInfoRow("No. Registrasi", v.no_reg);
-        message += soapInfoRow("Panel", v.kolom_label);
-        message += soapInfoRow("Input Ke", v.inputan_ke);
-        message += soapInfoRow("Status Data", v.status_data);
-        message += soapInfoRow("Diinput Oleh", v.nama_petugas);
-        message += soapInfoRow("Waktu Input", v.date_created);
-        message += soapInfoRow("Kolom Terisi", v.total_field);
-        message += "</div></div></div>";
+        // Nilai textarea bisa multi-baris: escape dulu, baru ubah newline jadi <br>
+        var escMultiline = function (s) {
+          return esc(s).replace(/\r\n|\r|\n/g, "<br>");
+        };
 
-        // Isian per grup
-        if (!v.groups || v.groups.length === 0) {
-          message +=
-            '<div class="alert alert-info mb-0">Tidak ada kolom yang terisi pada panel ini.</div>';
-        } else {
-          $.each(v.groups, function (i, group) {
-            message += soapDetailGroup(group);
-          });
+        // Satu item pada ringkasan header (label kecil di atas, nilai di bawah)
+        var itemHeader = function (label, isi, kolomLebar) {
+          return (
+            '<div class="' + kolomLebar + '">' +
+            '<div class="text-uppercase text-muted fw-semibold" style="font-size:.7rem;letter-spacing:.04em">' +
+            esc(label) +
+            "</div>" +
+            '<div class="fw-semibold text-break">' + isi + "</div>" +
+            "</div>"
+          );
+        };
+
+        var warnaPanel = { s: "primary", o: "info", a: "warning", p: "success" };
+        var ikonPanel = {
+          s: "bi-chat-left-text",
+          o: "bi-clipboard2-pulse",
+          a: "bi-journal-medical",
+          p: "bi-list-check",
+        };
+        var kolom = String(v.kolom_soap || "").toLowerCase();
+        var warna = warnaPanel[kolom] || "secondary";
+        var ikon = ikonPanel[kolom] || "bi-file-medical";
+
+        var html = "";
+
+        // ---- Ringkasan / header info
+        html += '<div class="card border-0 shadow-sm mb-3">';
+        html += '<div class="card-body py-3">';
+        html += '<div class="row g-3 align-items-start">';
+        html += itemHeader(
+          "No. Reg",
+          '<span class="font-monospace">' + esc(v.no_reg) + "</span>",
+          "col-6 col-md-3"
+        );
+        html += itemHeader(
+          "Panel",
+          '<span class="badge text-bg-' + warna + '">' +
+            '<i class="bi ' + ikon + ' me-1"></i>' +
+            esc(v.kolom_label) +
+            "</span>",
+          "col-6 col-md-3"
+        );
+        html += itemHeader(
+          "Inputan ke",
+          '<span class="badge rounded-pill text-bg-light border">' +
+            esc(v.inputan_ke) +
+            "</span>",
+          "col-6 col-md-2"
+        );
+        html += itemHeader(
+          "Petugas",
+          '<i class="bi bi-person-badge me-1 text-muted"></i>' +
+            esc(v.nama_petugas),
+          "col-6 col-md-4"
+        );
+        html += itemHeader(
+          "Tanggal",
+          '<i class="bi bi-calendar-event me-1 text-muted"></i>' +
+            esc(v.date_created),
+          "col-12 col-md-6"
+        );
+        if (v.total_field) {
+          html += itemHeader(
+            "Jumlah isian",
+            '<span class="badge rounded-pill text-bg-secondary">' +
+              esc(v.total_field) +
+              " kolom terisi</span>",
+            "col-12 col-md-6"
+          );
+        }
+        html += "</div></div></div>";
+
+        // ---- Isian per grup
+        var groups = v.groups || [];
+        if (!groups.length) {
+          html +=
+            '<div class="alert alert-light border text-center text-muted mb-0">' +
+            '<i class="bi bi-inbox fs-4 d-block mb-1"></i>' +
+            "Tidak ada isian pada panel ini." +
+            "</div>";
+        }
+
+        for (var i = 0; i < groups.length; i++) {
+          var g = groups[i];
+          var fields = g.fields || [];
+
+          html += '<div class="card shadow-sm mb-3">';
+          html +=
+            '<div class="card-header bg-' + warna + ' bg-opacity-10 border-bottom py-2 ' +
+            'd-flex justify-content-between align-items-center">' +
+            '<span class="fw-semibold"><i class="bi ' + ikon + ' me-2 text-' + warna + '"></i>' +
+            esc(g.title) +
+            "</span>" +
+            '<span class="badge rounded-pill text-bg-light border">' +
+            fields.length +
+            "</span>" +
+            "</div>";
+          html += '<div class="table-responsive">';
+          html +=
+            '<table class="table table-sm table-striped table-hover align-middle mb-0">';
+          html += "<tbody>";
+          for (var j = 0; j < fields.length; j++) {
+            var nilai = fields[j].value;
+            var isiNilai =
+              nilai === null || nilai === undefined || String(nilai).trim() === ""
+                ? '<span class="text-muted fst-italic">-</span>'
+                : escMultiline(nilai);
+            html +=
+              '<tr><th scope="row" class="fw-normal text-muted ps-3" style="width:38%">' +
+              esc(fields[j].label) +
+              '</th><td class="text-break pe-3">' +
+              isiNilai +
+              "</td></tr>";
+          }
+          html += "</tbody></table></div></div>";
         }
 
         bootbox.dialog({
-          title: "Detail S.O.A.P &mdash; " + esc(v.kolom_label),
-          message: message,
+          title:
+            '<i class="bi bi-file-earmark-medical me-2 text-' + warna + '"></i>' +
+            "Detail S.O.A.P",
+          message: '<div class="detail-soap-body">' + html + "</div>",
           size: "large",
+          scrollable: true,
+          centered: true,
           buttons: {
             cancel: {
-              label: "Close",
+              label: '<i class="bi bi-x-lg me-1"></i>Tutup',
               className: "btn-secondary",
             },
           },
         });
-      },
-      error: function (xhr) {
-        bootbox.alert({
-          title: "Detail S.O.A.P",
-          message:
-            '<div class="alert alert-danger mb-0">Gagal mengambil detail SOAP: ' +
-            esc(xhr.status + " " + xhr.statusText) +
-            "</div>",
-        });
-      },
-      complete: function () {
-        $btnDetail.prop("disabled", false);
       },
     });
   });
