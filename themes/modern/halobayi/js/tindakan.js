@@ -5,12 +5,12 @@
  *  Description  : Function Javascript (Vanilla, jQuery or Other Style Plugins Added) to Support Tindakan Module.
  */
 
-// LIST PASIEN DI MASTER PASIEN
+/* LIST PASIEN DI MASTER PASIEN */
 jQuery(document).ready(function () {
   console.log("Init Tindakan Dokter");
 
-  // source: https://stackoverflow.com/a/67184094
-  var tokenHash = $("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+  /* source: https://stackoverflow.com/a/67184094 */
+  var tokenHash = $("input[name=csrf_test_name]").val(); /* console.log(tokenHash) */
 
   tinymce
     .init({
@@ -43,14 +43,14 @@ jQuery(document).ready(function () {
             }
           },
         });
-        // .then(function () {
+        /* .then(function () { */
         /* console.log('oke');
 				theme_color = $('html').attr('data-bs-theme');
 				$iframe = $('.card-body').find('iframe');
 				$iframe_content = $iframe.contents();
 				$iframe_content.find('html').attr('data-bs-theme', theme_color); */
 
-        // })
+        /* }) */
       },
 
       codesample_content_css: base_url + "vendors/prism/themes/prism-dark.css",
@@ -71,7 +71,7 @@ jQuery(document).ready(function () {
       }
     });
 
-  // SOAP DATATABLES
+  /* SOAP DATATABLES */
   let dataTablesRiwayatSoap = "";
   const column =
     typeof $("#riwayatsoap-column").html() === "string"
@@ -87,7 +87,7 @@ jQuery(document).ready(function () {
     ajax: {
       url: url,
       type: "POST",
-      data: { csrf_test_name: tokenHash }, // source: https://stackoverflow.com/a/50541928
+      data: { csrf_test_name: tokenHash }, /* source: https://stackoverflow.com/a/50541928 */
     },
     oLanguage: {
       sLengthMenu: "_MENU_ records per page",
@@ -95,7 +95,7 @@ jQuery(document).ready(function () {
     },
     columns: typeof column === "object" ? column : "",
     initComplete: function (settings, json) {
-      // source: https://stackoverflow.com/a/30937415
+      /* source: https://stackoverflow.com/a/30937415 */
       $(".dataTables_filter input").unbind();
       $(".dataTables_filter input").bind("keyup", function (e) {
         if (e.keyCode == 13) {
@@ -108,7 +108,7 @@ jQuery(document).ready(function () {
 
       switch (aoData["kolom_soap"]) {
         case "s":
-          // $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
+          /* $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer'); */
           $("td", nRow)
             .eq(3)
             .text("Subject (S)", nRow)
@@ -143,7 +143,7 @@ jQuery(document).ready(function () {
   dataTablesRiwayatSoap = $("#tabel-riwayatsoap").DataTable(settings);
   dataTablesRiwayatSoap.columns.adjust().draw();
 
-  // EVALUASI DATATABLES
+  /* EVALUASI DATATABLES */
   let dataTablesRiwayatEvaluasi = "";
   const columnEvaluasi =
     typeof $("#riwayatevaluasi-column").html() === "string"
@@ -159,7 +159,7 @@ jQuery(document).ready(function () {
     ajax: {
       url: urlEvaluasi,
       type: "POST",
-      data: { csrf_test_name: tokenHash }, // source: https://stackoverflow.com/a/50541928
+      data: { csrf_test_name: tokenHash }, /* source: https://stackoverflow.com/a/50541928 */
     },
     oLanguage: {
       sLengthMenu: "_MENU_ records per page",
@@ -167,7 +167,7 @@ jQuery(document).ready(function () {
     },
     columns: typeof columnEvaluasi === "object" ? columnEvaluasi : "",
     initComplete: function (settingsEvaluasi, json) {
-      // source: https://stackoverflow.com/a/30937415
+      /* source: https://stackoverflow.com/a/30937415 */
       $(".dataTables_filter input").unbind();
       $(".dataTables_filter input").bind("keyup", function (e) {
         if (e.keyCode == 13) {
@@ -180,7 +180,7 @@ jQuery(document).ready(function () {
 
       switch (aoData["kolom_soap"]) {
         case "s":
-          // $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
+          /* $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer'); */
           $("td", nRow)
             .eq(3)
             .text("Subject (S)", nRow)
@@ -217,7 +217,7 @@ jQuery(document).ready(function () {
   );
   dataTablesRiwayatEvaluasi.columns.adjust().draw();
 
-  // OBAT DATATABLES
+  /* OBAT DATATABLES */
   let dataTablesRiwayatObat = "";
   const columnObat =
     typeof $("#riwayatobat-column").html() === "string"
@@ -233,7 +233,7 @@ jQuery(document).ready(function () {
     ajax: {
       url: urlObat,
       type: "POST",
-      data: { csrf_test_name: tokenHash }, // source: https://stackoverflow.com/a/50541928
+      data: { csrf_test_name: tokenHash }, /* source: https://stackoverflow.com/a/50541928 */
     },
     oLanguage: {
       sLengthMenu: "_MENU_ records per page",
@@ -241,7 +241,7 @@ jQuery(document).ready(function () {
     },
     columns: typeof columnObat === "object" ? columnObat : "",
     initComplete: function (settingsObat, json) {
-      // source: https://stackoverflow.com/a/30937415
+      /* source: https://stackoverflow.com/a/30937415 */
       $(".dataTables_filter input").unbind();
       $(".dataTables_filter input").bind("keyup", function (e) {
         if (e.keyCode == 13) {
@@ -254,7 +254,7 @@ jQuery(document).ready(function () {
 
       switch (aoData["kolom_soap"]) {
         case "s":
-          // $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
+          /* $('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('ObstetriRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer'); */
           $("td", nRow)
             .eq(3)
             .text("Subject (S)", nRow)
@@ -289,23 +289,23 @@ jQuery(document).ready(function () {
   dataTablesRiwayatObat = $("#tabel-riwayatobat").DataTable(settingsObat);
   dataTablesRiwayatObat.columns.adjust().draw();
 
-  // Ada Bugs di CSRF Token
+  /* Ada Bugs di CSRF Token */
   $("#riwayat-soap-tab").click(function () {
     let urlSoap = $("#riwayatsoap-url").html();
     $.ajax({
       url: urlSoap,
       dataType: "json",
       type: "POST",
-      // data: {
-      //     'csrf_test_name': tokenHash
-      // },
+      /* data: { */
+      /*     'csrf_test_name': tokenHash */
+      /* }, */
       success: function (data) {
         console.log(data);
       },
     });
   });
 
-  // Detail SOAP
+  /* Detail SOAP */
   var dataTablesSoap = $("#tabel-riwayatsoap");
   dataTablesSoap.on("click", "button.detail-soap", function (ev) {
     ev.preventDefault();
@@ -317,8 +317,8 @@ jQuery(document).ready(function () {
       dataType: "json",
       type: "GET",
       success: function (v) {
-        // Controller mengembalikan { status, no_reg, kolom_label, inputan_ke,
-        // status_data, nama_petugas, date_created, groups:[{title, fields:[{label,value}]}] }
+        /* Controller mengembalikan { status, no_reg, kolom_label, inputan_ke, */
+        /* status_data, nama_petugas, date_created, groups:[{title, fields:[{label,value}]}] } */
         if (!v || v.status !== "success") {
           bootbox.alert(
             (v && v.message) || "Data SOAP tidak dapat ditampilkan."
@@ -330,12 +330,12 @@ jQuery(document).ready(function () {
           return $("<div>").text(s == null ? "" : s).html();
         };
 
-        // Nilai textarea bisa multi-baris: escape dulu, baru ubah newline jadi <br>
+        /* Nilai textarea bisa multi-baris: escape dulu, baru ubah newline jadi <br> */
         var escMultiline = function (s) {
           return esc(s).replace(/\r\n|\r|\n/g, "<br>");
         };
 
-        // Satu item pada ringkasan header (label kecil di atas, nilai di bawah)
+        /* Satu item pada ringkasan header (label kecil di atas, nilai di bawah) */
         var itemHeader = function (label, isi, kolomLebar) {
           return (
             '<div class="' + kolomLebar + '">' +
@@ -360,7 +360,7 @@ jQuery(document).ready(function () {
 
         var html = "";
 
-        // ---- Ringkasan / header info
+        /* ---- Ringkasan / header info */
         html += '<div class="card border-0 shadow-sm mb-3">';
         html += '<div class="card-body py-3">';
         html += '<div class="row g-3 align-items-start">';
@@ -407,7 +407,7 @@ jQuery(document).ready(function () {
         }
         html += "</div></div></div>";
 
-        // ---- Isian per grup
+        /* ---- Isian per grup */
         var groups = v.groups || [];
         if (!groups.length) {
           html +=
@@ -471,7 +471,7 @@ jQuery(document).ready(function () {
     });
   });
 
-  // Cek Riwayat BB & TB dari pendaftaran sebelumnya (tampilkan data dulu, isi manual)
+  /* Cek Riwayat BB & TB dari pendaftaran sebelumnya (tampilkan data dulu, isi manual) */
   $(document).on("click", ".cek-riwayat-bbtb", function (ev) {
     ev.preventDefault();
 
@@ -535,7 +535,7 @@ jQuery(document).ready(function () {
     });
   });
 
-  // Isi hasil pengecekan riwayat ke form Objective (dijalankan saat tombol diklik)
+  /* Isi hasil pengecekan riwayat ke form Objective (dijalankan saat tombol diklik) */
   $(document).on("click", ".isi-riwayat-bbtb", function (ev) {
     ev.preventDefault();
 
@@ -558,7 +558,7 @@ jQuery(document).ready(function () {
 
   var frmSoap = $(".simpan-tindakan-soap");
   frmSoap.on("click", "button[data-id]", function (ev) {
-    // source: https://stackoverflow.com/a/70750965
+    /* source: https://stackoverflow.com/a/70750965 */
     ev.preventDefault();
     let kolomSoap = $(this).data("id");
 
@@ -692,14 +692,14 @@ jQuery(document).ready(function () {
             );
           dataTablesRiwayatSoap = $("#tabel-riwayatsoap").DataTable(settings);
 
-          // Alert
+          /* Alert */
           Toast.fire({
             html: '<div class="toast-content"></i>' + data.message + "</div>",
           });
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        // Handle errors here
+        /* Handle errors here */
         console.log("ERRORS: " + textStatus + " - " + errorThrown);
       },
     });
@@ -787,7 +787,7 @@ jQuery(document).ready(function () {
             html: '<div class="toast-content"></i>' + data.message + "</div>",
           });
         } else {
-          // Load Ajax Datatables
+          /* Load Ajax Datatables */
           settings.ajax.url = data.urlAjax;
           dataTablesRiwayatEvaluasi.destroy();
           len = $("#tabel-riwayatevaluasi").find("thead").find("th").length;
@@ -803,14 +803,14 @@ jQuery(document).ready(function () {
           dataTablesRiwayatEvaluasi = $("#tabel-riwayatevaluasi").DataTable(
             settingsEvaluasi,
           );
-          // Alert
+          /* Alert */
           Toast.fire({
             html: '<div class="toast-content"></i>' + data.message + "</div>",
           });
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        // Handle errors here
+        /* Handle errors here */
         console.log("ERRORS: " + textStatus + " - " + errorThrown);
       },
     });
@@ -845,7 +845,7 @@ jQuery(document).ready(function () {
       success: function (data, textStatus, jqXHR) {
         console.log(textStatus, jqXHR);
 
-        // Load Ajax Datatables
+        /* Load Ajax Datatables */
         settingsObat.ajax.url = data.urlAjax;
         dataTablesRiwayatObat.destroy();
         len = $("#tabel-riwayatobat").find("thead").find("th").length;
@@ -880,7 +880,7 @@ jQuery(document).ready(function () {
         });
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        // Handle errors here
+        /* Handle errors here */
         console.log("ERRORS: " + textStatus + " - " + errorThrown);
       },
     });
@@ -902,10 +902,10 @@ jQuery(document).ready(function () {
     time_24hr: true,
   });
 
-  // SOAP Tindakan Assessment
+  /* SOAP Tindakan Assessment */
   $(".objstetri").on("change", function () {
     var data = $(".objstetri option:selected").val();
-    // $("#test").val(data);
+    /* $("#test").val(data); */
     if (data === "1") {
       $(".object_1").show();
       $(".object_23").hide();
@@ -918,8 +918,8 @@ jQuery(document).ready(function () {
     }
   });
 
-  // Clone Obstetri
-  // Source: https://jsbin.com/xadedigapi/edit?html,output
+  /* Clone Obstetri */
+  /* Source: https://jsbin.com/xadedigapi/edit?html,output */
   $("#tambahCloneObstetri").click(function () {
     var r = (Math.random() + 1).toString(36).substring(2);
 
@@ -931,13 +931,13 @@ jQuery(document).ready(function () {
       })
       .end();
 
-    // 2. Generate a random ID
+    /* 2. Generate a random ID */
     var randomId = "clonedDiv_" + r;
 
-    // 3. Assign the new ID to the cloned div
+    /* 3. Assign the new ID to the cloned div */
     thing.attr("id", randomId);
 
-    // Optional: Add a class to distinguish cloned divs
+    /* Optional: Add a class to distinguish cloned divs */
     thing.addClass("cloned-div");
 
     thing.find(".object_1").attr({
@@ -959,8 +959,8 @@ jQuery(document).ready(function () {
     $(".clonedObstetri").append(thing);
 
     $(document).on("change", ".objstetriClone_" + r, function () {
-      var data = $(".objstetriClone_" + r + " option:selected").val(); //console.log(data);
-      // $("#test").val(data);
+      var data = $(".objstetriClone_" + r + " option:selected").val(); /* console.log(data); */
+      /* $("#test").val(data); */
       if (data === "1") {
         $(".object_1_" + r).show();
         $(".object_23_" + r).hide();
@@ -979,18 +979,18 @@ jQuery(document).ready(function () {
     $(".clonedDiv_" + id).remove();
   });
 
-  // Evaluasi Gizi - Minum Obat
+  /* Evaluasi Gizi - Minum Obat */
   $("#sedang_minum_obat_gizi")
     .on("change select2:select", function () {
       $("#nama_obat_ya").prop("disabled", $(this).val() !== "ya");
     })
     .trigger("change");
 
-  // Catatan: handler klik referensi ICD (.hint-icd9/.hint-icd10/.hint-kewanitaan)
-  // + relokasi modal #modalIcdRef ke <body> ditangani di view a-halaman.php
-  // (satu sumber, mencegah handler ganda & backdrop nyangkut).
+  /* Catatan: handler klik referensi ICD (.hint-icd9/.hint-icd10/.hint-kewanitaan) */
+  /* + relokasi modal #modalIcdRef ke <body> ditangani di view a-halaman.php */
+  /* (satu sumber, mencegah handler ganda & backdrop nyangkut). */
 
-  // Ganti Tindakan
+  /* Ganti Tindakan */
   $(document).on("click", ".btn.gantiTindakan", function () {
     id = $(this).attr("data-id");
     $bootbox = bootbox.dialog({
@@ -1007,7 +1007,7 @@ jQuery(document).ready(function () {
           callback: function () {
             $bootbox.find(".alert").remove();
 
-            // Validasi form
+            /* Validasi form */
             form = $bootbox.find("form")[0];
 
             var kode_tindakan = $bootbox
@@ -1028,7 +1028,7 @@ jQuery(document).ready(function () {
             );
             $button.prop("disabled", true);
 
-            // Submit Form
+            /* Submit Form */
             $.ajax({
               type: "POST",
               url: base_url + "tindakandokter/updateLayanan",
@@ -1128,7 +1128,7 @@ jQuery(document).ready(function () {
     });
   });
 
-  // Update Pasien
+  /* Update Pasien */
   $(document).on("click", ".btn.updatePasien", function () {
     id = $(this).attr("data-id");
     $bootbox = bootbox.dialog({
@@ -1145,7 +1145,7 @@ jQuery(document).ready(function () {
           callback: function () {
             $bootbox.find(".alert").remove();
 
-            // Validasi form
+            /* Validasi form */
             form = $bootbox.find("form")[0];
 
             var nama_pasien = $bootbox.find("input[name='nama_pasien']").val();
@@ -1254,7 +1254,7 @@ jQuery(document).ready(function () {
             );
             $buttonPasien.prop("disabled", true);
 
-            // Submit Form
+            /* Submit Form */
             $.ajax({
               type: "POST",
               url: base_url + "master/pasien/ajaxUpdateDataPasien",
@@ -1318,10 +1318,10 @@ jQuery(document).ready(function () {
                 }
 
                 try {
-                  // Hapus event listener scroll yang sebelumnya
+                  /* Hapus event listener scroll yang sebelumnya */
                   window.removeEventListener('scroll', tabScrollHandler);
 
-                  // Tambahkan styling untuk form
+                  /* Tambahkan styling untuk form */
                   const form = document.querySelector('.soap-form');
                   if (form) {
                       form.style.display = 'grid';
@@ -1330,7 +1330,7 @@ jQuery(document).ready(function () {
                       form.style.overflow = 'visible';
                   }
 
-                  // Tambahkan class untuk section-form
+                  /* Tambahkan class untuk section-form */
                   document.querySelectorAll('.form-section').forEach(section => {
                       section.style.padding = '20px';
                       section.style.border = '1px solid #ddd';
@@ -1338,14 +1338,14 @@ jQuery(document).ready(function () {
                       section.style.backgroundColor = '#f9f9f9';
                   });
 
-                  // Tambahkan styling untuk judul section
+                  /* Tambahkan styling untuk judul section */
                   document.querySelectorAll('.form-section h3').forEach(h3 => {
                       h3.style.marginTop = '0';
                       h3.style.color = '#333';
                       h3.style.fontSize = '1.2rem';
                   });
 
-                  // Tambahkan styling untuk form-group
+                  /* Tambahkan styling untuk form-group */
                   document.querySelectorAll('.form-group').forEach(group => {
                       group.style.marginBottom = '15px';
                   });
@@ -1374,7 +1374,7 @@ jQuery(document).ready(function () {
     var $buttonPasien = $bootbox.find("button").prop("disabled", true);
     var $buttonPasien_submit = $bootbox.find("button.submitUpdatePasien");
 
-    // Show Form Pasien
+    /* Show Form Pasien */
     $.get(
       base_url + "master/pasien/ajaxFormPasienBaru?id=" + id,
       function (html) {
@@ -1393,8 +1393,8 @@ jQuery(document).ready(function () {
     });
   });
 
-  // Collapse Riwayat Pendaftaran Pasien
-  // Escape HTML agar aman ditampilkan dan tampil '-' jika kosong
+  /* Collapse Riwayat Pendaftaran Pasien */
+  /* Escape HTML agar aman ditampilkan dan tampil '-' jika kosong */
   function esc(val) {
     if (val === null || val === undefined || String(val).trim() === '') return '-';
     return String(val)
@@ -1404,7 +1404,7 @@ jQuery(document).ready(function () {
       .replace(/"/g, '&quot;');
   }
 
-  // Bangun satu section SOAP (Subjective/Assessment/Plan) — rapi, teks berlabel
+  /* Bangun satu section SOAP (Subjective/Assessment/Plan) - rapi, teks berlabel */
   function soapSection(title, subtitle, fields) {
     var s = '';
     s += '<div class="mb-3">';
@@ -1438,7 +1438,7 @@ jQuery(document).ready(function () {
             $('#loadingRiwayat').hide();
             if (response.data && response.data.length > 0) {
                 var html = '';
-                // no_reg yang sedang dibuka (dari hidden input; fallback ke query URL)
+                /* no_reg yang sedang dibuka (dari hidden input; fallback ke query URL) */
                 var currentNoReg = ($('#no_reg').val() || $('input[name=no_reg]').val() || '').toString().trim();
                 if (currentNoReg === '') {
                     var mNoReg = window.location.search.match(/[?&]no_reg=([^&]+)/);
@@ -1452,7 +1452,7 @@ jQuery(document).ready(function () {
                         case 'selesai': statusBadge = '<span class="badge bg-success">Selesai</span>'; break;
                         default: statusBadge = '<span class="badge bg-secondary">' + (item.nama_dokter || '-') + '</span>';
                     }
-                    // Tandai baris yang no_reg-nya sedang dibuka sebagai 'active'
+                    /* Tandai baris yang no_reg-nya sedang dibuka sebagai 'active' */
                     var isActive = currentNoReg !== '' && (item.nomor_register || '').toString().trim() === currentNoReg;
                     var activeBadge = isActive ? '<span class="badge bg-success ms-auto">Active</span>' : '';
                     html += '<div class="accordion-item' + (isActive ? ' border border-success' : '') + '">';
@@ -1470,7 +1470,7 @@ jQuery(document).ready(function () {
                     html += '<div id="collapseRiwayat' + i + '" class="accordion-collapse collapse" aria-labelledby="headingRiwayat' + i + '" data-bs-parent="#listRiwayatPasien">';
                     html += '<div class="accordion-body p-3">';
 
-                    // --- Ringkasan Pendaftaran ---
+                    /* --- Ringkasan Pendaftaran --- */
                     html += '<div class="row g-2 small mb-3">';
                     html += '<div class="col-6 col-md-3"><span class="text-muted">No. Registrasi</span><div class="fw-medium">' + esc(item.nomor_register) + '</div></div>';
                     html += '<div class="col-6 col-md-3"><span class="text-muted">Tanggal Daftar</span><div class="fw-medium">' + esc(item.tgl_masuk) + '</div></div>';
@@ -1481,7 +1481,7 @@ jQuery(document).ready(function () {
                     html += '<div class="col-6 col-md-3"><span class="text-muted">Status</span><div>' + statusBadge + '</div></div>';
                     html += '</div>';
 
-                    // --- SOAP: Subjective / Assessment / Plan (3 kolom sejajar) ---
+                    /* --- SOAP: Subjective / Assessment / Plan (3 kolom sejajar) --- */
                     html += '<div class="row g-3">';
                     html += '<div class="col-12 col-md-4">' + soapSection('Subjective', 'ANAMNESA', [
                         ['Keluhan Utama', item.keluhan_utama],
@@ -1514,25 +1514,25 @@ jQuery(document).ready(function () {
     });
   });
 
-  // ===== SOAP: navigasi scroll (pengganti tab) =====
+  /* ===== SOAP: navigasi scroll (pengganti tab) ===== */
   (function initSoapScrollNav() {
     var $scroll = $("#soapScroll");
     if (!$scroll.length) return;
 
     var $links = $(".soap-quicknav-link");
 
-    // Klik quick-nav: smooth scroll ke section terkait
+    /* Klik quick-nav: smooth scroll ke section terkait */
     $links.on("click", function (e) {
       e.preventDefault();
       var targetId = $(this).attr("href");
       var $target = $(targetId);
       if (!$target.length) return;
 
-      var top = $target.offset().top - 80; // offset agar tidak ketutup navbar/quicknav
+      var top = $target.offset().top - 80; /* offset agar tidak ketutup navbar/quicknav */
       $("html, body").animate({ scrollTop: top }, 350);
     });
 
-    // Highlight quick-nav sesuai section yang sedang terlihat
+    /* Highlight quick-nav sesuai section yang sedang terlihat */
     var blocks = $(".soap-block").toArray();
     if ("IntersectionObserver" in window && blocks.length) {
       var observer = new IntersectionObserver(
