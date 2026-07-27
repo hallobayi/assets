@@ -385,7 +385,7 @@ jQuery(document).ready(function () {
           "col-6 col-md-2"
         );
         html += itemHeader(
-          "Petugas",
+          "Dokter",
           '<i class="bi bi-person-badge me-1 text-muted"></i>' +
             esc(v.nama_petugas),
           "col-6 col-md-4"
