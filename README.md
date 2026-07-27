@@ -38,7 +38,7 @@ Project ini tersedia melalui 3 (tiga) CDN berbeda dengan karakteristik masing-ma
 **Status:** ✅ **CSP SUPPORT**
 
 ```
-https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/jquery/jquery.min.js?r=1782870997
+https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997
 ```
 
 **Keunggulan:**
@@ -191,11 +191,11 @@ assets_halobayi/
 <html>
 <head>
     <!-- CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/bootstrap/css/bootstrap.min.css">
     
     <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/jquery/jquery.min.js?r=1782870997"></script>
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <!-- Your content -->
@@ -229,7 +229,7 @@ assets_halobayi/
 <html>
 <head>
     <!-- Primary: jsDelivr -->
-    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/jquery/jquery.min.js?r=1782870997"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997"></script>
     
     <!-- Fallback jika primary gagal -->
     <script>
@@ -254,11 +254,11 @@ assets_halobayi/
 - Global CDN dengan multiple mirrors
 - Auto-fallback antar mirrors
 - Aktifkan CSP headers di server
-- Gunakan versioning (`@1.2.7`)
+- Gunakan versioning (`@1.2.9`)
 - Tambahkan cache buster parameter (`?r=timestamp`)
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/jquery/jquery.min.js?r=1782870997"></script>
+<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997"></script>
 ```
 
 ✅ **Pilihan 2: StaticDelivr (Alternative)**
@@ -319,7 +319,7 @@ MAJOR.MINOR.PATCH
 <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@latest/vendors/jquery/jquery.min.js"></script>
 
 <!-- Version spesifik (recommended for production) -->
-<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.7/vendors/jquery/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js"></script>
 
 <!-- Major version -->
 <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1/vendors/jquery/jquery.min.js"></script>
