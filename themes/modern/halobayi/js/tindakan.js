@@ -1004,6 +1004,11 @@ jQuery(document).ready(function () {
               success: function (data) {
                 console.log(data);
 
+				/* Update CSRF token di semua form */
+				if (data.csrf_test_name) {
+					$('input[name="csrf_test_name"]').val(data.csrf_test_name);
+				}
+
                 if (data.message.status == "ok") {
                   $bootbox.modal("hide");
                   const Toast = Swal.mixin({
@@ -1028,7 +1033,10 @@ jQuery(document).ready(function () {
                       "</div>",
                   });
 
-                  location.reload();
+                  if (data.message.urlAjax == 'location.reload()') {
+						location.reload();
+				  }
+				  
                 } else {
                   $button_submit.find("i").remove();
                   $button.prop("disabled", false);
@@ -1049,6 +1057,10 @@ jQuery(document).ready(function () {
                 var errorMsg = "Terjadi kesalahan pada server";
                 try {
                   var response = JSON.parse(xhr.responseText);
+				  /* Update CSRF token jika dikirim di response error */
+				  if (response.csrf_test_name) {
+					$('input[name="csrf_test_name"]').val(response.csrf_test_name);
+				  }
                   if (response.message && response.message.message) {
                     errorMsg = response.message.message;
                   }
