@@ -603,10 +603,11 @@ jQuery(document).ready(function () {
           name: "diastole",
           value: $("input[name=diastole]").val(),
         });
+        /*
         postData.push({
           name: "kesadaran",
           value: $("input[name=kesadaran]").val(),
-        });
+        }); */
         postData.push({
           name: "tinggi_badan",
           value: $("input[name=tinggi_badan]").val(),
@@ -1357,7 +1358,7 @@ jQuery(document).ready(function () {
     });
   });
 
-  /* Ganti Dokter */
+  /* Ganti Dokter Popup */
   $(document).on("click", ".btn.gantiDokter", function () {
     id = $(this).attr("data-id");
     $bootbox = bootbox.dialog({
@@ -1523,6 +1524,27 @@ jQuery(document).ready(function () {
     return s;
   }
 
+  /* Section Objective: tanda vital ringkas 2 kolom (nilainya pendek, bukan narasi) */
+  function vitalSection(title, subtitle, fields) {
+    var s = '';
+    s += '<div class="mb-3">';
+    s += '<div class="fw-bold text-uppercase small border-bottom pb-1 mb-2">' + esc(title);
+    if (subtitle) s += ' <span class="text-muted">· ' + esc(subtitle) + '</span>';
+    s += '</div>';
+    s += '<div class="row g-2 small">';
+    for (var k = 0; k < fields.length; k++) {
+      /* Elemen ke-3 'full' untuk isian naratif (mis. kesimpulan USG) agar tidak sempit */
+      var isFull = fields[k][2] === 'full';
+      s += '<div class="' + (isFull ? 'col-12' : 'col-6') + '">';
+      s += '<div class="text-muted">' + esc(fields[k][0]) + '</div>';
+      s += '<div class="fw-medium" style="word-break:break-word;' + (isFull ? 'white-space:pre-wrap;' : '') + '">' + esc(fields[k][1]) + '</div>';
+      s += '</div>';
+    }
+    s += '</div>';
+    s += '</div>';
+    return s;
+  }
+
   $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
     const nomor_rm_sistem = $(this).data('nomor_rm_sistem');
     $.ajax({
@@ -1583,18 +1605,30 @@ jQuery(document).ready(function () {
                     html += '<div class="col-6 col-md-3"><span class="text-muted">Status</span><div>' + statusBadge + '</div></div>';
                     html += '</div>';
 
-                    /* --- SOAP: Subjective / Assessment / Plan (3 kolom sejajar) --- */
+                    /* --- SOAP lengkap: Subjective / Objective / Assessment / Plan (grid 2x2) --- */
                     html += '<div class="row g-3">';
-                    html += '<div class="col-12 col-md-4">' + soapSection('Subjective', 'ANAMNESA', [
+                    html += '<div class="col-12 col-md-6">' + soapSection('Subjective', 'ANAMNESA', [
                         ['Keluhan Utama', item.keluhan_utama],
                         ['Riwayat Penyakit', item.riwayat_penyakit]
                     ]) + '</div>';
-                    html += '<div class="col-12 col-md-4">' + soapSection('Assessment', '', [
-                        ['ICD 10 (Diagnosa)', item.icd10],
-                        ['ICD 9 (Tindakan)', item.icd9],
+                    html += '<div class="col-12 col-md-6">' + vitalSection('Objective', 'TANDA VITAL', [
+                        /* ['Kesadaran', item.kesadaran], */
+                        ['Tekanan Darah (mmHg)', item.tekanan_darah],
+                        ['Nadi (x/menit)', item.nadi],
+                        ['Frekuensi Napas (x/menit)', item.frekuensi_napas],
+                        ['Suhu Tubuh (°C)', item.suhu_tubuh],
+                        ['TFU (cm)', item.tfu],
+                        ['Tinggi Badan (cm)', item.tinggi_badan],
+                        ['Berat Badan (kg)', item.berat_badan],
+                        ['Obstetri Trimester', item.obstetri_trimester],
+                        ['Kesimpulan USG', item.kesimpulan_usg, 'full']
+                    ]) + '</div>';
+                    html += '<div class="col-12 col-md-6">' + soapSection('Assessment', '', [
+                        /* ['ICD 10 (Diagnosa)', item.icd10],
+                        ['ICD 9 (Tindakan)', item.icd9], */
                         ['Diagnosa Primer', item.diagnosa_primer]
                     ]) + '</div>';
-                    html += '<div class="col-12 col-md-4">' + soapSection('Plan', '', [
+                    html += '<div class="col-12 col-md-6">' + soapSection('Plan', '', [
                         ['Keterangan Lain', item.keterangan_lain]
                     ]) + '</div>';
                     html += '</div>';
