@@ -903,19 +903,14 @@ jQuery(document).ready(function () {
   });
 
   /* SOAP Tindakan Assessment */
-  $(".objstetri").on("change", function () {
-    var data = $(".objstetri option:selected").val();
-    /* $("#test").val(data); */
-    if (data === "1") {
-      $(".object_1").show();
-      $(".object_23").hide();
-    } else if (data === "2-3") {
-      $(".object_23").show();
-      $(".object_1").hide();
-    } else {
-      $(".object_23").hide();
-      $(".object_1").hide();
-    }
+  /* Panel trimester ditampilkan per blok obstetri (blok asli maupun hasil clone), */
+  /* jadi handler dipasang delegated dan dibatasi ke .obstetri-blok terdekat. */
+  $(document).on("change", ".obstetri-blok .objstetri", function () {
+    var blok = $(this).closest(".obstetri-blok");
+    var data = $(this).val();
+
+    blok.find(".object_1").toggle(data === "1");
+    blok.find(".object_23").toggle(data === "2-3");
   });
 
   /* Clone Obstetri */
@@ -923,60 +918,29 @@ jQuery(document).ready(function () {
   $("#tambahCloneObstetri").click(function () {
     var r = (Math.random() + 1).toString(36).substring(2);
 
-    var thing = $("#originalObstetri")
-      .clone(true)
-      .find(".objstetri")
-      .attr({
-        class: "objstetriClone_" + r,
-      })
-      .end();
+    var thing = $("#originalObstetri").clone();
 
-    /* 2. Generate a random ID */
-    var randomId = "clonedDiv_" + r;
+    /* Hindari id kembar dengan blok asli/blok tersimpan */
+    thing.find("[id]").removeAttr("id");
+    thing.attr("id", "clonedDiv_" + r).addClass("cloned-div");
+    thing.find(".tombolHapusObstetri").removeClass("d-none");
 
-    /* 3. Assign the new ID to the cloned div */
-    thing.attr("id", randomId);
+    /* Blok tambahan selalu mulai kosong; G/P/A ikut karena datanya milik pasien */
+    thing
+      .find("input[type=text]")
+      .not("[name^='assestment|gravida']")
+      .not("[name^='assestment|para']")
+      .not("[name^='assestment|abortus']")
+      .val("");
+    thing.find("textarea").val("");
+    thing.find(".objstetri").val("0");
+    thing.find(".object_1, .object_23").hide();
 
-    /* Optional: Add a class to distinguish cloned divs */
-    thing.addClass("cloned-div");
-
-    thing.find(".object_1").attr({
-      class: "object_1_" + r,
-    });
-
-    thing.find(".object_23").attr({
-      class: "object_23_" + r,
-    });
-
-    thing.find(".object_23_" + r).hide();
-    thing.find(".object_1_" + r).hide();
-
-    thing.find(".tombolDeleteObstetri").attr({
-      class: "btn btn-danger remove",
-      value: "Hapus Obstetri",
-      name: r,
-    });
     $(".clonedObstetri").append(thing);
-
-    $(document).on("change", ".objstetriClone_" + r, function () {
-      var data = $(".objstetriClone_" + r + " option:selected").val(); /* console.log(data); */
-      /* $("#test").val(data); */
-      if (data === "1") {
-        $(".object_1_" + r).show();
-        $(".object_23_" + r).hide();
-      } else if (data === "2-3") {
-        $(".object_23_" + r).show();
-        $(".object_1_" + r).hide();
-      } else {
-        $(".object_23_" + r).hide();
-        $(".object_1_" + r).hide();
-      }
-    });
   });
 
-  $(document).on("click", ".btn.remove", function () {
-    id = $(this).attr("name");
-    $(".clonedDiv_" + id).remove();
+  $(document).on("click", ".tombolHapusObstetri", function () {
+    $(this).closest(".obstetri-blok").remove();
   });
 
   /* Evaluasi Gizi - Minum Obat */
