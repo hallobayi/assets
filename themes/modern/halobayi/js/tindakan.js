@@ -1757,4 +1757,395 @@ jQuery(document).ready(function () {
     }
   })();
 
+  /* =========================================================================
+     MODAL REFERENSI ICD (#modalIcdRef) pada tab Assessment (SOAP)
+     Markup ada di app/Views/themes/modern/tindakan/medis/soap/a-halaman.php.
+     Daftar isi modal diambil dari tabel icdcustom lewat endpoint
+     master/rekammedis/icd-custom, dan bisa ditambah lewat tombol "Tambah".
+     ========================================================================= */
+  (function () {
+    var modalEl = document.getElementById("modalIcdRef");
+    if (!modalEl) return;
+
+    /* Cegah duplikat: bila partial pernah termuat lebih dari sekali, buang
+       modal lama yang sudah dipindah ke <body> agar hanya ada satu instance.
+       Duplikat id membuat data-api Bootstrap & .hide() menyasar elemen yang
+       salah, sehingga backdrop instance yang aktif tak pernah dibersihkan. */
+    document.querySelectorAll("body > #modalIcdRef").forEach(function (old) {
+      if (old !== modalEl) {
+        var inst = bootstrap.Modal.getInstance(old);
+        if (inst) inst.dispose();
+        old.remove();
+      }
+    });
+
+    /* Pindahkan modal ke <body>. Modal ini aslinya bersarang di dalam
+       .tab-pane / card yang bertumpuk, sehingga transitionend modal kadang
+       tidak terpicu dan backdrop nyangkut (event hidden.bs.modal tak jalan). */
+    if (modalEl.parentNode !== document.body) {
+      document.body.appendChild(modalEl);
+    }
+
+    var URL_LIST = base_url + "master/rekammedis/icd-custom";
+    var URL_SIMPAN = base_url + "master/rekammedis/icd-custom-simpan";
+
+    /* Field tujuan saat item daftar diklik, per kelompok. Kewanitaan tetap
+       berupa kode diagnosa (ICD-10) sehingga diarahkan ke input diagnosa. */
+    var TARGET_FIELD = {
+      1: "#kode_tindakan",
+      2: "#diagnosa_sekunder",
+      3: "#diagnosa_sekunder",
+    };
+
+    /* Token CSRF dirotasi server tiap POST (Config\Security::$regenerate),
+       jadi tokenHash diperbarui dari header X-CSRF-TOKEN yang dikirim
+       CSRFInitFilter pada setiap response. */
+    if (!window.icdCsrfSyncBound) {
+      window.icdCsrfSyncBound = true;
+
+      $(document).ajaxComplete(function (event, xhr) {
+        var token = xhr.getResponseHeader("X-CSRF-TOKEN");
+        if (!token) return;
+        tokenHash = token;
+        $("input[name=csrf_test_name]").val(token);
+        $(".csrf_token").val(token);
+      });
+
+      /* Script lain (app.js dll) menyimpan token sekali saat load sehingga
+         basi begitu ada POST lain. Nilai token pada request POST berikutnya
+         ditimpa dengan token terbaru supaya tidak ditolak 403. */
+      $(document).ajaxSend(function (event, xhr, settings) {
+        if (!tokenHash) return;
+        var metode = (settings.type || "GET").toUpperCase();
+        if (
+          metode !== "POST" &&
+          metode !== "PUT" &&
+          metode !== "PATCH" &&
+          metode !== "DELETE"
+        )
+          return;
+        xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
+        if (
+          typeof settings.data === "string" &&
+          settings.data.indexOf("csrf_test_name=") !== -1
+        ) {
+          settings.data = settings.data.replace(
+            /csrf_test_name=[^&]*/g,
+            "csrf_test_name=" + encodeURIComponent(tokenHash)
+          );
+        }
+      });
+    }
+
+    var $papers = $(modalEl).find(".notepad-paper");
+    var $formTambah = $(modalEl).find("#formIcdTambah");
+    var $pesan = $(modalEl).find("#icdTambahPesan");
+    var sudahDimuat = false;
+    var typeaheadSiap = false;
+
+    function kelompokTerpilih() {
+      return String($(modalEl).find("#icdTambahKelompok").val() || "2");
+    }
+
+    /* Sumber typeahead mengikuti dropdown kelompok: ICD 9 (Tindakan) -> master
+       icd9, ICD 10 (Diagnosa) & Kewanitaan -> master icd10 (kode kewanitaan
+       memang berupa kode ICD-10). */
+    function urlTypeahead(kelompok) {
+      return (
+        base_url +
+        (kelompok === "1"
+          ? "master/rekammedis/icd9-typeahead"
+          : "master/rekammedis/icd10-typeahead")
+      );
+    }
+
+    function setKode(nilai) {
+      var $kode = $(modalEl).find("#icdTambahKode");
+      if (typeaheadSiap) {
+        $kode.typeahead("val", nilai);
+      } else {
+        $kode.val(nilai);
+      }
+    }
+
+    function siapkanTypeahead() {
+      if (typeaheadSiap) return;
+
+      var $kode = $(modalEl).find("#icdTambahKode");
+      if (!$kode.length || typeof $kode.typeahead !== "function") return;
+
+      $kode
+        .typeahead(
+          {
+            hint: false,
+            highlight: true,
+            minLength: 1,
+          },
+          {
+            display: function (item) {
+              return item.kode;
+            },
+            limit: 12,
+            async: true,
+            templates: {
+              empty: '<div class="tt-suggestion text-muted">Data ICD tidak ditemukan</div>',
+              suggestion: function (item) {
+                return $("<div></div>")
+                  .text(item.kode + " - " + item.nama)
+                  .prop("outerHTML");
+              },
+            },
+            source: function (query, processSync, processAsync) {
+              return $.ajax({
+                url: urlTypeahead(kelompokTerpilih()),
+                dataType: "json",
+                type: "POST",
+                data: { max_rows: 15, q: query, csrf_test_name: tokenHash },
+                beforeSend: function (xhr) {
+                  xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
+                },
+                success: function (data) {
+                  var hasil = [];
+                  (data || []).forEach(function (row) {
+                    hasil.push({ kode: row.kode, nama: row.nama });
+                  });
+                  return processAsync(hasil);
+                },
+              });
+            },
+          }
+        )
+        .on("typeahead:selected typeahead:autocompleted", function (e, datum) {
+          if (!datum) return;
+          $(modalEl).find("#icdTambahNama").val(datum.nama);
+        })
+        .on("typeahead:asyncrequest", function (e) {
+          $(e.target).addClass("sLoading");
+        })
+        .on("typeahead:asynccancel typeahead:asyncreceive", function (e) {
+          $(e.target).removeClass("sLoading");
+        });
+
+      typeaheadSiap = true;
+    }
+
+    function tulisPesan(teks, sukses) {
+      if (!teks) {
+        $pesan
+          .addClass("d-none")
+          .removeClass("alert-success alert-danger")
+          .text("");
+        return;
+      }
+      $pesan
+        .removeClass("d-none alert-success alert-danger")
+        .addClass(sukses ? "alert-success" : "alert-danger")
+        .text(teks);
+    }
+
+    function tulisInfo($paper, teks) {
+      $paper.empty().append($('<div class="icd-info"></div>').text(teks));
+    }
+
+    function render(rows) {
+      $papers.each(function () {
+        var $paper = $(this);
+        var kelompok = String($paper.data("kelompok"));
+        var isi = (rows || []).filter(function (row) {
+          return String(row.kelompok) === kelompok;
+        });
+
+        if (!isi.length) {
+          tulisInfo(
+            $paper,
+            'Belum ada data. Klik tombol "Tambah" di pojok kanan atas untuk menambahkan.'
+          );
+          return;
+        }
+
+        $paper.empty();
+        isi.forEach(function (row) {
+          var label = row.kode + " - " + row.nama;
+          $('<a href="#" class="hint-icd"></a>')
+            .attr("data-target", TARGET_FIELD[kelompok] || "#diagnosa_sekunder")
+            .attr("data-value", label)
+            .attr("title", row.nama)
+            .text(label)
+            .appendTo($paper);
+        });
+      });
+    }
+
+    function muatData(paksa) {
+      if (sudahDimuat && !paksa) return;
+
+      $papers.each(function () {
+        tulisInfo($(this), "Memuat data...");
+      });
+
+      $.ajax({
+        url: URL_LIST,
+        type: "GET",
+        dataType: "json",
+        data: { t: new Date().getTime() },
+      })
+        .done(function (rows) {
+          sudahDimuat = true;
+          render(Array.isArray(rows) ? rows : []);
+        })
+        .fail(function () {
+          $papers.each(function () {
+            tulisInfo($(this), "Gagal memuat data referensi ICD.");
+          });
+        });
+    }
+
+    function simpan() {
+      var $tombol = $(modalEl).find("#btnIcdSimpan");
+      var kode = $.trim($(modalEl).find("#icdTambahKode").val());
+      var nama = $.trim($(modalEl).find("#icdTambahNama").val());
+      var kelompok = kelompokTerpilih();
+
+      if (!kode || !nama) {
+        tulisPesan("Kode dan nama wajib diisi", false);
+        return;
+      }
+
+      $tombol.prop("disabled", true);
+      tulisPesan("", false);
+
+      $.ajax({
+        url: URL_SIMPAN,
+        type: "POST",
+        dataType: "json",
+        data: {
+          kode: kode,
+          nama: nama,
+          kelompok: kelompok,
+          csrf_test_name: tokenHash,
+        },
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
+        },
+      })
+        .done(function (res) {
+          tulisPesan((res && res.message) || "Data ICD tersimpan", true);
+          setKode("");
+          $(modalEl).find("#icdTambahNama").val("");
+          muatData(true);
+
+          /* Pindah ke tab sesuai kelompok data yang baru disimpan. */
+          var target =
+            kelompok === "1"
+              ? "#pane-icd9"
+              : kelompok === "3"
+              ? "#pane-kewanitaan"
+              : "#pane-icd10";
+          var trigger = modalEl.querySelector(
+            '.nav-tabs [data-bs-target="' + target + '"]'
+          );
+          if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
+        })
+        .fail(function (xhr) {
+          var pesan =
+            (xhr.responseJSON && xhr.responseJSON.message) ||
+            "Gagal menyimpan data ICD";
+          tulisPesan(pesan, false);
+        })
+        .always(function () {
+          $tombol.prop("disabled", false);
+        });
+    }
+
+    /* Isi field dari daftar referensi, lalu tutup modal. */
+    $(document)
+      .off("click.hintIcd", "#modalIcdRef .hint-icd")
+      .on("click.hintIcd", "#modalIcdRef .hint-icd", function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var $target = $($btn.data("target"));
+        var value = $btn.data("value");
+        if ($target.length) {
+          /* Sinkronkan dengan typeahead bila terinisialisasi. */
+          if (typeof $target.typeahead === "function") {
+            $target.typeahead("val", value);
+          } else {
+            $target.val(value);
+          }
+          $target.trigger("change");
+        }
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      });
+
+    /* Bind listener modal sekali saja (guard) agar tidak menumpuk. */
+    if (!modalEl.dataset.icdBound) {
+      modalEl.dataset.icdBound = "1";
+
+      $(modalEl).on("click", "#btnIcdTambah", function () {
+        tulisPesan("", false);
+        $formTambah.toggleClass("d-none");
+        if (!$formTambah.hasClass("d-none")) {
+          siapkanTypeahead();
+          $(modalEl).find("#icdTambahKode").trigger("focus");
+        }
+      });
+
+      /* Ganti kelompok = ganti sumber typeahead, isian lama dikosongkan. */
+      $(modalEl).on("change", "#icdTambahKelompok", function () {
+        tulisPesan("", false);
+        setKode("");
+        $(modalEl).find("#icdTambahNama").val("");
+      });
+
+      $(modalEl).on("click", "#btnIcdBatal", function () {
+        tulisPesan("", false);
+        $formTambah.addClass("d-none");
+      });
+
+      $(modalEl).on("click", "#btnIcdSimpan", function () {
+        simpan();
+      });
+
+      /* Enter hanya pada input nama. Enter di input kode dipakai typeahead
+         untuk memilih saran, jadi jangan diserobot jadi simpan. */
+      $(modalEl).on("keydown", "#icdTambahNama", function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          simpan();
+        }
+      });
+
+      /* Muat data referensi + aktifkan tab sesuai tombol pemicu modal. */
+      modalEl.addEventListener("show.bs.modal", function (event) {
+        muatData(false);
+        siapkanTypeahead();
+
+        var tab = event.relatedTarget && event.relatedTarget.dataset.bsTab;
+        if (!tab) return;
+        var selector =
+          tab === "icd9"
+            ? '[data-bs-target="#pane-icd9"]'
+            : '[data-bs-target="#pane-icd10"]';
+        var trigger = modalEl.querySelector(".nav-tabs " + selector);
+        if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
+      });
+
+      /* Jaring pengaman: setelah modal ditutup, pastikan backdrop & state body
+         benar-benar bersih agar backdrop tidak nyangkut. */
+      modalEl.addEventListener("hidden.bs.modal", function () {
+        $formTambah.addClass("d-none");
+        tulisPesan("", false);
+
+        /* Jangan bersihkan bila masih ada modal lain yang terbuka. */
+        if (document.querySelector(".modal.show")) return;
+        document.querySelectorAll(".modal-backdrop").forEach(function (b) {
+          b.remove();
+        });
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("padding-right");
+      });
+    }
+  })();
+
 });
