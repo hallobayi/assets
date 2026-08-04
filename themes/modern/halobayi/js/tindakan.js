@@ -1557,17 +1557,49 @@ jQuery(document).ready(function () {
     return s;
   }
 
-  $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
-    const nomor_rm_sistem = $(this).data('nomor_rm_sistem');
+  /* Paging riwayat: nomor RM yang sedang ditampilkan + halaman aktif */
+  var riwayatPaging = { nomor_rm: '', page: 1, perPage: 5 };
+
+  /* Bar paging: info jumlah + tombol halaman (maks 5 nomor, digeser mengikuti halaman aktif) */
+  function riwayatPagingHtml(info) {
+    var page       = parseInt(info.page, 10) || 1;
+    var perPage    = parseInt(info.per_page, 10) || riwayatPaging.perPage;
+    var total      = parseInt(info.total, 10) || 0;
+    var totalPages = parseInt(info.total_pages, 10) || 1;
+    var start      = total === 0 ? 0 : ((page - 1) * perPage) + 1;
+    var end        = Math.min(page * perPage, total);
+
+    var s = '';
+    s += '<div class="d-flex flex-wrap align-items-center justify-content-between gap-2">';
+    s += '<small class="text-muted">Menampilkan ' + start + '-' + end + ' dari ' + total + ' pendaftaran</small>';
+    s += '<nav aria-label="Halaman riwayat pendaftaran"><ul class="pagination pagination-sm mb-0">';
+    s += '<li class="page-item' + (page <= 1 ? ' disabled' : '') + '"><a class="page-link" href="#" data-page="' + (page - 1) + '" aria-label="Sebelumnya">&laquo;</a></li>';
+
+    var last  = Math.min(totalPages, Math.max(1, page - 2) + 4);
+    var first = Math.max(1, last - 4);
+    for (var p = first; p <= last; p++) {
+      s += '<li class="page-item' + (p === page ? ' active' : '') + '"><a class="page-link" href="#" data-page="' + p + '">' + p + '</a></li>';
+    }
+
+    s += '<li class="page-item' + (page >= totalPages ? ' disabled' : '') + '"><a class="page-link" href="#" data-page="' + (page + 1) + '" aria-label="Berikutnya">&raquo;</a></li>';
+    s += '</ul></nav>';
+    s += '</div>';
+    return s;
+  }
+
+  function loadRiwayatPendaftaran(nomor_rm_sistem, page) {
+    riwayatPaging.nomor_rm = nomor_rm_sistem;
+    riwayatPaging.page     = page;
     $.ajax({
         url: base_url + "tindakandokter/ajaxRiwayatPendaftaranPasien",
         type: 'GET',
-        data: { nomor_rm: nomor_rm_sistem },
+        data: { nomor_rm: nomor_rm_sistem, page: page, per_page: riwayatPaging.perPage },
         dataType: 'json',
         beforeSend: function() {
             $('#loadingRiwayat').show();
             $('#listRiwayatPasien').hide().empty();
             $('#emptyRiwayat').hide();
+            $('#pagingRiwayatPasien').hide().empty();
         },
         success: function(response) {
             console.log("AJAX Success Response:", response);
@@ -1650,6 +1682,16 @@ jQuery(document).ready(function () {
                     html += '</div>';
                 });
                 $('#listRiwayatPasien').html(html).show();
+
+                /* Bar paging hanya perlu tampil bila datanya lebih dari satu halaman */
+                var info = response.pagination || {};
+                riwayatPaging.page = parseInt(info.page, 10) || page;
+                if ((parseInt(info.total_pages, 10) || 1) > 1) {
+                    $('#pagingRiwayatPasien').html(riwayatPagingHtml(info)).show();
+                }
+
+                /* Balik ke atas daftar supaya halaman baru langsung terlihat */
+                $('#scrollRiwayatPasien').scrollTop(0);
             } else {
                 $('#emptyRiwayat').show();
             }
@@ -1660,6 +1702,18 @@ jQuery(document).ready(function () {
             $('#emptyRiwayat').show();
         }
     });
+  }
+
+  $(document).on("click", "[data-bs-target='#collapseRiwayatPendaftaran'], .collapseRiwayatPendaftaran", function (e) {
+    loadRiwayatPendaftaran($(this).data('nomor_rm_sistem'), 1);
+  });
+
+  $(document).on("click", "#pagingRiwayatPasien .page-link", function (e) {
+    e.preventDefault();
+    if ($(this).closest('.page-item').hasClass('disabled') || $(this).closest('.page-item').hasClass('active')) return;
+    var page = parseInt($(this).data('page'), 10);
+    if (!page || page < 1) return;
+    loadRiwayatPendaftaran(riwayatPaging.nomor_rm, page);
   });
 
   /* ===== SOAP: navigasi scroll (pengganti tab) ===== */
