@@ -472,6 +472,8 @@ jQuery(document).ready(function () {
   });
 
   /* Cek Riwayat BB & TB dari pendaftaran sebelumnya (tampilkan data dulu, isi manual) */
+  var riwayatObstetriTerakhir = "";
+
   $(document).on("click", ".cek-riwayat-bbtb", function (ev) {
     ev.preventDefault();
 
@@ -497,6 +499,20 @@ jQuery(document).ready(function () {
           var bb = res.berat_badan || "";
           var tb = res.tinggi_badan || "";
 
+          riwayatObstetriTerakhir = res.riwayat_obstetri || "";
+
+          var infoObstetri = "";
+          if (riwayatObstetriTerakhir !== "") {
+            infoObstetri =
+              "<br />Riwayat Obstetri dari Reg " +
+              res.riwayat_obstetri_no_reg +
+              " (" +
+              res.riwayat_obstetri_tanggal +
+              "): <b>" +
+              $("<div>").text(riwayatObstetriTerakhir).html() +
+              "</b>";
+          }
+
           $info
             .removeClass("text-muted text-danger")
             .addClass("text-success")
@@ -509,7 +525,9 @@ jQuery(document).ready(function () {
                 (bb || "-") +
                 "</b> kg, TB: <b>" +
                 (tb || "-") +
-                '</b> cm &nbsp;<button type="button" class="btn btn-xs btn-success isi-riwayat-bbtb" ' +
+                "</b> cm" +
+                infoObstetri +
+                ' &nbsp;<button type="button" class="btn btn-xs btn-success isi-riwayat-bbtb" ' +
                 'data-bb="' +
                 bb +
                 '" data-tb="' +
@@ -517,6 +535,7 @@ jQuery(document).ready(function () {
                 '"><i class="fa fa-check pe-1"></i>Isi ke Form</button>'
             );
         } else {
+          riwayatObstetriTerakhir = "";
           $info
             .removeClass("text-muted text-success")
             .addClass("text-danger")
@@ -544,9 +563,14 @@ jQuery(document).ready(function () {
 
     if (bb !== "") {
       $("input[name='objective|berat_badan']").val(bb);
+      $("input[name='berat_badan_pasien']").val(bb);
     }
     if (tb !== "") {
       $("input[name='objective|tinggi_badan']").val(tb);
+      $("input[name='tinggi_badan_pasien']").val(tb);
+    }
+    if (riwayatObstetriTerakhir !== "") {
+      $("#riwayat_obstetri_kehamilan").val(riwayatObstetriTerakhir);
     }
 
     $(this)
