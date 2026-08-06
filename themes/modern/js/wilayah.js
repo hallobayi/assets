@@ -4,21 +4,23 @@ $(document).ready(function() {
 	 * =============================================================================
 	 * CSRF token helper
 	 * -----------------------------------------------------------------------------
-	 * Config\Security::$regenerate = true, jadi token CSRF BERUBAH setiap kali ada
-	 * request POST. Kalau token hanya dibaca sekali saat page load (cara lama),
-	 * request typeahead ke-2 dst akan memakai token basi -> ditolak 403 -> tanpa
-	 * error handler suggestion tidak pernah tampil & spinner muter terus.
-	 *
 	 * CSRFInitFilter (after '/ *') selalu mengirim token terbaru lewat response
 	 * header X-CSRF-TOKEN. Kita baca ulang tiap response lalu simpan ke hidden
-	 * input supaya request berikutnya (dan submit form) selalu pakai token valid.
+	 * input supaya submit form berikutnya selalu pakai token valid.
+	 *
+	 * CATATAN 403 "Sesi keamanan (CSRF) kedaluwarsa":
+	 * dulu typeahead memakai POST. CI4 me-regenerate hash CSRF setiap POST yang
+	 * lolos, sementara typeahead menembak 1 request per ketikan yang saling
+	 * tumpang tindih -> request yang sudah terlanjur terkirim membawa token lama
+	 * dan ditolak 403. Sekarang pencarian dipindah ke GET (lihat di bawah) yang
+	 * tidak diverifikasi CSRF sama sekali, jadi race-nya hilang.
 	 * =============================================================================
 	 */
 	var CSRF_HEADER = 'X-CSRF-TOKEN';
 
-	function getCsrfToken() {
-		return $('input[name=csrf_test_name]').val();
-	}
+	// jqXHR pencarian kelurahan yang sedang berjalan (untuk dibatalkan saat
+	// user mengetik lagi, supaya response lama tidak menimpa hasil terbaru).
+	var typeaheadXhr = null;
 
 	function refreshCsrfToken(xhr) {
 		if (!xhr || typeof xhr.getResponseHeader !== 'function') {
@@ -165,16 +167,22 @@ $(document).ready(function() {
 			}
 		},
 		source: function(query, processSync, processAsync) {
-			return $.ajax({
+			// Batalkan pencarian sebelumnya yang masih jalan.
+			if (typeaheadXhr) {
+				typeaheadXhr.abort();
+			}
+
+			typeaheadXhr = $.ajax({
 				url: base_url + 'wilayah/typeahead',
 				dataType: 'json',
-				type: 'POST',
+				// GET, BUKAN POST. Pencarian ini read-only dan CI4 hanya
+				// memverifikasi CSRF pada POST/PUT/PATCH/DELETE. Dengan POST,
+				// tiap request yang lolos me-regenerate token sehingga request
+				// per-ketikan yang tumpang tindih saling menjegal -> 403.
+				type: 'GET',
 				data: {
 					max_rows: 15,
 					q: query
-				},
-				beforeSend: function(xhr) {
-					xhr.setRequestHeader(CSRF_HEADER, getCsrfToken());
 				},
 				success: function(data) {
 					var return_list = [];
@@ -198,17 +206,27 @@ $(document).ready(function() {
 					}
 					return processAsync(return_list);
 				},
-				error: function(xhr) {
+				error: function(xhr, textStatus) {
+					// Request yang kita batalkan sendiri bukan error -> jangan
+					// tampilkan toast dan jangan kosongkan suggestion.
+					if (textStatus === 'abort' || xhr.statusText === 'abort') {
+						return;
+					}
 					// PENTING: tetap panggil processAsync([]) supaya spinner berhenti
 					// dan template "empty" tampil, bukan muter tanpa akhir.
 					processAsync([]);
 					notifyError(humanizeAjaxError(xhr));
 				},
 				complete: function(xhr) {
-					// simpan token terbaru untuk request berikutnya (fix 403 berulang)
+					if (typeaheadXhr === xhr) {
+						typeaheadXhr = null;
+					}
+					// simpan token terbaru untuk submit form berikutnya
 					refreshCsrfToken(xhr);
 				}
 			});
+
+			return typeaheadXhr;
 		}
 	}).on('typeahead:selected', onSelectedKelurahan).on('typeahead:asyncrequest', function(e) {
 		$(e.target).addClass('sLoading');
