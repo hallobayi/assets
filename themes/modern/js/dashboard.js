@@ -352,11 +352,28 @@ $(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            // Kirim token CSRF terbaru pada setiap request (token dirotasi tiap POST — regenerate = true).
-            "data": function (d) {
-                d.csrf_test_name = tokenHash;
+            // Kirim CSRF via header (CI4 support X-CSRF-TOKEN header)
+            "beforeSend": function (xhr) {
+                xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
             },
-            // Perbarui token dari response agar request berikutnya (mis. ganti tahun) tidak 403.
+            "data": function (d) {
+                // tidak perlu kirim csrf_test_name di body, sudah via header
+            },
+            // Refresh tokenHash dari response header setelah setiap request (termasuk error)
+            "xhr": function () {
+                var xhr = $.ajaxSettings.xhr();
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4) {
+                        var newToken = this.getResponseHeader("X-CSRF-TOKEN");
+                        if (newToken) {
+                            tokenHash = newToken;
+                            $("input[name=csrf_test_name]").val(tokenHash);
+                        }
+                    }
+                });
+                return xhr;
+            },
+            // Perbarui token dari response body jika ada (fallback)
             "dataSrc": function (json) {
                 if (json.csrf && json.csrf.value) {
                     tokenHash = json.csrf.value;
