@@ -46,17 +46,34 @@ jQuery(document).ready(function () {
     ajax: {
       url: url,
       type: "POST",
-      // "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+      // Kirim CSRF via header agar tidak konflik dengan double hidden input di halaman
+      // CI4 sudah support: Config\Security::$headerName = 'X-CSRF-TOKEN'
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
+      },
       data: function (d) {
         d.lokasi = cabang.value;
-        d.csrf_test_name = tokenHash;
         d.startDate = $("input[name=startDate]").val();
         d.endDate = $("input[name=endDate]").val();
         d.nik = $("input[name=nik]").val();
       },
-      dataSrc: function (json) {
-        // Perbarui tokenHash dengan CSRF token terbaru dari server
+      xhr: function () {
+        var xhr = $.ajaxSettings.xhr();
+        // Update tokenHash dari response header setelah setiap request (termasuk error)
         // agar request DataTables berikutnya tidak 403 (tokenRandomize = true)
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            var newToken = this.getResponseHeader("X-CSRF-TOKEN");
+            if (newToken) {
+              tokenHash = newToken;
+              $("input[name=csrf_test_name]").val(tokenHash);
+            }
+          }
+        });
+        return xhr;
+      },
+      dataSrc: function (json) {
+        // Update tokenHash dari JSON response jika ada (fallback)
         if (json.csrf && json.csrf.value) {
           tokenHash = json.csrf.value;
           $("input[name=csrf_test_name]").val(tokenHash);
