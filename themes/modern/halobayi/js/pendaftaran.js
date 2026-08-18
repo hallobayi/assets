@@ -54,6 +54,15 @@ jQuery(document).ready(function () {
         d.endDate = $("input[name=endDate]").val();
         d.nik = $("input[name=nik]").val();
       },
+      dataSrc: function (json) {
+        // Perbarui tokenHash dengan CSRF token terbaru dari server
+        // agar request DataTables berikutnya tidak 403 (tokenRandomize = true)
+        if (json.csrf && json.csrf.value) {
+          tokenHash = json.csrf.value;
+          $("input[name=csrf_test_name]").val(tokenHash);
+        }
+        return json.data ?? [];
+      },
     },
     order: [3, "desc"],
     oLanguage: {
@@ -140,44 +149,6 @@ jQuery(document).ready(function () {
             "</span>",
           nRow,
         );
-
-      // switch (aoData["status_layanan"]) {
-      //   case "daftar":
-      //     $("td", nRow)
-      //       .eq(5)
-      //       .text("Registrasi", nRow)
-      //       .css("color", "Sienna")
-      //       .css("font-weight", "Bold")
-      //       .addClass("kantongRelase")
-      //       .on("click", function () {
-      //         klikDetail(aoData["no_reg"]);
-      //       })
-      //       .css("cursor", "pointer");
-      //     break;
-      //   case "satset":
-      //     $("td", nRow)
-      //       .eq(5)
-      //       .text("Terkirim", nRow)
-      //       .css("color", "Black")
-      //       .css("font-weight", "Bold");
-      //     break;
-      //   case "selesai":
-      //     $("td", nRow)
-      //       .eq(5)
-      //       .text("Antrian Dikirim", nRow)
-      //       .css("color", "Green")
-      //       .css("font-weight", "Bold");
-      //     break;
-      //   case "failed":
-      //     $("td", nRow)
-      //       .eq(5)
-      //       .text("Gagal Terkirim!", nRow)
-      //       .css("color", "Red")
-      //       .css("font-weight", "Bold");
-      //     break;
-      //   default:
-      //     break;
-      // }
     },
   };
 
@@ -305,20 +276,6 @@ jQuery(document).ready(function () {
       },
     );
   };
-
-  // $("#display").on("click",".panggil", function(event){
-  // 	event.preventDefault();
-
-  // 	var nm_pasien 	= $(this).attr("data-nm_pasien");
-  // 	var nm_poli = $(this).attr("data-nm_poli");
-  // 	var no_reg = $(this).attr("data-no_reg");
-  // 	function play (){
-  // 	  responsiveVoice.speak(
-  // 		nm_pasien + ", nomor antrian " + no_reg + ", ke " + nm_poli ,"Indonesian Male", {pitch: 1,rate: 0.8,volume: 2}
-  // 	  );
-  // 	}
-  // 	play();
-  // });
 
   // Add Anak
   $("#add-row").on("click", function () {
@@ -556,9 +513,10 @@ jQuery(document).ready(function () {
     var hari = totalHari % 7;
 
     $(".usia_kehamilan").val(pekan);
-    document.getElementById("nilaiKalkulasi").innerHTML = pekan + " pekan, " + hari + " hari.";
-    document.getElementById("nilaiKalkulasiSend").value = pekan + " pekan," + hari + " hari.";
-
+    document.getElementById("nilaiKalkulasi").innerHTML =
+      pekan + " minggu, " + hari + " hari.";
+    document.getElementById("nilaiKalkulasiSend").value =
+      pekan + " minggu," + hari + " hari.";
   }
 
   function set_usiaKehamilan($elm) {
@@ -936,72 +894,76 @@ jQuery(document).ready(function () {
   });
 
   // Cari Dokter
-  $('.cariDokter').typeahead({
-      hint: true,
-      highlight: true,
-      minLength: 1
-  },
-  {
-      display: function(item){
-          return item.value
+  $(".cariDokter")
+    .typeahead(
+      {
+        hint: true,
+        highlight: true,
+        minLength: 1,
       },
-      limit: 12,
-      async: true,
-      templates: {
+      {
+        display: function (item) {
+          return item.value;
+        },
+        limit: 12,
+        async: true,
+        templates: {
           empty: [
-              '<div class="d-flex justify-content-center">Data Dokter Tidak Ada!</div>'
-          ].join('\n'),
-          suggestion: function (item){
-              return '<div>' + item.value + '</div>'
-          }
-      },
-      source: function (query, processSync, processAsync) {
-      // processSync(['This suggestion appears immediately', 'This one too']);
-        return $.ajax({
-          url: base_url + 'master/dokter/typeahead',
-          dataType: "json",
-          type: "POST",
-          data: {
+            '<div class="d-flex justify-content-center">Data Dokter Tidak Ada!</div>',
+          ].join("\n"),
+          suggestion: function (item) {
+            return "<div>" + item.value + "</div>";
+          },
+        },
+        source: function (query, processSync, processAsync) {
+          // processSync(['This suggestion appears immediately', 'This one too']);
+          return $.ajax({
+            url: base_url + "master/dokter/typeahead",
+            dataType: "json",
+            type: "POST",
+            data: {
               max_rows: 15,
-              q:query
-          },
-          beforeSend: function (xhr) 
-          {       
-          xhr.setRequestHeader('X-CSRF-Token' , tokenHash);       
-          },
-          success: function (data) {
-              var return_list = [], i = data.length;
+              q: query,
+            },
+            beforeSend: function (xhr) {
+              xhr.setRequestHeader("X-CSRF-Token", tokenHash);
+            },
+            success: function (data) {
+              var return_list = [],
+                i = data.length;
               while (i--) {
-                  return_list[i] = {
-                      id: data[i].nik,
-                      value: data[i].nik + " - " + data[i].nama_pegawai,
-                      nama_pegawai: data[i].nama_pegawai,
-                      nik: data[i].nik,
+                return_list[i] = {
+                  id: data[i].nik,
+                  value: data[i].nik + " - " + data[i].nama_pegawai,
+                  nama_pegawai: data[i].nama_pegawai,
+                  nik: data[i].nik,
+                };
+              }
+              // in this example, json is simply an array of strings
+              return processAsync(return_list);
+            },
+          });
+        },
+      },
+    )
+    .on("typeahead:selected", onSelectedNamaDokter)
+    .on("typeahead:asyncrequest", function (e) {
+      $(e.target).addClass("sLoading");
+    })
+    .on("typeahead:asynccancel typeahead:asyncreceive", function (e) {
+      $(e.target).removeClass("sLoading");
+    });
 
-                  };
-              }    
-            // in this example, json is simply an array of strings
-            return processAsync(return_list);
-          }
-        });
-      }
-  }).on('typeahead:selected', onSelectedNamaDokter).on('typeahead:asyncrequest', function(e) {
-      $(e.target).addClass('sLoading');
-  }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
-      $(e.target).removeClass('sLoading');
+  // Kosongkan nik tersembunyi saat input dokter dikosongkan
+  $(".cariDokter").on("input typeahead:change", function () {
+    if ($(this).val().trim() === "") {
+      $("#nik").val("");
+    }
   });
 
-    // Kosongkan nik tersembunyi saat input dokter dikosongkan
-  $('.cariDokter').on('input typeahead:change', function() {
-      if ($(this).val().trim() === '') {
-          $('#nik').val('');
-      }
-  });
-  
   // source: https://stackoverflow.com/a/19540313
   function onSelectedNamaDokter($e, datum) {
-      $('#nama_pegawai').val(datum.nama_pegawai);
-      $('#nik').val(datum.nik);
+    $("#nama_pegawai").val(datum.nama_pegawai);
+    $("#nik").val(datum.nik);
   }
-
 });
