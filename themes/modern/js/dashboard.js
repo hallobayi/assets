@@ -632,4 +632,22 @@ $(document).ready(function() {
     }
 
     $('#tahun-tindakan-terbesar').trigger('change');
+
+    // ===== DataTables Pasien Terbaru =====
+    if ($('#tabel-pasien-terbaru').length) {
+        let pasienDt = $('#tabel-pasien-terbaru').DataTable({
+            "order": [],
+            "columnDefs": [{ "targets": [0], "orderable": false }],
+            pageLength: 5,
+            lengthChange: false,
+            searching: false,
+            info: false
+        });
+        // Nomor urut kolom pertama
+        pasienDt.on('order.dt search.dt', function() {
+            pasienDt.column(0, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
+    }
 });
