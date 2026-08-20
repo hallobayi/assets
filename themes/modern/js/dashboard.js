@@ -204,42 +204,81 @@ $(document).ready(function() {
         });
     }
 
-    // Ambil ulang data dari server saat filter berubah, lalu update semua chart
-    function reloadKlinis() {
-        let tahun = $('#filter-klinis-tahun').val() || klinisTahunAwal;
-        let cabang = $('#filter-klinis-cabang').val() || '';
+    // ===== Filter per-kartu (Tahun + Cabang) =====
+    // Tiap kartu punya <div class="card-filter" data-filter="<key>"> berisi
+    // select #filter-<key>-tahun dan #filter-<key>-cabang.
+    const KLINIS_KEYS = ['pendaftaran', 'soap', 'awal', 'obat'];
 
-        let $wrap = $('#filter-klinis-cabang').parent();
-        let $spinner = $('<div class="spinner-container ms-2" style="display:inline-block">' +
-            '<div class="spinner-border spinner-border-sm"></div></div>').appendTo($wrap);
+    function filterVal(key, jenis) {
+        let $el = $('#filter-' + key + '-' + jenis);
+        return $el.length ? ($el.val() || '') : '';
+    }
 
-        $.get(klinisEndpoint + '?jenis=all&tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(resp) {
+    function filterSpinner(key) {
+        return $('<div class="spinner-container ms-2" style="display:inline-block">' +
+            '<div class="spinner-border spinner-border-sm"></div></div>')
+            .appendTo($('.card-filter[data-filter="' + key + '"]'));
+    }
+
+    function escHtml(val) {
+        return $('<div>').text(val == null ? '' : val).html();
+    }
+
+    // Ambil ulang data satu kartu grafik klinis saat filternya berubah
+    function reloadKlinis(key) {
+        let tahun = filterVal(key, 'tahun') || klinisTahunAwal;
+        let cabang = filterVal(key, 'cabang');
+        let $spinner = filterSpinner(key);
+
+        $.get(klinisEndpoint + '?jenis=' + key + '&tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(resp) {
             $spinner.remove();
             let data = typeof resp === 'string' ? JSON.parse(resp) : resp;
-            Object.keys(KLINIS_META).forEach(function(key) {
-                if (!klinisCharts[key] || !data[key]) return;
-                klinisCharts[key].data.datasets[0].data = data[key].count;
+            if (!data) return;
+
+            if (key === 'soap') {
+                if (soapChart) {
+                    soapChart.data.datasets[0].data = soapValues(data);
+                    soapChart.update();
+                }
+                return;
+            }
+
+            if (key === 'awal') {
+                if (dokterChart) {
+                    dokterChart.data.labels = gaugeLabels(data);
+                    dokterChart.data.datasets[0].data = gaugeData(data);
+                    dokterChart.data.datasets[0].backgroundColor = gaugeColors(data);
+                    dokterChart.update();
+                }
+                return;
+            }
+
+            if (klinisCharts[key]) {
+                klinisCharts[key].data.datasets[0].data = data.count;
                 if (KLINIS_META[key].withNilai && klinisCharts[key].data.datasets[1]) {
-                    klinisCharts[key].data.datasets[1].data = data[key].nilai;
+                    klinisCharts[key].data.datasets[1].data = data.nilai;
                 }
                 klinisCharts[key].update();
-            });
-            if (soapChart && data.soap) {
-                soapChart.data.datasets[0].data = soapValues(data.soap);
-                soapChart.update();
-            }
-            if (dokterChart && data.awal) {
-                dokterChart.data.labels = gaugeLabels(data.awal);
-                dokterChart.data.datasets[0].data = gaugeData(data.awal);
-                dokterChart.data.datasets[0].backgroundColor = gaugeColors(data.awal);
-                dokterChart.update();
             }
         }).fail(function() {
             $spinner.remove();
         });
     }
 
-    $('#filter-klinis-tahun, #filter-klinis-cabang').on('change', reloadKlinis);
+    // Dispatcher: perubahan filter hanya me-reload kartunya sendiri
+    $('.card-filter').on('change', 'select', function() {
+        let key = $(this).closest('.card-filter').data('filter');
+
+        if (KLINIS_KEYS.indexOf(key) >= 0) {
+            reloadKlinis(key);
+        } else if (key === 'kunjungan') {
+            reloadKunjungan();
+        } else if (key === 'dokter-favorite') {
+            reloadDokterFavorite();
+        } else if (key === 'pasien-terbaru') {
+            reloadPasienTerbaru();
+        }
+    });
 
     // Update warna chart klinis saat ganti tema
     $('body').delegate('.nav-theme-option button', 'click', function() {
@@ -349,17 +388,19 @@ $(document).ready(function() {
         });
     })
 
-    // Update Total Kunjungan Pasien per Layanan (DataTables)
-    $('#tahun-barang-terlaris').change(function() {
-        $this = $(this);
-        settings.ajax.url = base_url + 'dashboard/getDataDTKunjunganPasien?tahun=' + $this.val();
+    // Update Total Kunjungan Pasien per Layanan (DataTables) sesuai filter kartu
+    function reloadKunjungan() {
+        let tahun = filterVal('kunjungan', 'tahun');
+        let cabang = filterVal('kunjungan', 'cabang');
+
+        settings.ajax.url = base_url + 'dashboard/getDataDTKunjunganPasien?tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang);
         dataTablesPenjualanTerbesar.destroy();
-        len = $('#tabel-penjualan-terbesar').find('thead').find('th').length;
+        let len = $('#tabel-penjualan-terbesar').find('thead').find('th').length;
         $('#tabel-penjualan-terbesar').find('tbody').html('<tr>' +
             '<td colspan="' + len + '" class="text-center">Loading data...</td>' +
             '</tr>');
         dataTablesPenjualanTerbesar = $('#tabel-penjualan-terbesar').DataTable(settings);
-    })
+    }
 
     // ===== Chart Dokter Favorite (PIE) =====
     let chartDokterFavorite = null;
@@ -392,39 +433,42 @@ $(document).ready(function() {
         chartDokterFavorite = new Chart(dokterFavEl.getContext('2d'), configChartDokterFavorite);
     }
 
-    // Update Chart Dokter Favorite
-    $('#tahun-item-terjual').change(function() {
-        $this = $(this);
-        $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
-            '<div class="spinner-border spinner-border-sm"></div>' +
-            '</div>').prependTo($this.parent());
+    // Update Chart Dokter Favorite sesuai filter kartu
+    function reloadDokterFavorite() {
+        if (!chartDokterFavorite) return;
 
-        $.get(base_url + 'dashboard/ajaxGetDokterFavorite?tahun=' + $(this).val(), function(data) {
+        let tahun = filterVal('dokter-favorite', 'tahun');
+        let cabang = filterVal('dokter-favorite', 'cabang');
+        let $spinner = filterSpinner('dokter-favorite');
+
+        $.get(base_url + 'dashboard/ajaxGetDokterFavorite?tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(data) {
             $spinner.remove();
-            if (data) {
-                data = JSON.parse(data);
-                dokter_favorite = data.total;
-                dokter_favorite_label = data.nama_dokter;
+            if (!data) return;
 
-                randomBackground = [];
-                dokter_favorite.map(() => {
-                    randomBackground.push(dynamicColors());
-                })
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+            dokter_favorite = data.total || [];
+            dokter_favorite_label = data.nama_dokter || [];
 
-                theme_value = $('html').attr('data-bs-theme');
-                border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
-                configChartDokterFavorite.data = {
-                    datasets: [{
-                        data: dokter_favorite,
-                        backgroundColor: randomBackground,
-                        borderColor: border_color
-                    }],
-                    labels: dokter_favorite_label
-                }
-                chartDokterFavorite.update();
+            let randomBackground = [];
+            dokter_favorite.map(() => {
+                randomBackground.push(dynamicColors());
+            })
+
+            let theme_value = $('html').attr('data-bs-theme');
+            let border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
+            configChartDokterFavorite.data = {
+                datasets: [{
+                    data: dokter_favorite,
+                    backgroundColor: randomBackground,
+                    borderColor: border_color
+                }],
+                labels: dokter_favorite_label
             }
+            chartDokterFavorite.update();
+        }).fail(function() {
+            $spinner.remove();
         });
-    })
+    }
 
     // Update Kategori Terjual
     $('#tahun-kategori-terjual').change(function() {
@@ -631,9 +675,33 @@ $(document).ready(function() {
 
     $('#tahun-tindakan-terbesar').trigger('change');
 
+    // Update Pasien Terbaru sesuai filter kartu
+    let pasienDt = null;
+
+    function reloadPasienTerbaru() {
+        if (!pasienDt) return;
+
+        let tahun = filterVal('pasien-terbaru', 'tahun');
+        let cabang = filterVal('pasien-terbaru', 'cabang');
+        let $spinner = filterSpinner('pasien-terbaru');
+
+        $.get(base_url + 'dashboard/ajaxGetPasienTerbaru?tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(data) {
+            $spinner.remove();
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+
+            pasienDt.clear();
+            (data || []).map(item => {
+                pasienDt.row.add(['', escHtml(item.nama_pasien), escHtml(item.nomor_rm)]);
+            })
+            pasienDt.draw();
+        }).fail(function() {
+            $spinner.remove();
+        });
+    }
+
     // ===== DataTables Pasien Terbaru =====
     if ($('#tabel-pasien-terbaru').length) {
-        let pasienDt = $('#tabel-pasien-terbaru').DataTable({
+        pasienDt = $('#tabel-pasien-terbaru').DataTable({
             "order": [],
             "columnDefs": [{ "targets": [0], "orderable": false }],
             pageLength: 5,
