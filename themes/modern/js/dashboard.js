@@ -716,4 +716,36 @@ $(document).ready(function() {
             });
         }).draw();
     }
+
+    // ===== Dropdown tahun pada footer kartu statistik =====
+    // Ganti tahun -> ambil ulang angka + growth kartunya saja.
+    // Jenis kartu dibaca dari atribut data-kartu pada select-nya.
+    $('.card-year-select').on('change', function() {
+        let jenis = $(this).data('kartu');
+        let tahun = $(this).val();
+        let $card = $(this).closest('.card');
+        let $nilai = $card.find('.card-title');
+        let $growth = $card.find('.card-footer-left p');
+        let $icon = $card.find('.card-footer-left .icon');
+        let teksLama = $nilai.text();
+
+        $nilai.text('...');
+
+        $.get(kartuStatistikEndpoint + '?jenis=' + encodeURIComponent(jenis) + '&tahun=' + encodeURIComponent(tahun), function(resp) {
+            let data = typeof resp === 'string' ? JSON.parse(resp) : resp;
+            if (!data) {
+                $nilai.text(teksLama);
+                return;
+            }
+
+            $nilai.text(data.jml);
+            $growth.text(data.growth ? data.growth + '%' : '-');
+            $icon.html(data.growth
+                ? '<i class="fas ' + (data.growth > 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down') + '"></i>'
+                : '');
+        }).fail(function() {
+            $nilai.text(teksLama);
+        });
+    });
+
 });
