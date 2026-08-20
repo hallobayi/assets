@@ -19,7 +19,7 @@ Repository untuk mengelola dan mendistribusikan assets statis project Halo Bayi 
 
 Repository ini menyediakan assets statis (JavaScript libraries, CSS frameworks, fonts, images) untuk aplikasi Halo Bayi dengan akses melalui multiple CDN untuk reliability dan performance optimization.
 
-**Version:** 1.2.10
+**Version:** 1.2.14
 
 **Tech Stack:**
 - jQuery
@@ -76,7 +76,7 @@ https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
 **Status:** ✅ **CSP SUPPORT**
 
 ```
-https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.10/vendors/jquery/jquery.min.js
+https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.14/vendors/jquery/jquery.min.js
 ```
 
 **Keunggulan:**
@@ -268,7 +268,7 @@ assets_halobayi/
 - CSP compatible dengan consistent domain
 
 ```html
-<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.10/vendors/jquery/jquery.min.js"></script>
+<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.14/vendors/jquery/jquery.min.js"></script>
 ```
 
 ### Development Environment
@@ -304,11 +304,11 @@ Project ini menggunakan semantic versioning:
 MAJOR.MINOR.PATCH
 ```
 
-**Current Version:** `1.2.10`
+**Current Version:** `1.2.14`
 
 ### Version History
 
-- `1.2.10` - Current stable version
+- `1.2.14` - Current stable version
 - `1.1.x` - Minor updates & bug fixes
 - `1.x.x` - Feature updates
 
