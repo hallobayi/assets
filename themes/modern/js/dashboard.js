@@ -3,16 +3,7 @@ $(document).ready(function() {
     // source: https://stackoverflow.com/a/67184094
     var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
 
-    // Chart Penjualan Perbulan
-    let randomBackground = [];
-
-    for (i = 0; i < 12; i++) {
-        randomBackground.push(dynamicColors());
-    }
-
-    dataset_penjualan = [];
-    colors = ['rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)'];
-    // colors = ['rgb(76 162 199)', 'rgb(250 168 38)', 'rgb(37 176 91)'];
+    // ===== GRAFIK KLINIS (Pendaftaran, SOAP, Awal Medis, Obat) =====
     border_color_dark = '#b2b7c7';
     border_color_light = '#FFFFFF';
     grid_color_light = '#e9e9e9';
@@ -20,316 +11,251 @@ $(document).ready(function() {
     chart_font_color = cookie_jwd_adm_theme == 'dark' ? dark_color : light_color;
     chart_grid_color = cookie_jwd_adm_theme == 'dark' ? grid_color_dark : grid_color_light;
 
-    num = 0;
-    Object.keys(data_penjualan).map(tahun => {
-        color = colors[num];
-        dataset_penjualan.push({
-            label: tahun,
-            backgroundColor: color,
-            data: data_penjualan[tahun],
-            fill: false,
-            borderColor: color,
+    const LABEL_BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    // Format angka ribuan pakai titik
+    function fmtRibuan(value) {
+        return (value == null ? 0 : value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Bangun config chart klinis. withNilai=true -> tampilkan 2 dataset (Jumlah + Nilai Rp)
+    function buildConfigKlinis(labelJumlah, series, withNilai) {
+        let datasets = [{
+            label: labelJumlah,
+            data: series.count,
+            backgroundColor: 'rgb(99 174 206)',
+            borderColor: 'rgb(99 174 206)',
+            yAxisID: 'y',
             tension: 0.1
+        }];
+
+        if (withNilai) {
+            datasets.push({
+                label: 'Nilai (Rp)',
+                data: series.nilai,
+                backgroundColor: 'rgb(251 179 66)',
+                borderColor: 'rgb(251 179 66)',
+                yAxisID: 'y1',
+                type: 'line',
+                tension: 0.1
+            });
+        }
+
+        let scales = {
+            x: {
+                ticks: { color: chart_font_color },
+                grid: { color: chart_grid_color }
+            },
+            y: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                title: { display: true, text: 'Jumlah', color: chart_font_color },
+                ticks: {
+                    color: chart_font_color,
+                    callback: function(value) { return fmtRibuan(value); }
+                },
+                grid: { color: chart_grid_color }
+            }
+        };
+
+        if (withNilai) {
+            scales.y1 = {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                title: { display: true, text: 'Nilai (Rp)', color: chart_font_color },
+                ticks: {
+                    color: chart_font_color,
+                    callback: function(value) { return fmtRibuan(value); }
+                },
+                grid: { drawOnChartArea: false }
+            };
+        }
+
+        return {
+            type: 'bar',
+            data: { labels: LABEL_BULAN, datasets: datasets },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { padding: 10, boxWidth: 30, color: chart_font_color }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.dataset.label + ': ' + fmtRibuan(ctx.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: scales
+            }
+        };
+    }
+
+    // Registry chart 12-bulan (bar): id canvas, label, apakah pakai nilai rupiah
+    const KLINIS_META = {
+        pendaftaran: { canvas: 'chart-klinis-pendaftaran', label: 'Jumlah Pendaftaran', withNilai: true },
+        obat:        { canvas: 'chart-klinis-obat',        label: 'Jumlah Obat',        withNilai: true }
+    };
+
+    let klinisCharts = {};
+
+    Object.keys(KLINIS_META).forEach(function(key) {
+        let meta = KLINIS_META[key];
+        let el = document.getElementById(meta.canvas);
+        if (!el) return;
+        let series = (klinisData && klinisData[key]) ? klinisData[key] : { count: [], nilai: [] };
+        klinisCharts[key] = new Chart(el.getContext('2d'), buildConfigKlinis(meta.label, series, meta.withNilai));
+    });
+
+    // ===== SOAP PIE Chart (Subject/Objective/Assessment/Planning) =====
+    const SOAP_LABELS = ['Subject', 'Objective', 'Assessment', 'Planning'];
+    const SOAP_KEYS   = ['subject', 'objective', 'assestment', 'planing'];
+    const SOAP_COLORS = ['rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)', 'rgb(220 92 92)'];
+
+    function soapValues(src) {
+        return SOAP_KEYS.map(function(k) { return (src && src[k]) ? Number(src[k]) : 0; });
+    }
+
+    let soapChart = null;
+    let soapEl = document.getElementById('chart-klinis-soap');
+    if (soapEl) {
+        soapChart = new Chart(soapEl.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: SOAP_LABELS,
+                datasets: [{
+                    data: soapValues(typeof soapBreakdown !== 'undefined' ? soapBreakdown : {}),
+                    backgroundColor: SOAP_COLORS,
+                    borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { padding: 10, boxWidth: 30, color: chart_font_color }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.label + ': ' + fmtRibuan(ctx.parsed);
+                            }
+                        }
+                    }
+                }
+            }
         });
-        num++;
-    });
-
-    let dataChartPenjualan = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-        datasets: dataset_penjualan
-    };
-
-    configChartPenjualan = {
-        type: 'line',
-        data: dataChartPenjualan,
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    fullWidth: false,
-                    labels: {
-                        padding: 10,
-                        boxWidth: 30,
-                        color: chart_font_color
-                    }
-                }
-            },
-
-            tooltips: {
-                callbacks: {
-                    label: function(tooltipItems, data) {
-                        // return data.labels[tooltipItems.index] + ": " + data.datasets[0].data[tooltipItems.index].toLocaleString();
-                        // return "Total : " + data.datasets[0].data[tooltipItems.index].toLocaleString();
-                        return "Total : " + data.datasets[0].data[tooltipItems.index].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: chart_font_color
-                    },
-                    grid: {
-                        color: chart_grid_color
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    ticks: {
-                        color: chart_font_color,
-                        callback: function(value, index, values) {
-                            // return value.toLocaleString();
-                            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                        }
-                    },
-                    grid: {
-                        color: chart_grid_color
-                    }
-                }
-            }
-        }
     }
 
-    // Chart Total Penjualan
-    label_total_penjualan = [];
-    // colors = ['rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)'];
-    colors = [dynamicColors(), dynamicColors(), dynamicColors()];
-    // colors = ['rgb(76 162 199)', 'rgb(250 168 38)', 'rgb(37 176 91)'];
+    // ===== Gauge Pendapatan per Dokter (half-doughnut) =====
+    const GAUGE_COLORS = [
+        'rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)', 'rgb(220 92 92)',
+        'rgb(153 102 255)', 'rgb(255 159 64)', 'rgb(75 192 192)', 'rgb(201 203 207)'
+    ];
+    function gaugeLabels(list) { return (list || []).map(function(r) { return r.nama || '-'; }); }
+    function gaugeData(list) { return (list || []).map(function(r) { return Number(r.total) || 0; }); }
+    function gaugeColors(list) { return (list || []).map(function(_, i) { return GAUGE_COLORS[i % GAUGE_COLORS.length]; }); }
 
-    num = 0;
-    Object.keys(total_penjualan).map(tahun => {
-        label_total_penjualan.push(tahun);
-    });
-
-    let dataChartTotalPenjualan = {
-        labels: label_total_penjualan,
-        datasets: [{
-            data: total_penjualan,
-            backgroundColor: colors,
-            borderWidth: 1
-        }]
-    };
-
-    configChartTotalPenjualan = {
-        type: 'bar',
-        data: dataChartTotalPenjualan,
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            aspectRatio: 1,
-            plugins: {
-                legend: {
-                    display: false,
-                    position: 'top',
-                    fullWidth: false,
-                    labels: {
-                        padding: 10,
-                        boxWidth: 30,
-                        color: chart_font_color
-                    }
-                },
-                display: false,
-                text: '',
-                fontSize: 14,
-                lineHeight: 3
-            },
-            tooltips: {
-                callbacks: {
-                    label: function(tooltipItems, data) {
-                        // return data.labels[tooltipItems.index] + ": " + data.datasets[0].data[tooltipItems.index].toLocaleString();
-                        // return "Total : " + data.datasets[0].data[tooltipItems.index].toLocaleString();
-                        return "Total : " + data.datasets[0].data[tooltipItems.index].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: chart_font_color
-                    },
-                    grid: {
-                        color: chart_grid_color
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    ticks: {
-                        color: chart_font_color,
-                        // stepSize: 500000000,
-                        callback: function(value, index, values) {
-                            // return value.toLocaleString();
-                            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                        }
-                    },
-                    grid: {
-                        color: chart_grid_color
-                    }
-                }
-            }
-        }
-    }
-
-    // Chart Dokter Favorite
-    let dokter_favorite_bg = [];
-    dokter_favorite.map(() => {
-        dokter_favorite_bg.push(dynamicColors());
-    })
-
-    theme_value = $('html').attr('data-bs-theme');
-    border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
-    var configChartDokterFavorite = {
-        type: 'pie',
-        data: {
-            datasets: [{
-                data: dokter_favorite,
-                backgroundColor: dokter_favorite_bg,
-                borderColor: border_color
-            }],
-            labels: dokter_favorite_label
-        },
-        options: {
-            responsive: false,
-            // maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    fullWidth: false,
-                    labels: {
-                        padding: 10,
-                        boxWidth: 30,
-                        color: chart_font_color
-                    }
-                },
-                title: {
-                    display: false,
-                    text: 'Dokter Favorite'
-                }
-            },
-            elements: {
-                arc: {
+    let dokterChart = null;
+    let dokterEl = document.getElementById('chart-klinis-awal');
+    if (dokterEl) {
+        let dokterList = (typeof pendapatanDokter !== 'undefined') ? pendapatanDokter : [];
+        dokterChart = new Chart(dokterEl.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: gaugeLabels(dokterList),
+                datasets: [{
+                    data: gaugeData(dokterList),
+                    backgroundColor: gaugeColors(dokterList),
+                    borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
                     borderWidth: 1
-                }
-            }
-        }
-    };
-
-    data_kategori = JSON.parse(jumlah_item_kategori)
-
-    let background_kategori = [];
-    dokter_favorite.map(() => {
-        background_kategori.push(dynamicColors());
-    })
-
-    const dataChartKategori = {
-        labels: JSON.parse(label_kategori),
-        datasets: [{
-            label: 'Top Kategori',
-            data: data_kategori,
-            backgroundColor: background_kategori,
-            borderColor: border_color,
-            hoverOffset: 4
-        }]
-    };
-
-    const configChartKategori = {
-        type: 'doughnut',
-        data: dataChartKategori,
-        options: {
-            responsive: false,
-            // maintainAspectRatio: false,
-            title: {
-                display: false,
-                text: '',
-                fontSize: 14,
-                lineHeight: 3
+                }]
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    fullWidth: false,
-                    labels: {
-                        padding: 10,
-                        boxWidth: 30,
-                        color: chart_font_color
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                rotation: -90,
+                circumference: 180,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { padding: 10, boxWidth: 20, color: chart_font_color }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) { return ctx.label + ': Rp ' + fmtRibuan(ctx.parsed); }
+                        }
                     }
-                },
-                title: {
-                    display: false,
-                    text: 'Kategori'
-                }
-            },
-            elements: {
-                arc: {
-                    borderWidth: 1
                 }
             }
-        }
-    };
-
-    /* Penjualan perbulan */
-    var barContainer = document.getElementById('bar-container');
-    if (barContainer) {
-        var ctx = barContainer.getContext('2d');
-        chartPenjualan = new Chart(ctx, configChartPenjualan);
+        });
     }
 
-    /* Penjualan total */
-    var chartTotalEl = document.getElementById('chart-total-penjualan');
-    if (chartTotalEl) {
-        var ctx = chartTotalEl.getContext('2d');
-        chartTotalPenjualan = new Chart(ctx, configChartTotalPenjualan);
+    // Ambil ulang data dari server saat filter berubah, lalu update semua chart
+    function reloadKlinis() {
+        let tahun = $('#filter-klinis-tahun').val() || klinisTahunAwal;
+        let cabang = $('#filter-klinis-cabang').val() || '';
+
+        let $wrap = $('#filter-klinis-cabang').parent();
+        let $spinner = $('<div class="spinner-container ms-2" style="display:inline-block">' +
+            '<div class="spinner-border spinner-border-sm"></div></div>').appendTo($wrap);
+
+        $.get(klinisEndpoint + '?jenis=all&tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(resp) {
+            $spinner.remove();
+            let data = typeof resp === 'string' ? JSON.parse(resp) : resp;
+            Object.keys(KLINIS_META).forEach(function(key) {
+                if (!klinisCharts[key] || !data[key]) return;
+                klinisCharts[key].data.datasets[0].data = data[key].count;
+                if (KLINIS_META[key].withNilai && klinisCharts[key].data.datasets[1]) {
+                    klinisCharts[key].data.datasets[1].data = data[key].nilai;
+                }
+                klinisCharts[key].update();
+            });
+            if (soapChart && data.soap) {
+                soapChart.data.datasets[0].data = soapValues(data.soap);
+                soapChart.update();
+            }
+            if (dokterChart && data.awal) {
+                dokterChart.data.labels = gaugeLabels(data.awal);
+                dokterChart.data.datasets[0].data = gaugeData(data.awal);
+                dokterChart.data.datasets[0].backgroundColor = gaugeColors(data.awal);
+                dokterChart.update();
+            }
+        }).fail(function() {
+            $spinner.remove();
+        });
     }
 
-    /* Dokter Favorite */
-    var pieContainer = document.getElementById('pie-container');
-    if (pieContainer) {
-        var ctx = pieContainer.getContext('2d');
-        chartDokterFavorite = new Chart(ctx, configChartDokterFavorite);
-    }
+    $('#filter-klinis-tahun, #filter-klinis-cabang').on('change', reloadKlinis);
 
-    /* Kategori */
-    var chartKategoriEl = document.getElementById('chart-kategori');
-    if (chartKategoriEl) {
-        var ctx = chartKategoriEl.getContext('2d');
-        chartKategori = new Chart(ctx, configChartKategori);
-    }
-
+    // Update warna chart klinis saat ganti tema
     $('body').delegate('.nav-theme-option button', 'click', function() {
         theme_value = $(this).attr('data-theme-value');
         font_color = theme_value == 'dark' ? dark_color : light_color;
         grid_color = theme_value == 'dark' ? grid_color_dark : grid_color_light;
-        border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
 
-        chartPenjualan.options.scales.x.ticks.color = font_color;
-        chartPenjualan.options.scales.y.ticks.color = font_color;
-        chartPenjualan.options.scales.x.grid.color = grid_color;
-        chartPenjualan.options.scales.y.grid.color = grid_color;
-        chartPenjualan.options.plugins.legend.labels.color = font_color;
-        chartPenjualan.update();
-
-        chartTotalPenjualan.options.scales.x.ticks.color = font_color;
-        chartTotalPenjualan.options.scales.y.ticks.color = font_color;
-        chartTotalPenjualan.options.scales.x.grid.color = grid_color;
-        chartTotalPenjualan.options.scales.y.grid.color = grid_color;
-        chartTotalPenjualan.options.plugins.legend.labels.color = font_color;
-        chartTotalPenjualan.update();
-
-        chartDokterFavorite.options.plugins.legend.labels.color = font_color;
-        chartDokterFavorite.data.datasets.map(function(v) {
-            v.borderColor = border_color
-        })
-        chartDokterFavorite.update();
-
-        chartKategori.options.plugins.legend.labels.color = font_color;
-        chartKategori.data.datasets.map(function(v) {
-            v.borderColor = border_color
-        })
-        chartKategori.update();
+        Object.keys(klinisCharts).forEach(function(key) {
+            let c = klinisCharts[key];
+            if (!c) return;
+            if (c.options.scales.x) { c.options.scales.x.ticks.color = font_color; c.options.scales.x.grid.color = grid_color; }
+            if (c.options.scales.y) { c.options.scales.y.ticks.color = font_color; c.options.scales.y.grid.color = grid_color; c.options.scales.y.title.color = font_color; }
+            if (c.options.scales.y1) { c.options.scales.y1.ticks.color = font_color; c.options.scales.y1.title.color = font_color; }
+            c.options.plugins.legend.labels.color = font_color;
+            c.update();
+        });
 
         if (theme_value == 'dark') {
             $('#tindakan-terbesar_wrapper').find('.buttons-html5').removeClass('btn-light');
@@ -434,6 +360,37 @@ $(document).ready(function() {
             '</tr>');
         dataTablesPenjualanTerbesar = $('#tabel-penjualan-terbesar').DataTable(settings);
     })
+
+    // ===== Chart Dokter Favorite (PIE) =====
+    let chartDokterFavorite = null;
+    let configChartDokterFavorite = null;
+    let dokterFavEl = document.getElementById('pie-container');
+    if (dokterFavEl) {
+        let dokterFavBg = (dokter_favorite || []).map(function() { return dynamicColors(); });
+        let borderColorInit = (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light);
+        configChartDokterFavorite = {
+            type: 'pie',
+            data: {
+                labels: dokter_favorite_label,
+                datasets: [{
+                    data: dokter_favorite,
+                    backgroundColor: dokterFavBg,
+                    borderColor: borderColorInit
+                }]
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { padding: 10, boxWidth: 30, color: chart_font_color }
+                    }
+                }
+            }
+        };
+        chartDokterFavorite = new Chart(dokterFavEl.getContext('2d'), configChartDokterFavorite);
+    }
 
     // Update Chart Dokter Favorite
     $('#tahun-item-terjual').change(function() {
