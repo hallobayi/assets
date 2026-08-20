@@ -349,10 +349,10 @@ $(document).ready(function() {
         });
     })
 
-    // Update Kontribusi Penjualan
+    // Update Total Kunjungan Pasien per Layanan (DataTables)
     $('#tahun-barang-terlaris').change(function() {
         $this = $(this);
-        settings.ajax.url = base_url + 'dashboard/getDataDTPenjualanTerbesar?tahun=' + $this.val();
+        settings.ajax.url = base_url + 'dashboard/getDataDTKunjunganPasien?tahun=' + $this.val();
         dataTablesPenjualanTerbesar.destroy();
         len = $('#tabel-penjualan-terbesar').find('thead').find('th').length;
         $('#tabel-penjualan-terbesar').find('tbody').html('<tr>' +
@@ -463,24 +463,22 @@ $(document).ready(function() {
         });
     })
 
-    // Update Kategori Terjual Detail
-    $('#tahun-kategori-terjual-detail').change(function() {
+    // Update Total Kunjungan Pasien per Layanan
+    $('#tahun-kunjungan-pasien').change(function() {
         $this = $(this);
         $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
             '<div class="spinner-border spinner-border-sm"></div>' +
             '</div>').prependTo($this.parent());
 
-        $.get(base_url + 'dashboard/ajaxGetKategoriTerjual?tahun=' + $(this).val(), function(data) {
+        $.get(base_url + 'dashboard/ajaxGetKunjunganPasien?tahun=' + $(this).val(), function(data) {
             $spinner.remove();
             if (data) {
                 data = JSON.parse(data);
                 html = '';
-                data.item_terjual.map(item => {
+                data.map(item => {
                     html += '<tr>' +
-                        '<td><span class="text-warning h5"><i class="fas fa-folder"></i></span></td>' +
-                        '<td>' + item.nama_kategori + '</td>' +
-                        '<td class="text-end">' + item.nilai + '</td>' +
-
+                        '<td>' + item.nama_pasien + '</td>' +
+                        '<td class="text-end">' + item.jml_kunjungan + '</td>' +
                         '</tr>';
                 })
                 $this.parents('.card').eq(0).find('tbody').html(html);
