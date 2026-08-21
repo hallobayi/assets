@@ -19,9 +19,10 @@ Repository untuk mengelola dan mendistribusikan assets statis project Halo Bayi 
 
 Repository ini menyediakan assets statis (JavaScript libraries, CSS frameworks, fonts, images) untuk aplikasi Halo Bayi dengan akses melalui multiple CDN untuk reliability dan performance optimization.
 
-**Version:** 1.2.14
+**Version:** 1.2.16
 
 **Tech Stack:**
+
 - jQuery
 - Bootstrap
 - Font Awesome
@@ -42,6 +43,7 @@ https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?
 ```
 
 **Keunggulan:**
+
 - ✅ Mendukung Content Security Policy (CSP)
 - ✅ Global CDN dengan multiple mirrors
 - ✅ Auto-fallback jika mirror gagal
@@ -62,6 +64,7 @@ https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
 ```
 
 **Keterbatasan:**
+
 - ❌ Tidak mendukung CSP
 - ❌ Akan di-block oleh strict CSP policies
 - ❌ Tidak ada integrity hash support
@@ -76,10 +79,11 @@ https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js
 **Status:** ✅ **CSP SUPPORT**
 
 ```
-https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.14/vendors/jquery/jquery.min.js
+https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.16/vendors/jquery/jquery.min.js
 ```
 
 **Keunggulan:**
+
 - ✅ **CSP Compatible** - Dapat digunakan dalam situs dengan Content Security Policy
 - ✅ **Multi-CDN Architecture** - Menggunakan beberapa CDN untuk ketersediaan dan performa tinggi
 - ✅ **Consistent Domain** - Semua aset di-host melalui domain konsisten yang dapat di-whitelist CSP
@@ -96,6 +100,7 @@ https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.14/vendors/jquery/jquery.mi
 ### Mengapa CSP Penting?
 
 Content Security Policy adalah security header yang melindungi aplikasi dari:
+
 - Cross-Site Scripting (XSS) attacks
 - Code injection attacks
 - Clickjacking
@@ -189,17 +194,20 @@ assets_halobayi/
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <!-- CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/bootstrap/css/bootstrap.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/bootstrap/css/bootstrap.min.css"
+    />
+
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997"></script>
     <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Your content -->
-</body>
+  </body>
 </html>
 ```
 
@@ -208,17 +216,20 @@ assets_halobayi/
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <!-- CSS -->
-    <link rel="stylesheet" href="https://hallobayi.github.io/assets/vendors/bootstrap/css/bootstrap.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://hallobayi.github.io/assets/vendors/bootstrap/css/bootstrap.min.css"
+    />
+
     <!-- JavaScript -->
     <script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"></script>
     <script src="https://hallobayi.github.io/assets/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Your content -->
-</body>
+  </body>
 </html>
 ```
 
@@ -227,20 +238,22 @@ assets_halobayi/
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <!-- Primary: jsDelivr -->
     <script src="https://cdn.jsdelivr.net/gh/hallobayi/assets@1.2.9/vendors/jquery/jquery.min.js?r=1782870997"></script>
-    
+
     <!-- Fallback jika primary gagal -->
     <script>
-        if (typeof jQuery === 'undefined') {
-            document.write('<script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"><\/script>');
-        }
+      if (typeof jQuery === "undefined") {
+        document.write(
+          '<script src="https://hallobayi.github.io/assets/vendors/jquery/jquery.min.js"><\/script>',
+        );
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Your content -->
-</body>
+  </body>
 </html>
 ```
 
@@ -251,6 +264,7 @@ assets_halobayi/
 ### Production Environment
 
 ✅ **Pilihan 1: jsDelivr (Primary)**
+
 - Global CDN dengan multiple mirrors
 - Auto-fallback antar mirrors
 - Aktifkan CSP headers di server
@@ -262,18 +276,20 @@ assets_halobayi/
 ```
 
 ✅ **Pilihan 2: StaticDelivr (Alternative)**
+
 - Multi-CDN architecture untuk high availability
 - Auto-fallback ke server asal jika CDN gagal
 - WordPress integration ready
 - CSP compatible dengan consistent domain
 
 ```html
-<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.14/vendors/jquery/jquery.min.js"></script>
+<script src="https://cdn.staticdelivr.com/gh/hallobayi/assets/1.2.16/vendors/jquery/jquery.min.js"></script>
 ```
 
 ### Development Environment
 
 ✅ **Bisa menggunakan GitHub Pages**
+
 - Lebih cepat untuk testing lokal
 - Tidak perlu konfigurasi CSP (untuk dev)
 - Mudah di-debug
@@ -283,12 +299,14 @@ assets_halobayi/
 ```
 
 ✅ **Atau StaticDelivr untuk testing dengan CSP**
+
 - Test CSP compatibility di development
 - Simulate production behavior
 
 ### Staging Environment
 
 ✅ **Gunakan jsDelivr atau StaticDelivr**
+
 - Test CSP compatibility
 - Validate cache behavior
 - Performance testing
@@ -304,11 +322,11 @@ Project ini menggunakan semantic versioning:
 MAJOR.MINOR.PATCH
 ```
 
-**Current Version:** `1.2.14`
+**Current Version:** `1.2.16`
 
 ### Version History
 
-- `1.2.14` - Current stable version
+- `1.2.16` - Current stable version
 - `1.1.x` - Minor updates & bug fixes
 - `1.x.x` - Feature updates
 
