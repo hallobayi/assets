@@ -100,8 +100,7 @@ $(document).ready(function() {
 
     // Registry chart 12-bulan (bar): id canvas, label, apakah pakai nilai rupiah
     const KLINIS_META = {
-        pendaftaran: { canvas: 'chart-klinis-pendaftaran', label: 'Jumlah Pendaftaran', withNilai: true },
-        obat:        { canvas: 'chart-klinis-obat',        label: 'Jumlah Obat',        withNilai: true }
+        pendaftaran: { canvas: 'chart-klinis-pendaftaran', label: 'Jumlah Pendaftaran', withNilai: true }
     };
 
     let klinisCharts = {};
@@ -251,10 +250,91 @@ $(document).ready(function() {
         });
     }
 
+    // ===== POLAR AREA CHART Total Tindakan per Layanan =====
+    const TINDAKAN_COLORS = [
+        'rgba(99, 174, 206, 0.75)',
+        'rgba(251, 179, 66, 0.75)',
+        'rgba(62, 185, 110, 0.75)',
+        'rgba(220, 92, 92, 0.75)',
+        'rgba(153, 102, 255, 0.75)',
+        'rgba(255, 159, 64, 0.75)',
+        'rgba(75, 192, 192, 0.75)',
+        'rgba(201, 203, 207, 0.75)',
+        'rgba(240, 98, 146, 0.75)',
+        'rgba(77, 182, 172, 0.75)',
+        'rgba(174, 213, 129, 0.75)',
+        'rgba(255, 213, 79, 0.75)'
+    ];
+
+    function tindakanList(src) {
+        return Array.isArray(src) ? src : [];
+    }
+    function tindakanLabels(list) {
+        return list.map(function(r) { return r.nama_tindakan || r.kode_tindakan || '-'; });
+    }
+    function tindakanData(list) {
+        return list.map(function(r) { return Number(r.total) || 0; });
+    }
+    function tindakanColors(list) {
+        return list.map(function(_, i) { return TINDAKAN_COLORS[i % TINDAKAN_COLORS.length]; });
+    }
+
+    let tindakanChart = null;
+    let tindakanEl = document.getElementById('chart-klinis-tindakan');
+    if (tindakanEl) {
+        let tindakanList0 = tindakanList(typeof tindakanItems !== 'undefined' ? tindakanItems : []);
+        tindakanChart = new Chart(tindakanEl.getContext('2d'), {
+            type: 'polarArea',
+            data: {
+                labels: tindakanLabels(tindakanList0),
+                datasets: [{
+                    data: tindakanData(tindakanList0),
+                    backgroundColor: tindakanColors(tindakanList0),
+                    borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        ticks: {
+                            color: chart_font_color,
+                            backdropColor: 'transparent',
+                            precision: 0,
+                            callback: function(value) { return fmtRibuan(value); }
+                        },
+                        grid: {
+                            color: chart_grid_color
+                        },
+                        angleLines: {
+                            color: chart_grid_color
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: { padding: 10, boxWidth: 15, color: chart_font_color }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.label + ': ' + fmtRibuan(ctx.parsed.r !== undefined ? ctx.parsed.r : ctx.raw) + ' tindakan';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // ===== Filter per-kartu (Tahun + Cabang) =====
     // Tiap kartu punya <div class="card-filter" data-filter="<key>"> berisi
     // select #filter-<key>-tahun dan #filter-<key>-cabang.
-    const KLINIS_KEYS = ['pendaftaran', 'soap', 'awal', 'obat'];
+    const KLINIS_KEYS = ['pendaftaran', 'soap', 'awal', 'tindakan', 'obat'];
 
     function filterVal(key, jenis) {
         let $el = $('#filter-' + key + '-' + jenis);
@@ -299,6 +379,17 @@ $(document).ready(function() {
                     dokterChart.data.datasets[0].data = gaugeData(data);
                     dokterChart.data.datasets[0].backgroundColor = gaugeColors(data);
                     dokterChart.update();
+                }
+                return;
+            }
+
+            if (key === 'tindakan' || key === 'obat') {
+                if (tindakanChart) {
+                    let list = tindakanList(data);
+                    tindakanChart.data.labels = tindakanLabels(list);
+                    tindakanChart.data.datasets[0].data = tindakanData(list);
+                    tindakanChart.data.datasets[0].backgroundColor = tindakanColors(list);
+                    tindakanChart.update();
                 }
                 return;
             }
@@ -360,6 +451,19 @@ $(document).ready(function() {
                 ds.borderColor = (theme_value == 'dark' ? border_color_dark : border_color_light);
             });
             icdChart.update();
+        }
+
+        if (tindakanChart) {
+            if (tindakanChart.options.scales && tindakanChart.options.scales.r) {
+                tindakanChart.options.scales.r.ticks.color = font_color;
+                tindakanChart.options.scales.r.grid.color = grid_color;
+                tindakanChart.options.scales.r.angleLines.color = grid_color;
+            }
+            tindakanChart.options.plugins.legend.labels.color = font_color;
+            tindakanChart.data.datasets.forEach(function(ds) {
+                ds.borderColor = (theme_value == 'dark' ? border_color_dark : border_color_light);
+            });
+            tindakanChart.update();
         }
     });
 
