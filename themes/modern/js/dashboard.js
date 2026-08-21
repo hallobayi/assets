@@ -114,48 +114,95 @@ $(document).ready(function() {
         klinisCharts[key] = new Chart(el.getContext('2d'), buildConfigKlinis(meta.label, series, meta.withNilai));
     });
 
-    // ===== SOAP PIE Chart (Subject/Objective/Assessment/Planning) =====
-    const SOAP_LABELS = ['Subject', 'Objective', 'Assessment', 'Planning'];
-    const SOAP_KEYS   = ['subject', 'objective', 'assestment', 'planing'];
-    const SOAP_COLORS = ['rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)', 'rgb(220 92 92)'];
+    /* ===== BAR Diagnosa & Tindakan terbanyak (isi panel Assessment) =====
+       Sumber: rme_soap.json_assestment. Server mengirim peringkat isi inputan:
+       [{label, kode, jenis: 'tindakan'|'diagnosa'|'dokter', total}, ...].
+       Tiap jenis jadi dataset tersendiri (stacked) supaya legend-nya jelas;
+       satu label hanya terisi pada satu dataset. */
+    const ICD_JENIS = [
+        { key: 'tindakan', label: 'Tindakan (ICD 9)',  color: 'rgb(251 179 66)' },
+        { key: 'diagnosa', label: 'Diagnosa (ICD 10)', color: 'rgb(99 174 206)' },
+        { key: 'dokter',   label: 'Diagnosa Dokter',   color: 'rgb(62 185 110)' }
+    ];
 
-    function soapValues(src) {
-        return SOAP_KEYS.map(function(k) { return (src && src[k]) ? Number(src[k]) : 0; });
+    function icdList(src) {
+        return Array.isArray(src) ? src : [];
     }
 
-    let soapChart = null;
-    let soapEl = document.getElementById('chart-klinis-soap');
-    if (soapEl) {
-        soapChart = new Chart(soapEl.getContext('2d'), {
-            type: 'pie',
+    /* Label sumbu dipotong agar tidak menggeser area chart; teks utuh tetap
+       tampil di tooltip lewat icdFullLabels. */
+    function icdShort(item) {
+        let teks = item.label || item.kode || '-';
+        return teks.length > 32 ? teks.substr(0, 31) + '...' : teks;
+    }
+
+    function icdFullLabels(list) {
+        return list.map(function(it) {
+            return (it.kode ? it.kode + ' - ' : '') + (it.label || '-');
+        });
+    }
+
+    function icdDatasets(list) {
+        return ICD_JENIS.map(function(j) {
+            return {
+                label: j.label,
+                data: list.map(function(it) { return it.jenis === j.key ? Number(it.total) || 0 : 0; }),
+                backgroundColor: j.color,
+                borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
+                borderWidth: 1
+            };
+        });
+    }
+
+    let icdChart = null;
+    let icdEl = document.getElementById('chart-klinis-soap');
+    if (icdEl) {
+        let icdList0 = icdList(typeof icdItems !== 'undefined' ? icdItems : []);
+        icdChart = new Chart(icdEl.getContext('2d'), {
+            type: 'bar',
             data: {
-                labels: SOAP_LABELS,
-                datasets: [{
-                    data: soapValues(typeof soapBreakdown !== 'undefined' ? soapBreakdown : {}),
-                    backgroundColor: SOAP_COLORS,
-                    borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
-                    borderWidth: 1
-                }]
+                labels: icdList0.map(icdShort),
+                datasets: icdDatasets(icdList0)
             },
             options: {
+                indexAxis: 'y',
                 responsive: false,
                 maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { precision: 0, color: chart_font_color },
+                        grid: { color: chart_grid_color }
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: { color: chart_font_color },
+                        grid: { color: chart_grid_color }
+                    }
+                },
                 plugins: {
                     legend: {
                         display: true,
                         position: 'bottom',
-                        labels: { padding: 10, boxWidth: 30, color: chart_font_color }
+                        labels: { padding: 10, boxWidth: 20, color: chart_font_color }
                     },
                     tooltip: {
                         callbacks: {
+                            title: function(ctx) {
+                                let full = icdChart ? (icdChart.fullLabels || []) : [];
+                                return full[ctx[0].dataIndex] || ctx[0].label;
+                            },
                             label: function(ctx) {
-                                return ctx.label + ': ' + fmtRibuan(ctx.parsed);
+                                return ctx.dataset.label + ': ' + fmtRibuan(ctx.parsed.x);
                             }
-                        }
+                        },
+                        filter: function(ctx) { return ctx.parsed.x > 0; }
                     }
                 }
             }
         });
+        icdChart.fullLabels = icdFullLabels(icdList0);
     }
 
     // ===== Gauge Pendapatan per Dokter (half-doughnut) =====
@@ -236,9 +283,12 @@ $(document).ready(function() {
             if (!data) return;
 
             if (key === 'soap') {
-                if (soapChart) {
-                    soapChart.data.datasets[0].data = soapValues(data);
-                    soapChart.update();
+                if (icdChart) {
+                    let list = icdList(data);
+                    icdChart.data.labels = list.map(icdShort);
+                    icdChart.data.datasets = icdDatasets(list);
+                    icdChart.fullLabels = icdFullLabels(list);
+                    icdChart.update();
                 }
                 return;
             }
@@ -277,6 +327,10 @@ $(document).ready(function() {
             reloadDokterFavorite();
         } else if (key === 'pasien-terbaru') {
             reloadPasienTerbaru();
+        } else if (key === 'datang-kembali') {
+            reloadDatangKembali();
+        } else if (key === 'rencana-bulan') {
+            reloadRencanaBulan();
         }
     });
 
@@ -296,10 +350,16 @@ $(document).ready(function() {
             c.update();
         });
 
-        if (theme_value == 'dark') {
-            $('#tindakan-terbesar_wrapper').find('.buttons-html5').removeClass('btn-light');
-        } else {
-            $('#tindakan-terbesar_wrapper').find('.buttons-html5').addClass('btn-light');
+        if (icdChart) {
+            icdChart.options.scales.x.ticks.color = font_color;
+            icdChart.options.scales.x.grid.color = grid_color;
+            icdChart.options.scales.y.ticks.color = font_color;
+            icdChart.options.scales.y.grid.color = grid_color;
+            icdChart.options.plugins.legend.labels.color = font_color;
+            icdChart.data.datasets.forEach(function(ds) {
+                ds.borderColor = (theme_value == 'dark' ? border_color_dark : border_color_light);
+            });
+            icdChart.update();
         }
     });
 
@@ -470,43 +530,6 @@ $(document).ready(function() {
         });
     }
 
-    // Update Kategori Terjual
-    $('#tahun-kategori-terjual').change(function() {
-        $this = $(this);
-        $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
-            '<div class="spinner-border spinner-border-sm"></div>' +
-            '</div>').prependTo($this.parent());
-
-        $.get(base_url + 'dashboard/ajaxGetKategoriTerjual?tahun=' + $(this).val(), function(data) {
-            $spinner.remove();
-            if (data) {
-                data = JSON.parse(data);
-                data_kategori = data.total;
-                data_kategori_label = data.nama_kategori;
-
-                randomBackground = [];
-                data_kategori.map(() => {
-                    randomBackground.push(dynamicColors());
-                })
-
-                theme_value = $('html').attr('data-bs-theme');
-                border_color = theme_value == 'dark' ? border_color_dark : border_color_light;
-                configChartKategori.data = {
-                    labels: data_kategori_label,
-                    datasets: [{
-                        label: 'Top Kategori',
-                        data: data_kategori,
-                        backgroundColor: randomBackground,
-                        hoverOffset: 4,
-                        borderColor: border_color
-                    }]
-                }
-
-                chartKategori.update();
-            }
-        });
-    })
-
     // Update Total Kunjungan Pasien per Layanan
     $('#tahun-kunjungan-pasien').change(function() {
         $this = $(this);
@@ -530,151 +553,6 @@ $(document).ready(function() {
         });
     })
 
-    // Update Penjualan Terbaru
-    $('#tahun-tindakan-terbesar').change(function() {
-
-        $this = $(this);
-        $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
-            '<div class="spinner-border spinner-border-sm"></div>' +
-            '</div>').prependTo($this.parent());
-
-        if (dataTablesPenjualanTerbaru) {
-            dataTablesPenjualanTerbaru.destroy();
-        }
-
-        $tbody = $this.parents('.card').eq(0).find('tbody');
-        len = $this.parents('.card').eq(0).find('th').length;
-        html = '<tr><td colspan="' + len + '">Loading data...</td></tr>';
-        $tbody.html(html);
-
-        $.get(base_url + 'dashboard/ajaxGetTindakanTerbesar?tahun=' + $(this).val(), function(data) {
-            $spinner.remove();
-            if (data) {
-                data = JSON.parse(data);
-                html = '';
-                data.map((item, index) => {
-                    html += '<tr>' +
-                        '<td>' + (index + 1) + '</td>' +
-                        '<td>' + item.nama_pasien + '</td>' +
-                        '<td class="text-end">' + item.jml_barang + '</td>' +
-                        '<td class="text-end">' + item.total_harga + '</td>' +
-                        '<td>' + item.tgl_transaksi + '</td>' +
-                        '<td><span class="badge rounded-pill bg-success">' + item.status + '</span></td>' +
-                        '</tr>';
-                })
-
-                $tbody.html(html);
-                initDataTablesTindakanTerbesar();
-            }
-        });
-    })
-
-    // Update Pelanggan Terbesar
-    $('#tahun-pelanggan-terbesar').change(function() {
-
-        $this = $(this);
-        $spinner = $('<div class="spinner-container me-2" style="margin:auto">' +
-            '<div class="spinner-border spinner-border-sm"></div>' +
-            '</div>').prependTo($this.parent());
-
-        $.get(base_url + 'dashboard/ajaxGetPelangganTerbesar?tahun=' + $(this).val(), function(data) {
-            $spinner.remove();
-            if (data) {
-                data = JSON.parse(data);
-                html = '';
-                data.map(item => {
-                    html += '<tr>' +
-                        '<td>' + item.foto + '</td>' +
-                        '<td>' + item.nama_pelanggan + '</td>' +
-                        '<td class="text-end">' + item.total_harga + '</td>' +
-                        '</tr>';
-                })
-
-                $this.parents('.card').eq(0).find('tbody').html(html);
-            }
-        });
-    })
-
-    let dataTablesPenjualanTerbaru = '';
-
-    function initDataTablesTindakanTerbesar() {
-        let settings = {
-            "order": [4, "desc"],
-            "columnDefs": [{
-                "targets": [0],
-                "orderable": false
-            }],
-            pageLength: 5,
-            lengthChange: false
-        };
-
-        const addSettings = {
-            // "dom":"Bfrtip",
-            "buttons": [{
-                    "extend": "copy",
-                    "text": "<i class='far fa-copy'></i> Copy",
-                    "className": "btn-light me-1"
-                },
-                {
-                    "extend": "excel",
-                    "title": "Data Tindakan Terbesar",
-                    "text": "<i class='far fa-file-excel'></i> Excel",
-                    "exportOptions": {
-                        columns: [0, 1, 2, 3, 4],
-                        modifier: {
-                            selected: null
-                        }
-                    },
-                    "className": "btn-light me-1"
-                },
-                {
-                    "extend": "pdf",
-                    "title": "Data Tindakan Terbesar",
-                    "text": "<i class='far fa-file-pdf'></i> PDF",
-                    "exportOptions": {
-                        columns: [0, 1, 2, 3, 4],
-                        modifier: {
-                            selected: null
-                        }
-                    },
-                    "className": "btn-light me-1"
-                }
-            ]
-        }
-
-        // Merge settings
-        // settings['lengthChange'] = false;
-        settings = {
-            ...settings,
-            ...addSettings
-        };
-
-        // settings['buttons'] = [ 'copy', 'excel', 'pdf', 'colvis' ];
-        dataTablesPenjualanTerbaru = $('#tindakan-terbesar').DataTable(settings);
-        dataTablesPenjualanTerbaru.buttons().container()
-            .appendTo('#tindakan-terbesar_wrapper .col-md-6:eq(0)');
-
-        $('#tindakan-terbesar_wrapper').find('.row').eq(1).css('overflow', 'auto');
-
-        if (cookie_jwd_adm_theme == 'dark') {
-            $('#tindakan-terbesar_wrapper').find('.buttons-html5').removeClass('btn-light');
-        } else {
-            $('#tindakan-terbesar_wrapper').find('.buttons-html5').addClass('btn-light');
-        }
-
-        // No urut
-        dataTablesPenjualanTerbaru.on('order.dt search.dt', function() {
-            dataTablesPenjualanTerbaru.column(0, {
-                search: 'applied',
-                order: 'applied'
-            }).nodes().each(function(cell, i) {
-                cell.innerHTML = i + 1;
-            });
-        }).draw();
-    }
-
-    $('#tahun-tindakan-terbesar').trigger('change');
-
     // Update Pasien Terbaru sesuai filter kartu
     let pasienDt = null;
 
@@ -697,6 +575,205 @@ $(document).ready(function() {
         }).fail(function() {
             $spinner.remove();
         });
+    }
+
+    /* ===== DOUGHNUT Sebaran Rencana Kembali =====
+       Sumber sama dengan tabel Tgl. Datang Kembali (rme_soap.json_plan),
+       dikelompokkan per bulan tgl_datang_kembali: [{periode,label,total}, ...]. */
+    const RENCANA_COLORS = [
+        'rgb(99 174 206)', 'rgb(251 179 66)', 'rgb(62 185 110)', 'rgb(220 92 92)',
+        'rgb(153 102 255)', 'rgb(255 159 64)', 'rgb(75 192 192)', 'rgb(201 203 207)',
+        'rgb(120 144 224)', 'rgb(233 129 179)', 'rgb(158 199 92)', 'rgb(240 210 90)'
+    ];
+
+    function rencanaList(src) {
+        return Array.isArray(src) ? src : [];
+    }
+    function rencanaLabels(list) { return list.map(function(r) { return r.label || '-'; }); }
+    function rencanaData(list) { return list.map(function(r) { return Number(r.total) || 0; }); }
+    function rencanaColors(list) {
+        return list.map(function(_, i) { return RENCANA_COLORS[i % RENCANA_COLORS.length]; });
+    }
+
+    /* Irisan yang sedang ditampilkan doughnut; dipakai saat irisan diklik agar
+       tahu periode mana yang harus diambil detailnya. */
+    let rencanaItems = [];
+
+    // Klik satu irisan -> tampilkan daftar tanggal + pasien pada periode tsb.
+    function tampilkanDetailRencana(item) {
+        if (!item) return;
+
+        let tahun = filterVal('rencana-bulan', 'tahun') || klinisTahunAwal;
+        let cabang = filterVal('rencana-bulan', 'cabang');
+        let $dialog = bootbox.dialog({
+            title: 'Rencana Datang Kembali - ' + escHtml(item.label),
+            message: '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>',
+            size: 'large',
+            buttons: {
+                cancel: { label: 'Tutup', className: 'btn-secondary' }
+            }
+        });
+
+        $.get(base_url + 'dashboard/ajaxGetDatangKembali?jenis=periode'
+            + '&periode=' + encodeURIComponent(item.periode)
+            + '&tahun=' + encodeURIComponent(tahun)
+            + '&cabang=' + encodeURIComponent(cabang), function(data) {
+
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+            let list = rencanaList(data);
+            let html = '';
+
+            if (!list.length) {
+                html = '<div class="alert alert-warning mb-0">Data tidak ditemukan</div>';
+            } else {
+                html = '<div class="table-responsive"><table class="table table-sm table-hover mb-0">' +
+                    '<thead><tr><th>No</th><th>Tgl. Kembali</th><th>Nama Pasien</th>' +
+                    '<th>No. RM</th><th>No. Reg</th></tr></thead><tbody>';
+                list.map(function(r, i) {
+                    html += '<tr>' +
+                        '<td>' + (i + 1) + '</td>' +
+                        '<td>' + escHtml(r.tgl_kembali_label) + '</td>' +
+                        '<td>' + escHtml(r.nama_pasien) + '</td>' +
+                        '<td>' + escHtml(r.nomor_rm) + '</td>' +
+                        '<td>' + escHtml(r.no_reg) + '</td>' +
+                        '</tr>';
+                });
+                html += '</tbody></table></div>' +
+                    '<p class="text-muted mt-2 mb-0">Total ' + fmtRibuan(list.length) + ' rencana kontrol.</p>';
+            }
+
+            $dialog.find('.bootbox-body').html(html);
+        }).fail(function() {
+            $dialog.find('.bootbox-body')
+                .html('<div class="alert alert-danger mb-0">Gagal mengambil data</div>');
+        });
+    }
+
+    let rencanaChart = null;
+    let rencanaEl = document.getElementById('chart-rencana-bulan');
+    if (rencanaEl) {
+        rencanaItems = rencanaList(typeof rencanaBulan !== 'undefined' ? rencanaBulan : []);
+        rencanaChart = new Chart(rencanaEl.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: rencanaLabels(rencanaItems),
+                datasets: [{
+                    data: rencanaData(rencanaItems),
+                    backgroundColor: rencanaColors(rencanaItems),
+                    borderColor: (cookie_jwd_adm_theme == 'dark' ? border_color_dark : border_color_light),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                onClick: function(evt, elements) {
+                    if (!elements.length) return;
+                    tampilkanDetailRencana(rencanaItems[elements[0].index]);
+                },
+                onHover: function(evt, elements) {
+                    if (!evt.native || !evt.native.target) return;
+                    evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { padding: 8, boxWidth: 16, color: chart_font_color }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                let total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                let persen = total ? Math.round(ctx.parsed / total * 100) : 0;
+                                return ctx.label + ': ' + fmtRibuan(ctx.parsed) + ' (' + persen + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function reloadRencanaBulan() {
+        if (!rencanaChart) return;
+
+        let tahun = filterVal('rencana-bulan', 'tahun') || klinisTahunAwal;
+        let cabang = filterVal('rencana-bulan', 'cabang');
+        let $spinner = filterSpinner('rencana-bulan');
+
+        $.get(base_url + 'dashboard/ajaxGetDatangKembali?jenis=bulan&tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(data) {
+            $spinner.remove();
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+
+            rencanaItems = rencanaList(data);
+            rencanaChart.data.labels = rencanaLabels(rencanaItems);
+            rencanaChart.data.datasets[0].data = rencanaData(rencanaItems);
+            rencanaChart.data.datasets[0].backgroundColor = rencanaColors(rencanaItems);
+            rencanaChart.update();
+        }).fail(function() {
+            $spinner.remove();
+        });
+    }
+
+    /* ===== DataTables Tgl. Datang Kembali =====
+       Isi tabel: rencana kontrol dari rme_soap.json_plan (plan|tgl_datang_kembali).
+       Tanggal tampil dd-mm-yyyy, jadi urutannya perlu tipe sendiri supaya tidak
+       diurutkan sebagai teks biasa. */
+    $.fn.dataTable.ext.type.order['tgl-id-pre'] = function(d) {
+        let m = String(d).match(/^(\d{2})-(\d{2})-(\d{4})$/);
+        return m ? Number(m[3] + m[2] + m[1]) : 0;
+    };
+
+    let datangDt = null;
+
+    function reloadDatangKembali() {
+        if (!datangDt) return;
+
+        let tahun = filterVal('datang-kembali', 'tahun') || klinisTahunAwal;
+        let cabang = filterVal('datang-kembali', 'cabang');
+        let $spinner = filterSpinner('datang-kembali');
+
+        $.get(base_url + 'dashboard/ajaxGetDatangKembali?tahun=' + encodeURIComponent(tahun) + '&cabang=' + encodeURIComponent(cabang), function(data) {
+            $spinner.remove();
+            data = typeof data === 'string' ? JSON.parse(data) : data;
+
+            datangDt.clear();
+            (data || []).map(item => {
+                datangDt.row.add(['', escHtml(item.nama_pasien), escHtml(item.nomor_rm), escHtml(item.tgl_kembali_label)]);
+            })
+            datangDt.draw();
+        }).fail(function() {
+            $spinner.remove();
+        });
+    }
+
+    if ($('#tabel-datang-kembali').length) {
+        datangDt = $('#tabel-datang-kembali').DataTable({
+            "order": [],
+            "columnDefs": [
+                { "targets": [0], "orderable": false },
+                { "targets": [3], "type": "tgl-id" }
+            ],
+            pageLength: 5,
+            lengthChange: false,
+            searching: true,
+            info: false,
+            language: {
+                search: '',
+                searchPlaceholder: 'Cari pasien...',
+                emptyTable: 'Belum ada rencana datang kembali',
+                zeroRecords: 'Data tidak ditemukan',
+                paginate: { previous: '&laquo;', next: '&raquo;' }
+            }
+        });
+        // Nomor urut kolom pertama
+        datangDt.on('order.dt search.dt', function() {
+            datangDt.column(0, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
     }
 
     // ===== DataTables Pasien Terbaru =====
