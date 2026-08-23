@@ -936,8 +936,10 @@ $(document).ready(function () {
     });
 
     $.get(
-      base_url +
-        "dashboard/ajaxGetDatangKembali?jenis=periode" +
+      (typeof rencanaDatangEndpoint !== "undefined"
+        ? rencanaDatangEndpoint
+        : base_url + "dashboard/ajaxGetRencanaDatang") +
+        "?jenis=periode" +
         "&periode=" +
         encodeURIComponent(item.periode) +
         "&tahun=" +
@@ -1079,8 +1081,10 @@ $(document).ready(function () {
     let $spinner = filterSpinner("rencana-bulan");
 
     $.get(
-      base_url +
-        "dashboard/ajaxGetDatangKembali?jenis=bulan&tahun=" +
+      (typeof rencanaDatangEndpoint !== "undefined"
+        ? rencanaDatangEndpoint
+        : base_url + "dashboard/ajaxGetRencanaDatang") +
+        "?jenis=bulan&tahun=" +
         encodeURIComponent(tahun) +
         "&cabang=" +
         encodeURIComponent(cabang),
@@ -1119,8 +1123,10 @@ $(document).ready(function () {
     let $spinner = filterSpinner("datang-kembali");
 
     $.get(
-      base_url +
-        "dashboard/ajaxGetDatangKembali?tahun=" +
+      (typeof rencanaDatangEndpoint !== "undefined"
+        ? rencanaDatangEndpoint
+        : base_url + "dashboard/ajaxGetRencanaDatang") +
+        "?tahun=" +
         encodeURIComponent(tahun) +
         "&cabang=" +
         encodeURIComponent(cabang),
