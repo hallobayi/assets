@@ -1104,82 +1104,115 @@ $(document).ready(function () {
     });
   }
 
-  /* ===== DataTables Tgl. Datang Kembali =====
-       Isi tabel: rencana kontrol dari rme_soap.json_plan (plan|tgl_datang_kembali).
-       Tanggal tampil dd-mm-yyyy, jadi urutannya perlu tipe sendiri supaya tidak
-       diurutkan sebagai teks biasa. */
+  // ===== DataTables Rencana Datang Kembali (server-side AJAX) =====
   $.fn.dataTable.ext.type.order["tgl-id-pre"] = function (d) {
     let m = String(d).match(/^(\d{2})-(\d{2})-(\d{4})$/);
     return m ? Number(m[3] + m[2] + m[1]) : 0;
   };
 
   let datangDt = null;
-
-  function reloadDatangKembali() {
-    if (!datangDt) return;
-
-    let tahun = filterVal("datang-kembali", "tahun") || klinisTahunAwal;
-    let cabang = filterVal("datang-kembali", "cabang");
-    let $spinner = filterSpinner("datang-kembali");
-
-    $.get(
-      (typeof rencanaDatangEndpoint !== "undefined"
-        ? rencanaDatangEndpoint
-        : base_url + "dashboard/ajaxGetRencanaDatang") +
-        "?tahun=" +
-        encodeURIComponent(tahun) +
-        "&cabang=" +
-        encodeURIComponent(cabang),
-      function (data) {
-        $spinner.remove();
-        data = typeof data === "string" ? JSON.parse(data) : data;
-
-        datangDt.clear();
-        (data || []).map((item) => {
-          datangDt.row.add([
-            "",
-            escHtml(item.nama_pasien),
-            escHtml(item.nomor_rm),
-            escHtml(item.tgl_kembali_label),
-          ]);
-        });
-        datangDt.draw();
-      },
-    ).fail(function () {
-      $spinner.remove();
-    });
-  }
+  let datangDtSettings = null;
 
   if ($("#tabel-datang-kembali").length) {
-    datangDt = $("#tabel-datang-kembali").DataTable({
-      order: [],
-      columnDefs: [
-        { targets: [0], orderable: false },
-        { targets: [3], type: "tgl-id" },
-      ],
+    let datangColumn  = $.parseJSON($("#datang-kembali-column").html());
+    let datangUrl     = $("#datang-kembali-url").text();
+    let datangAddSetting = $("#datang-kembali-setting").length
+      ? $.parseJSON($("#datang-kembali-setting").html())
+      : {};
+
+    datangDtSettings = {
+      processing: true,
+      serverSide: true,
+      scrollX: true,
       pageLength: 5,
       lengthChange: false,
       searching: true,
-      info: false,
       language: {
         search: "",
         searchPlaceholder: "Cari pasien...",
         emptyTable: "Belum ada rencana datang kembali",
         zeroRecords: "Data tidak ditemukan",
         paginate: { previous: "&laquo;", next: "&raquo;" },
+        processing: "Memuat data...",
       },
-    });
-    // Nomor urut kolom pertama
-    datangDt
-      .on("order.dt search.dt", function () {
-        datangDt
+      ajax: {
+        url: datangUrl,
+        type: "POST",
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
+        },
+        data: function (d) {
+          // CSRF dikirim via header, tidak perlu di body
+        },
+        xhr: function () {
+          var xhr = $.ajaxSettings.xhr();
+          xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+              var newToken = this.getResponseHeader("X-CSRF-TOKEN");
+              if (newToken) {
+                tokenHash = newToken;
+                $("input[name=csrf_test_name]").val(tokenHash);
+              }
+            }
+          });
+          return xhr;
+        },
+        dataSrc: function (json) {
+          if (json.csrf && json.csrf.value) {
+            tokenHash = json.csrf.value;
+            $("input[name=csrf_test_name]").val(tokenHash);
+          }
+          return json.data;
+        },
+      },
+      columns: datangColumn,
+      drawCallback: function () {
+        // Nomor urut otomatis
+        let api = this.api();
+        let start = api.page.info().start;
+        api
           .column(0, { search: "applied", order: "applied" })
           .nodes()
           .each(function (cell, i) {
-            cell.innerHTML = i + 1;
+            cell.innerHTML = start + i + 1;
           });
-      })
-      .draw();
+      },
+    };
+
+    // Gabung setting tambahan dari span (order, columnDefs, dll.)
+    for (let k in datangAddSetting) {
+      datangDtSettings[k] = datangAddSetting[k];
+    }
+
+    datangDt = $("#tabel-datang-kembali").DataTable(datangDtSettings);
+  }
+
+  function reloadDatangKembali() {
+    if (!datangDt) return;
+
+    let tahun  = filterVal("datang-kembali", "tahun") || klinisTahunAwal;
+    let cabang = filterVal("datang-kembali", "cabang");
+
+    let newUrl =
+      (typeof datangKembaliDtEndpoint !== "undefined"
+        ? datangKembaliDtEndpoint
+        : base_url + "dashboard/getDataDTDatangKembali") +
+      "?tahun=" +
+      encodeURIComponent(tahun) +
+      "&cabang=" +
+      encodeURIComponent(cabang);
+
+    datangDtSettings.ajax.url = newUrl;
+    datangDt.destroy();
+    let len = $("#tabel-datang-kembali").find("thead").find("th").length;
+    $("#tabel-datang-kembali")
+      .find("tbody")
+      .html(
+        "<tr>" +
+          '<td colspan="' + len + '" class="text-center">Loading data...</td>' +
+          "</tr>",
+      );
+    datangDt = $("#tabel-datang-kembali").DataTable(datangDtSettings);
   }
 
   // ===== DataTables Pasien Terbaru =====
