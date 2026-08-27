@@ -6,8 +6,8 @@
 
 jQuery(document).ready(function() {
 
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
     if ($('.select2').length > 0 ) {
 		$(".select2").select2({
@@ -28,7 +28,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -36,7 +36,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof column === 'object') ? column : '',
         "initComplete": function(settings, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -45,17 +45,17 @@ jQuery(document).ready(function() {
             });
         },
         "fnRowCallback": function(nRow, aoData) {
-            // if (aoData[11] === '~~TIDAK TERSEDIA~~') {
-            //     $(nRow).css('color', '#0072c6').css("font-weight", "Bold");
-            // } else {
-            //     $('td', nRow).eq(11).text(aoData[11], nRow).css('color', '#0072c6').css("font-weight", "Bold");
-            // }
+            /* if (aoData[11] === '~~TIDAK TERSEDIA~~') {*/
+            /*     $(nRow).css('color', '#0072c6').css("font-weight", "Bold");*/
+            /* } else {*/
+            /*     $('td', nRow).eq(11).text(aoData[11], nRow).css('color', '#0072c6').css("font-weight", "Bold");*/
+            /* }*/
 
-            // // if (aoData[12] === '~~TIDAK TERSEDIA~~') {
-            // //     $(nRow).css('color', '#da8d5e').css("font-weight", "Bold");
-            // // } else {
-            // //     $('td', nRow).eq(12).text(aoData[12], nRow).css('color', '#da8d5e').css("font-weight", "Bold");
-            // // }
+            /* // if (aoData[12] === '~~TIDAK TERSEDIA~~') {*/
+            /* //     $(nRow).css('color', '#da8d5e').css("font-weight", "Bold");*/
+            /* // } else {*/
+            /* //     $('td', nRow).eq(12).text(aoData[12], nRow).css('color', '#da8d5e').css("font-weight", "Bold");*/
+            /* // }*/
         }
     }
 
@@ -70,7 +70,7 @@ jQuery(document).ready(function() {
     const table = $('#table-result').DataTable(settings);
     table.columns.adjust().draw()
 
-    // Add Anak
+    /* Add Anak*/
     $('#add-row').on('click', function(){
 		$source = $(this).parent().parent();
 		$container = $source.parent();
@@ -78,7 +78,7 @@ jQuery(document).ready(function() {
 		$clone.find('input').val('');
 		$clone.find('a').removeAttr('class').addClass('btn btn-danger delete-row').removeAttr('id').find('i').removeAttr('class').addClass('fas fa-times');
 		
-		// Find DIV row before submit and text muted
+		/* Find DIV row before submit and text muted*/
 		index = $container.children().length - 1 - 1;
 		console.log(index);
 		$last = $container.children().eq(index);

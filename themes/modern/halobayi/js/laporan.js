@@ -10,16 +10,16 @@ jQuery(document).ready(function () {
 
   $(document).ready(function () {
 
-    // Format: XLS
-    // $("#btnExport").click(function () {
-    //     $("#tblExport").btechco_excelexport({
-    //         containerid: "tblExport"
-    //     , datatype: $datatype.Table
-    //     });
-    // });
+    /* Format: XLS*/
+    /* $("#btnExport").click(function () {*/
+    /*     $("#tblExport").btechco_excelexport({*/
+    /*         containerid: "tblExport"*/
+    /*     , datatype: $datatype.Table*/
+    /*     });*/
+    /* });*/
 
-    // Format: XLSX
-    // Source: https://github.com/hhurz/tableExport.jquery.plugin.git
+    /* Format: XLSX*/
+    /* Source: https://github.com/hhurz/tableExport.jquery.plugin.git*/
     var namaFile = 'file-laporan-absensi';
     $("#btnExport").click(function () {
       $('#tblExport').tableExport({

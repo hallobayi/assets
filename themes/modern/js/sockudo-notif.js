@@ -30,18 +30,18 @@
 
     if (window.__sockudoNotifStarted) return;
     var cfg = window.SOCKUDO;
-    if (!cfg || !cfg.key || !cfg.wsHost) return; // Belum dikonfigurasi -> diam.
+    if (!cfg || !cfg.key || !cfg.wsHost) return; /* Belum dikonfigurasi -> diam.*/
 
-    // Normalisasi daftar topics. Dukung juga format lama (channel/event tunggal).
+    /* Normalisasi daftar topics. Dukung juga format lama (channel/event tunggal).*/
     var topics = Array.isArray(cfg.topics) ? cfg.topics.slice() : [];
     if (!topics.length && cfg.channel && cfg.event) {
         topics.push({ channel: cfg.channel, event: cfg.event });
     }
-    if (!topics.length) return; // Tidak ada yang perlu didengarkan.
+    if (!topics.length) return; /* Tidak ada yang perlu didengarkan.*/
 
     window.__sockudoNotifStarted = true;
 
-    // Index: event -> topic, dan daftar channel unik untuk di-subscribe.
+    /* Index: event -> topic, dan daftar channel unik untuk di-subscribe.*/
     var topicByEvent = {};
     var channels = {};
     topics.forEach(function (t) {
@@ -56,12 +56,12 @@
         '/app/' + cfg.key + '?protocol=7&client=js&version=8.4.0&flavour=web';
 
     var ws = null;
-    var reconnectDelay = 2000;      // mulai 2 detik
-    var reconnectMax = 30000;       // maksimal 30 detik
+    var reconnectDelay = 2000;      /* mulai 2 detik*/
+    var reconnectMax = 30000;       /* maksimal 30 detik*/
     var activityTimer = null;
 
-    // Broadcast status koneksi realtime supaya UI (mis. badge di dashboard)
-    // bisa menampilkannya. State: connecting | connected | disconnected.
+    /* Broadcast status koneksi realtime supaya UI (mis. badge di dashboard)*/
+    /* bisa menampilkannya. State: connecting | connected | disconnected.*/
     function setStatus(state) {
         window.SOCKUDO_STATE = state;
         try {
@@ -80,7 +80,7 @@
         }
 
         ws.onopen = function () {
-            reconnectDelay = 2000; // reset backoff
+            reconnectDelay = 2000; /* reset backoff*/
         };
 
         ws.onmessage = function (msg) {
@@ -91,7 +91,7 @@
                 return;
             }
 
-            // data pada protokol Pusher berupa STRING JSON -> parse lagi.
+            /* data pada protokol Pusher berupa STRING JSON -> parse lagi.*/
             var data = payload.data;
             if (typeof data === 'string') {
                 try { data = JSON.parse(data); } catch (e) { /* biarkan string */ }
@@ -142,7 +142,7 @@
         });
     }
 
-    // Kirim ping berkala supaya koneksi tidak di-drop server.
+    /* Kirim ping berkala supaya koneksi tidak di-drop server.*/
     function keepAlive(established) {
         var interval = 25000;
         if (established && established.activity_timeout) {
@@ -160,11 +160,11 @@
         reconnectDelay = Math.min(reconnectMax, reconnectDelay * 1.5);
     }
 
-    // ---- Tampilan notifikasi -------------------------------------------------
+    /* ---- Tampilan notifikasi -------------------------------------------------*/
 
     function handleNotif(topic, d) {
         var judul = topic.title || 'Notifikasi';
-        // Judul lebih spesifik bila ada nama pasien.
+        /* Judul lebih spesifik bila ada nama pasien.*/
         if (d.nama_pasien) {
             judul = (topic.title || 'Notifikasi') + ': ' + d.nama_pasien;
         }
@@ -190,13 +190,13 @@
             console.log('[notif] ' + judul + ' — ' + pesan);
         }
 
-        // Event kustom per-topik agar halaman lain bisa bereaksi.
+        /* Event kustom per-topik agar halaman lain bisa bereaksi.*/
         try {
             document.dispatchEvent(new CustomEvent('sockudo:' + topic.event, { detail: d }));
         } catch (e) {}
     }
 
-    // Susun baris pesan dari field yang tersedia (fleksibel untuk topik apa pun).
+    /* Susun baris pesan dari field yang tersedia (fleksibel untuk topik apa pun).*/
     function buildMessage(d) {
         var parts = [];
         if (d.nama_layanan) parts.push(d.nama_layanan);
@@ -208,7 +208,7 @@
         return parts.join(' ');
     }
 
-    // Bunyi bip singkat via Web Audio (tanpa file audio).
+    /* Bunyi bip singkat via Web Audio (tanpa file audio).*/
     function beep() {
         try {
             var Ctx = window.AudioContext || window.webkitAudioContext;

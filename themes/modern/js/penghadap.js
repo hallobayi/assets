@@ -6,7 +6,7 @@ jQuery(document).ready(function () {
 		$clone.find('input').val('');
 		$clone.find('a').removeAttr('class').addClass('btn btn-danger delete-row').removeAttr('id').find('i').removeAttr('class').addClass('fas fa-times');
 		
-		// Find DIV row before submit and text muted
+		/* Find DIV row before submit and text muted*/
 		index = $container.children().length - 2 - 1;
 		console.log(index);
 		$last = $container.children().eq(index);

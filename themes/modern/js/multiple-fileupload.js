@@ -16,7 +16,7 @@ jQuery(document).ready(function () {
 		$clone.find('.upload-file-thumb').hide();
 		$clone.children().eq(0).show();
 		
-		// Find DIV row before submit and text muted
+		/* Find DIV row before submit and text muted*/
 		index = $container.children().length - 1;
 		console.log(index);
 		$last = $container.children().eq(index);
@@ -36,12 +36,12 @@ jQuery(document).ready(function () {
 
 		var reader = new FileReader();
 
-		// Closure to capture the file information.
+		/* Closure to capture the file information.*/
 		var $upload_img = $this.parent().children('.upload-file-thumb');
 		
 		reader.onload = (function(e) {
 
-			// Render thumbnail.
+			/* Render thumbnail.*/
 			/* $upload_img.find('img').remove();
 			var thumb = '<img class="thumb" src="' + e.target.result +
                             '" title="' + escape(file.name) + '"/>';

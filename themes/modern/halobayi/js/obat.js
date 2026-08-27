@@ -2,25 +2,25 @@ $().ready(function(){
     
     console.log('Init Module Obat');
 
-    // source: https://stackoverflow.com/a/26683984
-    // $('#konten_obat').load(urlObat, function( response, status, xhr ) {
-    //     var responseAsObject = $.parseJSON(response);
-    //     // console.log(responseAsObject);
-    //     var table = document.getElementById('konten_obat');
-    //     responseAsObject.data.forEach(function(object) {
-    //         var tr = document.createElement('tr');
-    //         tr.innerHTML = '<td>' + object.id + '</td>' +
-    //             '<td>' + object.id_obat + '</td>' +
-    //             '<td>' + object.id_satuan_obat + '</td>' +
-    //             '<td>' + object.no_reg + '</td>';
-    //         table.appendChild(tr);
-    //     });
-    // });
+    /* source: https://stackoverflow.com/a/26683984*/
+    /* $('#konten_obat').load(urlObat, function( response, status, xhr ) {*/
+    /*     var responseAsObject = $.parseJSON(response);*/
+    /*     // console.log(responseAsObject);*/
+    /*     var table = document.getElementById('konten_obat');*/
+    /*     responseAsObject.data.forEach(function(object) {*/
+    /*         var tr = document.createElement('tr');*/
+    /*         tr.innerHTML = '<td>' + object.id + '</td>' +*/
+    /*             '<td>' + object.id_obat + '</td>' +*/
+    /*             '<td>' + object.id_satuan_obat + '</td>' +*/
+    /*             '<td>' + object.no_reg + '</td>';*/
+    /*         table.appendChild(tr);*/
+    /*     });*/
+    /* });*/
 
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
-    // source: https://stackoverflow.com/a/30340490
+    /* source: https://stackoverflow.com/a/30340490*/
     $('.nama_obat').typeahead({
         hint: true,
         highlight: true,
@@ -41,7 +41,7 @@ $().ready(function(){
             }
         },
         source: function (query, processSync, processAsync) { console.log(query)
-        // processSync(['This suggestion appears immediately', 'This one too']);
+        /* processSync(['This suggestion appears immediately', 'This one too']);*/
             return $.ajax({
                 url: base_url + 'master/farmasi/obat-typeahead',
                 dataType: "json",
@@ -49,7 +49,7 @@ $().ready(function(){
                 data: {
                     max_rows: 15,
                     q:query,
-                    csrf_test_name:tokenHash // source: https://stackoverflow.com/a/50541928
+                    csrf_test_name:tokenHash /* source: https://stackoverflow.com/a/50541928*/
                 },
                 beforeSend: function (xhr) {       
                     xhr.setRequestHeader('csrf_test_name' , tokenHash);    
@@ -66,15 +66,15 @@ $().ready(function(){
                             harga_jual_obat: data[i].harga_jual_satuan
                         };
                     }    
-                    // in this example, json is simply an array of strings
+                    /* in this example, json is simply an array of strings*/
                     return processAsync(return_list);
                 }
             });
         }
     }).on('typeahead:selected', onSelectNamaObat);
 
-    // source: https://stackoverflow.com/a/19540313
-    function onSelectNamaObat($e, datum) { //console.log(datum)
+    /* source: https://stackoverflow.com/a/19540313*/
+    function onSelectNamaObat($e, datum) { /*console.log(datum)*/
         $('#nama_obat').val(datum.nama_obat);
         $('#id_obat').val(datum.id);
         $('#id_satuan_obat').val(datum.id_satuan);

@@ -7,8 +7,8 @@
 
 jQuery(document).ready(function() {
 
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
     let dataTablesPerjanjian = '';
     const column = (typeof $('#perjanjian-column').html() === 'string') ? $.parseJSON($('#perjanjian-column').html()) : {};
@@ -21,16 +21,16 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
-		// "order": [4, "desc"],
+		/* "order": [4, "desc"],*/
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
             "sSearch": "Cari <span style='color:#F00;'>(Tekan Enter)</span>: _INPUT_"
         },
         "columns": (typeof column === 'object') ? column : '',
         "initComplete": function(settingsPerjanjian, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -39,10 +39,10 @@ jQuery(document).ready(function() {
             });
         },
         "fnRowCallback": function(nRow, aoData) { console.log(aoData)
-            // if (aoData['status_layanan'] === 'daftar') {
-            //     // $(nRow).css('color', '#0072c6').css("font-weight", "Bold");
-			// 	$('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('kantongRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
-            // }
+            /* if (aoData['status_layanan'] === 'daftar') {*/
+            /*     // $(nRow).css('color', '#0072c6').css("font-weight", "Bold");*/
+			/* 	$('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('kantongRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');*/
+            /* }*/
         }
     }
 
@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
 
     $('#form-perjanjian').submit(function(e) {
 
-		e.preventDefault(); // avoid to execute the actual submit of the form.
+		e.preventDefault(); /* avoid to execute the actual submit of the form.*/
 
 		let startDate = $("#startDate").val();
 		let endDate = $("#endDate").val();
@@ -85,7 +85,7 @@ jQuery(document).ready(function() {
                         $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
                         $button.prop('disabled', true);
 
-                        // Submit Form Janjian
+                        /* Submit Form Janjian*/
                         form = $bootbox.find('form')[0];
                         $.ajax({
                             type: 'POST',

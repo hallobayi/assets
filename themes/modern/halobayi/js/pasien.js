@@ -5,11 +5,11 @@
  *  Description  : [TODO]
  */
 
-// LIST PASIEN DI MASTER PASIEN
+/* LIST PASIEN DI MASTER PASIEN*/
 jQuery(document).ready(function() {
     
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
     if ($('.select2').length > 0 ) {
 		$(".select2").select2({
@@ -30,7 +30,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof column === 'object') ? column : '',
         "initComplete": function(settings, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -50,22 +50,22 @@ jQuery(document).ready(function() {
 
             console.log('nRow:',nRow, '\naoData:',aoData, '\naoKolom:',c);
 
-            // Kolom "Nama"
+            /* Kolom "Nama"*/
             $('td', nRow).eq(1).html('<b>' + aoData['nama_pasien'] + ' </b><i style="color: #28c0e5" class="fa fa-venus"></i><br/><span class="label label-success">RM Lama: ' + aoData['nomor_rm_lama'] + '</span>', nRow).css('color', '#da8d5e').css("font-weight", "Bold");
 
-            // Kolom "Petugas"
+            /* Kolom "Petugas"*/
             $('td', nRow).eq(6).html('<b>' + aoData['HC_user#nama'] + ' </b><span class="label label-success"><br />Waktu: '+aoData['date_created']+' </span>', nRow).css('color', 'black');
 
-            // Kolom "Nomor RM"
+            /* Kolom "Nomor RM"*/
             $('td', nRow).eq(2).html('<b>' + aoData['nomor_rm'] + ' </b><span class="label label-success"></span>', nRow).css('color', 'black');
 
-            // Kolom "Kontak"
+            /* Kolom "Kontak"*/
             $('td', nRow).eq(7).html('<b><i style="color: #00a65a !important" class="fa fa-phone-square"></i> ' + aoData['nomor_hape'] + ' </b><br /><i style="color: #00a65a !important" class="fa fa-envelope"></i><span class="label label-success"> ' + aoData['email'] + '</span>', nRow);
 
-            // Kolom IHS SatuSehat
+            /* Kolom IHS SatuSehat*/
             if (aoData['ihs'] === null || aoData['ihs'] === 'offline') {
                 $('td', nRow).eq(8).text('🔁 Sinkronisasi Ulang!', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('cekIhsPasien').on("click", function(){ postIhsPasien(aoData['HC_pasien#nik']); }).css('cursor', 'pointer');
-                // $('td', nRow).eq(8).text('Cek IHS', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('cekIhsPasien').on("click", function(){ cekIhsPasien(aoData['HC_pasien#nik']); }).css('cursor', 'pointer');
+                /* $('td', nRow).eq(8).text('Cek IHS', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('cekIhsPasien').on("click", function(){ cekIhsPasien(aoData['HC_pasien#nik']); }).css('cursor', 'pointer');*/
             } else {
                 $('td', nRow).eq(8).text(aoData['ihs'], nRow).css('color', '#da8d5e').css("font-weight", "Bold");
             }
@@ -101,17 +101,17 @@ jQuery(document).ready(function() {
         dataType: "json",
         type: "GET",
         success: function(data) { console.log(data)
-            // if (data.status === 'success') {
-            //     Swal.fire({
-            //         title: "Berhasil Update Nomor IHS!",
-            //         text: data.pesan,
-            //         icon: "success"
-            //     }).then((result) => { console.log(result)
-            //         location.reload();
-            //     });
-            // }else{
-            //     console.log('gagal coy')
-            // }
+            /* if (data.status === 'success') {*/
+            /*     Swal.fire({*/
+            /*         title: "Berhasil Update Nomor IHS!",*/
+            /*         text: data.pesan,*/
+            /*         icon: "success"*/
+            /*     }).then((result) => { console.log(result)*/
+            /*         location.reload();*/
+            /*     });*/
+            /* }else{*/
+            /*     console.log('gagal coy')*/
+            /* }*/
         }
      });
     }
@@ -127,7 +127,7 @@ jQuery(document).ready(function() {
     const table = $('#table-result').DataTable(settings);
     table.columns.adjust().draw()
 
-    // Add Anak
+    /* Add Anak*/
     $('#add-row').on('click', function(){
 		$source = $(this).parent().parent();
 		$container = $source.parent();
@@ -135,7 +135,7 @@ jQuery(document).ready(function() {
 		$clone.find('input').val('');
 		$clone.find('a').removeAttr('class').addClass('btn btn-danger delete-row').removeAttr('id').find('i').removeAttr('class').addClass('fas fa-times');
 		
-		// Find DIV row before submit and text muted
+		/* Find DIV row before submit and text muted*/
 		index = $container.children().length - 1 - 1;
 		console.log(index);
 		$last = $container.children().eq(index);
@@ -150,11 +150,11 @@ jQuery(document).ready(function() {
 
 });
 
-// LIST KUNJUNGAN PASIEN DI PROFILE
+/* LIST KUNJUNGAN PASIEN DI PROFILE*/
 jQuery(document).ready(function() {
 
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
 	let dataTablesRiwayaKunjungan = '';
     const column = (typeof $('#riwayatkunjungan-column').html() === 'string') ? $.parseJSON($('#riwayatkunjungan-column').html()) : {};
@@ -167,7 +167,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -175,7 +175,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof column === 'object') ? column : '',
         "initComplete": function(settingRiwayat, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -183,9 +183,9 @@ jQuery(document).ready(function() {
                 }
             });
         },
-        "fnRowCallback": function(nRow, aoData) { //console.log(aoData)
+        "fnRowCallback": function(nRow, aoData) { /*console.log(aoData)*/
 
-            // Baris riwayat kunjungan dapat diklik, membuka resume di tab baru
+            /* Baris riwayat kunjungan dapat diklik, membuka resume di tab baru*/
             if (aoData['no_reg']) {
                 var urlResume = base_url + 'resume/list?no_reg=' + encodeURIComponent(aoData['no_reg']) + '&form=resume';
                 $(nRow).css('cursor', 'pointer').attr('title', 'Buka resume di tab baru');
@@ -194,10 +194,10 @@ jQuery(document).ready(function() {
                 });
             }
 
-            // if (aoData['status_layanan'] === 'daftar') {
-            //     // $(nRow).css('color', '#0072c6').css("font-weight", "Bold");
-			// 	$('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('kantongRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');
-            // }
+            /* if (aoData['status_layanan'] === 'daftar') {*/
+            /*     // $(nRow).css('color', '#0072c6').css("font-weight", "Bold");*/
+			/* 	$('td', nRow).eq(9).text('Registrasi', nRow).css('color', 'Sienna').css("font-weight","Bold").addClass('kantongRelase').on("click", function(){ klikDetail(aoData['no_reg']); }).css('cursor', 'pointer');*/
+            /* }*/
 
         }
     }
@@ -206,10 +206,10 @@ jQuery(document).ready(function() {
 	dataTablesRiwayaKunjungan.columns.adjust().draw()
 });
 
-// LIST TTD DOCUMENT DIGITALL
+/* LIST TTD DOCUMENT DIGITALL*/
 jQuery(document).ready(function() {
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
 	let dataTablesRiwayatTtd = '';
     const columnTtd = (typeof $('#riwayatttd-column').html() === 'string') ? $.parseJSON($('#riwayatttd-column').html()) : {};
@@ -222,7 +222,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": urlTtd,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -230,7 +230,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof columnTtd === 'object') ? columnTtd : '',
         "initComplete": function(settingsTtd, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -238,7 +238,7 @@ jQuery(document).ready(function() {
                 }
             });
         },
-        "fnRowCallback": function(nRow, aoData) { //console.log(aoData)
+        "fnRowCallback": function(nRow, aoData) { /*console.log(aoData)*/
             switch (aoData['jenis_ttd']) {
                 case 'general':
                     $('td', nRow).eq(2).text('🗎 General Consent', nRow).css('color', '#3ca870').css("font-weight","Bold").addClass('documentRead').on("click", function(){ documentRead(aoData['id_ttd_digital'],'general'); }).css('cursor', 'pointer');
@@ -255,7 +255,7 @@ jQuery(document).ready(function() {
 
 });
 
-// OPEN KYC
+/* OPEN KYC*/
 jQuery(document).ready(function() {
     var idDoc = $('.openKYC').attr('data-id');
     var frmKyc = $('.openKYC');
@@ -265,7 +265,7 @@ jQuery(document).ready(function() {
     });
 });
 
-// OPEN DOCUMENT
+/* OPEN DOCUMENT*/
 function documentRead(id,tipe) {
     $bootbox = bootbox.dialog({
         title: 'Liat Document',
@@ -298,66 +298,66 @@ jQuery(document).ready(function() {
                 cancel: {
                     label: 'Cancel'
                 },
-                // success: {
-                //     label: 'Submit',
-                //     className: 'btn-success submitTtd',
-                //     callback: function() {
-                //         $bootbox.find('.alert').remove();
-                //         $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
-                //         $button.prop('disabled', true);
+                /* success: {*/
+                /*     label: 'Submit',*/
+                /*     className: 'btn-success submitTtd',*/
+                /*     callback: function() {*/
+                /*         $bootbox.find('.alert').remove();*/
+                /*         $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');*/
+                /*         $button.prop('disabled', true);*/
 
-                //         // Submit Tanda Tangan Digitall
-                //         form = $bootbox.find('form')[0];
-                //         $.ajax({
-                //             type: 'POST',
-                //             url: base_url+'signature/ajaxUpdateTtd/'+idFrm,
-                //             data: new FormData(form),
-                //             processData: false,
-                //             contentType: false,
-                //             dataType: 'json',
-                //             success: function(data) {
+                /*         // Submit Tanda Tangan Digitall*/
+                /*         form = $bootbox.find('form')[0];*/
+                /*         $.ajax({*/
+                /*             type: 'POST',*/
+                /*             url: base_url+'signature/ajaxUpdateTtd/'+idFrm,*/
+                /*             data: new FormData(form),*/
+                /*             processData: false,*/
+                /*             contentType: false,*/
+                /*             dataType: 'json',*/
+                /*             success: function(data) {*/
 
-                //                 $bootbox.modal('hide');
-                //                 if (data.status == 'ok') {
-                //                     const Toast = Swal.mixin({
-                //                         toast: true,
-                //                         position: 'top-end',
-                //                         showConfirmButton: false,
-                //                         timer: 2500,
-                //                         timerProgressBar: true,
-                //                         iconColor: 'white',
-                //                         customClass: {
-                //                             popup: 'bg-success text-light toast p-2'
-                //                         },
-                //                         didOpen: (toast) => {
-                //                             toast.addEventListener('mouseenter', Swal.stopTimer)
-                //                             toast.addEventListener('mouseleave', Swal.resumeTimer)
-                //                         }
-                //                     })
-                //                     Toast.fire({
-                //                         html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil disimpan</div>'
-                //                     })
+                /*                 $bootbox.modal('hide');*/
+                /*                 if (data.status == 'ok') {*/
+                /*                     const Toast = Swal.mixin({*/
+                /*                         toast: true,*/
+                /*                         position: 'top-end',*/
+                /*                         showConfirmButton: false,*/
+                /*                         timer: 2500,*/
+                /*                         timerProgressBar: true,*/
+                /*                         iconColor: 'white',*/
+                /*                         customClass: {*/
+                /*                             popup: 'bg-success text-light toast p-2'*/
+                /*                         },*/
+                /*                         didOpen: (toast) => {*/
+                /*                             toast.addEventListener('mouseenter', Swal.stopTimer)*/
+                /*                             toast.addEventListener('mouseleave', Swal.resumeTimer)*/
+                /*                         }*/
+                /*                     })*/
+                /*                     Toast.fire({*/
+                /*                         html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil disimpan</div>'*/
+                /*                     })*/
                                   
-                //                     dataTables.draw();
+                /*                     dataTables.draw();*/
                                     
-                //                 } else {
-                //                     show_alert('Error !!!', data.message, 'error');
-                //                 }
-                //             },
-                //             error: function(xhr) {
-                //                 show_alert('Error !!!', xhr.responseText, 'error');
-                //                 console.log(xhr.responseText);
-                //             }
-                //         })
-                //         return false;
-                //     }
-                // }
+                /*                 } else {*/
+                /*                     show_alert('Error !!!', data.message, 'error');*/
+                /*                 }*/
+                /*             },*/
+                /*             error: function(xhr) {*/
+                /*                 show_alert('Error !!!', xhr.responseText, 'error');*/
+                /*                 console.log(xhr.responseText);*/
+                /*             }*/
+                /*         })*/
+                /*         return false;*/
+                /*     }*/
+                /* }*/
             }
         });
 
         $bootbox.find('.modal-dialog').css('max-width', '700px');
         var $button = $bootbox.find('button').prop('disabled', true);
-        // var $button_submit = $bootbox.find('button.submitAbsensi');
+        /* var $button_submit = $bootbox.find('button.submitAbsensi');*/
 
         $.get(base_url+'master/pasien/surat?form='+idFrm, function(html) {
             $button.prop('disabled', false);
@@ -367,13 +367,13 @@ jQuery(document).ready(function() {
     });
 });
 
-// DATATABLES ICD 9 & 10
+/* DATATABLES ICD 9 & 10*/
 jQuery(document).ready(function() {
 
-    // source: https://stackoverflow.com/a/67184094
-    var tokenHash=$("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+    /* source: https://stackoverflow.com/a/67184094*/
+    var tokenHash=$("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
-    // LIST ICD9
+    /* LIST ICD9*/
 	let datatablesIcdSembilan = '';
     const column = (typeof $('#icd9-column').html() === 'string') ? $.parseJSON($('#icd9-column').html()) : {};
     let url = $('#icd9-url').text();
@@ -385,7 +385,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": url,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -393,7 +393,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof column === 'object') ? column : '',
         "initComplete": function(settings, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -401,14 +401,14 @@ jQuery(document).ready(function() {
                 }
             });
         },
-        "fnRowCallback": function(nRow, aoData) { //console.log(aoData)
+        "fnRowCallback": function(nRow, aoData) { /*console.log(aoData)*/
         }
     }
 
 	datatablesIcdSembilan = $('#tabel-icd9').DataTable(settings);
 	datatablesIcdSembilan.columns.adjust().draw();
 
-    // LIST ICD10
+    /* LIST ICD10*/
 	let datatablesIcdSepuluh = '';
     const columnSepuluh = (typeof $('#icd10-column').html() === 'string') ? $.parseJSON($('#icd10-column').html()) : {};
     let urlSepuluh = $('#icd10-url').text();
@@ -420,7 +420,7 @@ jQuery(document).ready(function() {
         "ajax": {
             "url": urlSepuluh,
             "type": "POST",
-            "data": { 'csrf_test_name':tokenHash } // source: https://stackoverflow.com/a/50541928
+            "data": { 'csrf_test_name':tokenHash } /* source: https://stackoverflow.com/a/50541928*/
         },
         "oLanguage": {
             "sLengthMenu": "_MENU_ records per page",
@@ -428,7 +428,7 @@ jQuery(document).ready(function() {
         },
         "columns": (typeof columnSepuluh === 'object') ? columnSepuluh : '',
         "initComplete": function(settings, json) {
-            // source: https://stackoverflow.com/a/30937415
+            /* source: https://stackoverflow.com/a/30937415*/
             $('.dataTables_filter input').unbind();
             $('.dataTables_filter input').bind('keyup', function(e) {
                 if (e.keyCode == 13) {
@@ -436,7 +436,7 @@ jQuery(document).ready(function() {
                 }
             });
         },
-        "fnRowCallback": function(nRow, aoData) {//console.log(aoData)
+        "fnRowCallback": function(nRow, aoData) {/*console.log(aoData)*/
         }
     }
 
@@ -466,7 +466,7 @@ jQuery(document).ready(function() {
     frmSinkronAwal.click(function (e) { 
         e.preventDefault();
 
-        var idNikPasien = $('#nik').val();  //console.log(idNikPasien);      
+        var idNikPasien = $('#nik').val();  /*console.log(idNikPasien);      */
         $bootbox = bootbox.dialog({
             title: 'Sinkronisasi Satusehat Pasien',
             message: '<div class="text-center text-secondary"><div class="spinner-border"></div></div>',
@@ -485,14 +485,14 @@ jQuery(document).ready(function() {
         var jenDis = document.getElementById("jenis_identitas");
         var jenDisValue = jenDis.options[jenDis.selectedIndex].value;
 
-        // Pastikan Nomor KTP!
+        /* Pastikan Nomor KTP!*/
         if ($(this).val().length == 16 && jenDisValue === 'ktp') {
             console.log('do delay with ajax here');
             $.ajax({
                 type: "GET",
                 dataType: "json",
                 url: base_url+'tanpalogin/cekSatusehatPasien?nikPasien='+ $(this).val(),
-                // data: 'order=' + $(this).val(),
+                /* data: 'order=' + $(this).val(),*/
                 cache: false,
                 success: function(json) { console.log(json);
                     if (json.status === 'success') {

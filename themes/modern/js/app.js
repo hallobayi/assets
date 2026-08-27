@@ -4,7 +4,7 @@ $(function() {
         e.preventDefault();
     })
 
-    // source: https://stackoverflow.com/a/3291856
+    /* source: https://stackoverflow.com/a/3291856*/
     Object.defineProperty(String.prototype, 'capitalize', {
         value: function() {
           return this.charAt(0).toUpperCase() + this.slice(1);
@@ -20,10 +20,10 @@ $(function() {
         this.value = this.value.toUpperCase();
     });
 
-    // source: https://stackoverflow.com/a/67184094
+    /* source: https://stackoverflow.com/a/67184094*/
     var tokenHash=$("input[name=csrf_test_name]").val();
 
-    // source: https://stackoverflow.com/a/30340490
+    /* source: https://stackoverflow.com/a/30340490*/
     $('#no_rm_header').typeahead({
         hint: true,
         highlight: true,
@@ -44,7 +44,7 @@ $(function() {
             }
         },
         source: function (query, processSync, processAsync) {
-        // processSync(['This suggestion appears immediately', 'This one too']);
+        /* processSync(['This suggestion appears immediately', 'This one too']);*/
           return $.ajax({
             url: base_url + 'master/pasien/typeahead',
             dataType: "json",
@@ -68,7 +68,7 @@ $(function() {
                         tgl_lahir_ibu: data[i].tgl_lahir_ibu
                     };
                 }    
-              // in this example, json is simply an array of strings
+              /* in this example, json is simply an array of strings*/
               return processAsync(return_list);
             }
           });
@@ -79,16 +79,16 @@ $(function() {
         $(e.target).removeClass('sLoading');
     });
 
-    // source: https://stackoverflow.com/a/19540313
+    /* source: https://stackoverflow.com/a/19540313*/
     function onSelectedNomorRmHeader($e, datum) {
         window.location = base_url+'master/pasien/profile/'+datum.no_rm;
     }
 
-    // source: https://stackoverflow.com/a/30340490
-    // TODO:
-    // https://stackoverflow.com/questions/11269439/how-to-include-csrf-from-codeigniter-into-ajax-data
-    // https://stackoverflow.com/questions/25930653/can-i-listen-to-a-specific-element-on-ajaxcomplete-instead-of-document
-    // https://stackoverflow.com/questions/38502548/codeigniter-csrf-valid-for-only-one-time-ajax-request
+    /* source: https://stackoverflow.com/a/30340490*/
+    /* TODO:*/
+    /* https://stackoverflow.com/questions/11269439/how-to-include-csrf-from-codeigniter-into-ajax-data*/
+    /* https://stackoverflow.com/questions/25930653/can-i-listen-to-a-specific-element-on-ajaxcomplete-instead-of-document*/
+    /* https://stackoverflow.com/questions/38502548/codeigniter-csrf-valid-for-only-one-time-ajax-request*/
     
     $('.no_rm').typeahead({
         hint: true,
@@ -110,7 +110,7 @@ $(function() {
             }
         },
         source: function (query, processSync, processAsync) {
-        // processSync(['This suggestion appears immediately', 'This one too']);
+        /* processSync(['This suggestion appears immediately', 'This one too']);*/
           return $.ajax({
             url: base_url + 'master/pasien/typeahead',
             dataType: "json",
@@ -135,7 +135,7 @@ $(function() {
                         no_wa: data[i].no_wa,
                     };
                 }    
-              // in this example, json is simply an array of strings
+              /* in this example, json is simply an array of strings*/
               return processAsync(return_list);
             }
           });
@@ -146,7 +146,7 @@ $(function() {
         $(e.target).removeClass('sLoading');
     });
 
-    // source: https://stackoverflow.com/a/19540313
+    /* source: https://stackoverflow.com/a/19540313*/
     function onSelectedNomorRm($e, datum) {
         $('#nama_ibu').val(datum.nama);
         $('#tanggal_lahir_ibu').val(datum.tgl_lahir_ibu);
@@ -155,7 +155,7 @@ $(function() {
         $('span[data-id="nama_pasien"]').attr('data-id', datum.nama); 
     }
 
-    // Show Popup Pasien New
+    /* Show Popup Pasien New*/
     $('body').delegate('.tambah-pasien', 'click', function(e) {
         e.preventDefault();
 		showFormPasienBaru();
@@ -177,7 +177,7 @@ $(function() {
                         $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
                         $button.prop('disabled', true);
 
-                        // Submit Form Janjian
+                        /* Submit Form Janjian*/
                         form = $bootbox.find('form')[0];
                         $.ajax({
                             type: 'POST',
@@ -209,14 +209,14 @@ $(function() {
                                         html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil disimpan</div>'
                                     })
                                   
-                                    // Load Ajax Datatables 
-                                    // TODO: Masih ada Bugs CSRF Nyangkut
-                                    // settingsPerjanjian.ajax.url = data.message.urlAjax;
-                                    // dataTablesPerjanjian.destroy();
-                                    // len = $('#tabel-perjanjian').find('thead').find('th').length;
-                                    // $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');
-                                    // dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);
-                                    // dataTablesPerjanjian.draw();
+                                    /* Load Ajax Datatables */
+                                    /* TODO: Masih ada Bugs CSRF Nyangkut*/
+                                    /* settingsPerjanjian.ajax.url = data.message.urlAjax;*/
+                                    /* dataTablesPerjanjian.destroy();*/
+                                    /* len = $('#tabel-perjanjian').find('thead').find('th').length;*/
+                                    /* $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');*/
+                                    /* dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);*/
+                                    /* dataTablesPerjanjian.draw();*/
 
                                     location.reload();
                                     
@@ -242,20 +242,20 @@ $(function() {
         $.get(base_url+'master/pasien/ajaxFormPasienBaru', function(html) {
             $button.prop('disabled', false);
             $bootbox.find('.modal-body').empty().append(html);
-            // $('.tglJanjiDatang').flatpickr({
-            //     dateFormat: "d-m-Y",
-            //     minDate: new Date()
-            // });
-            // $('.jamJanjiDatang').flatpickr({
-            //     enableTime: true,
-            //     noCalendar: true,
-            //     dateFormat: "H:i",
-            //     time_24hr: true
-            // });
+            /* $('.tglJanjiDatang').flatpickr({*/
+            /*     dateFormat: "d-m-Y",*/
+            /*     minDate: new Date()*/
+            /* });*/
+            /* $('.jamJanjiDatang').flatpickr({*/
+            /*     enableTime: true,*/
+            /*     noCalendar: true,*/
+            /*     dateFormat: "H:i",*/
+            /*     time_24hr: true*/
+            /* });*/
         });
     };
 
-    // source: https://stackoverflow.com/a/16958005
+    /* source: https://stackoverflow.com/a/16958005*/
     $.date = function(dateObject) {
         var d = new Date(dateObject);
         var day = d.getDate();
@@ -271,7 +271,7 @@ $(function() {
         return date;
     };
 
-    // source: https://stackoverflow.com/a/30340490
+    /* source: https://stackoverflow.com/a/30340490*/
     $('.diagnosa').typeahead({
         hint: true,
         highlight: true,
@@ -292,7 +292,7 @@ $(function() {
             }
         },
         source: function (query, processSync, processAsync) {
-        // processSync(['This suggestion appears immediately', 'This one too']);
+        /* processSync(['This suggestion appears immediately', 'This one too']);*/
           return $.ajax({
             url: base_url + 'master/rekammedis/icd10-typeahead',
             dataType: "json",
@@ -300,7 +300,7 @@ $(function() {
             data: {
                 max_rows: 15,
                 q:query,
-                csrf_test_name:tokenHash // source: https://stackoverflow.com/a/50541928
+                csrf_test_name:tokenHash /* source: https://stackoverflow.com/a/50541928*/
             },
             beforeSend: function (xhr) 
             {       
@@ -315,7 +315,7 @@ $(function() {
                         nama_diagnosa: data[i].nama
                     };
                 }    
-              // in this example, json is simply an array of strings
+              /* in this example, json is simply an array of strings*/
               return processAsync(return_list);
             }
           });
@@ -326,13 +326,13 @@ $(function() {
         $(e.target).removeClass('sLoading');
     });
 
-    // source: https://stackoverflow.com/a/19540313
+    /* source: https://stackoverflow.com/a/19540313*/
     function onSelectedDiagnosa($e, datum) {
         $('#nama_diagnosa').val(datum.nama_diagnosa);
-        // $('#diagnosa_utama').val(datum.id);
+        /* $('#diagnosa_utama').val(datum.id);*/
     }
 
-    // source: https://stackoverflow.com/a/30340490
+    /* source: https://stackoverflow.com/a/30340490*/
     $('.tindakan').typeahead({
         hint: true,
         highlight: true,
@@ -353,7 +353,7 @@ $(function() {
             }
         },
         source: function (query, processSync, processAsync) {
-        // processSync(['This suggestion appears immediately', 'This one too']);
+        /* processSync(['This suggestion appears immediately', 'This one too']);*/
             return $.ajax({
             url: base_url + 'master/rekammedis/icd9-typeahead',
             dataType: "json",
@@ -361,7 +361,7 @@ $(function() {
             data: {
                 max_rows: 15,
                 q:query,
-                csrf_test_name:tokenHash // source: https://stackoverflow.com/a/50541928
+                csrf_test_name:tokenHash /* source: https://stackoverflow.com/a/50541928*/
             },
             beforeSend: function (xhr) 
             {       
@@ -376,7 +376,7 @@ $(function() {
                         nama_tindakan: data[i].nama
                     };
                 }    
-                // in this example, json is simply an array of strings
+                /* in this example, json is simply an array of strings*/
                 return processAsync(return_list);
             }
             });
@@ -387,7 +387,7 @@ $(function() {
         $(e.target).removeClass('sLoading');
     });
 
-    // source: https://stackoverflow.com/a/19540313
+    /* source: https://stackoverflow.com/a/19540313*/
     function onSelectedTindakan($e, datum) {
         $('#nama_tindakan').val(datum.nama_tindakan);
     }
@@ -476,7 +476,7 @@ $(function() {
     class MainApp {
         constructor() { }
         initLoader() {
-            // Preloader
+            /* Preloader*/
             $(window).on("load", function () {
                 $("#status").fadeOut();
                 $("#preloader").delay(250).fadeOut("slow");
@@ -486,11 +486,11 @@ $(function() {
             this.initLoader();
         }
     }
-    //init
+    /*init*/
     ($.MainApp = new MainApp()),
     ($.MainApp.Constructor = MainApp);
 })(window.jQuery),
-//initializing
+/*initializing*/
 (function($) {
     "use strict";
     $.MainApp.init();

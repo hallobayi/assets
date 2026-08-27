@@ -7,12 +7,12 @@ jQuery(document).ready(function ()
 
 		var reader = new FileReader();
 
-		// Closure to capture the file information.
+		/* Closure to capture the file information.*/
 		var $upload_img = $this.parent().children('.upload-file-thumb');
 		
 		reader.onload = (function(e) {
 
-			// Render thumbnail.
+			/* Render thumbnail.*/
 			$upload_img.find('img').remove();
 			var thumb = '<img class="thumb" src="' + e.target.result +
                             '" title="' + escape(file.name) + '"/>';
@@ -29,7 +29,7 @@ jQuery(document).ready(function ()
 		} else if (size > 1024) {
 			file_size = parseFloat(size / 1024).toFixed(2) + ' Kb';
 		}
-		// console.log(file);
+		/* console.log(file);*/
 		if (size > 1024 * 1024 * 2) {
 			$('<small class="alert alert-danger">Ukuran file maksimal: 2Mb, file Anda ' + file_size + '</small>').insertAfter($this);
 			return;

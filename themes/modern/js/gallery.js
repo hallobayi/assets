@@ -94,12 +94,12 @@
 							show_alert('Error !!!', data.message, 'error');
 						} else {
 							
-							// File Browser
+							/* File Browser*/
 							var $ul = $('.list-image-container');
 							var $li_first = $ul.find('li').eq(0);
 							var $li = $li_first.clone().hide();
 								$li.removeAttr('data-initial-item');
-							// var $img_cont = $li.find('.img-container');
+							/* var $img_cont = $li.find('.img-container');*/
 							
 							if ($li_first.attr('data-initial-item') == 'true') {
 								$li_first.remove();
@@ -108,12 +108,12 @@
 							$gallery_container.find('.alert-danger').remove();
 							
 							$li.attr('id', 'gallery-' + data['id_gallery']);
-							// $li.find('input[name="urut[]"]').val(data['id_gallery']);
+							/* $li.find('input[name="urut[]"]').val(data['id_gallery']);*/
 							
 							$new_img = $elm.find('img');
-							// $img_cont.find('img').attr('src', parsedResponse.file_info['thumbnail']['url']);
+							/* $img_cont.find('img').attr('src', parsedResponse.file_info['thumbnail']['url']);*/
 							$li.find('img').replaceWith($new_img);
-							// $img_cont.find('.meta-file').html(JSON.stringify(parsedResponse.file_info));
+							/* $img_cont.find('.meta-file').html(JSON.stringify(parsedResponse.file_info));*/
 							$ul.prepend($li);
 							$li.fadeIn('fast');
 							

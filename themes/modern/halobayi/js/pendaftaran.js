@@ -6,8 +6,8 @@
  */
 
 jQuery(document).ready(function () {
-  // source: https://stackoverflow.com/a/67184094
-  var tokenHash = $("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+  /* source: https://stackoverflow.com/a/67184094*/
+  var tokenHash = $("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
   if ($(".select2").length > 0) {
     $(".cabang").attr("required", "required");
@@ -46,8 +46,8 @@ jQuery(document).ready(function () {
     ajax: {
       url: url,
       type: "POST",
-      // Kirim CSRF via header agar tidak konflik dengan double hidden input di halaman
-      // CI4 sudah support: Config\Security::$headerName = 'X-CSRF-TOKEN'
+      /* Kirim CSRF via header agar tidak konflik dengan double hidden input di halaman*/
+      /* CI4 sudah support: Config\Security::$headerName = 'X-CSRF-TOKEN'*/
       beforeSend: function (xhr) {
         xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
       },
@@ -59,8 +59,8 @@ jQuery(document).ready(function () {
       },
       xhr: function () {
         var xhr = $.ajaxSettings.xhr();
-        // Update tokenHash dari response header setelah setiap request (termasuk error)
-        // agar request DataTables berikutnya tidak 403 (tokenRandomize = true)
+        /* Update tokenHash dari response header setelah setiap request (termasuk error)*/
+        /* agar request DataTables berikutnya tidak 403 (tokenRandomize = true)*/
         xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
             var newToken = this.getResponseHeader("X-CSRF-TOKEN");
@@ -73,7 +73,7 @@ jQuery(document).ready(function () {
         return xhr;
       },
       dataSrc: function (json) {
-        // Update tokenHash dari JSON response jika ada (fallback)
+        /* Update tokenHash dari JSON response jika ada (fallback)*/
         if (json.csrf && json.csrf.value) {
           tokenHash = json.csrf.value;
           $("input[name=csrf_test_name]").val(tokenHash);
@@ -88,7 +88,7 @@ jQuery(document).ready(function () {
     },
     columns: typeof column === "object" ? column : "",
     initComplete: function (settings, json) {
-      // source: https://stackoverflow.com/a/30937415
+      /* source: https://stackoverflow.com/a/30937415*/
       $(".dataTables_filter input").unbind();
       $(".dataTables_filter input").bind("keyup", function (e) {
         if (e.keyCode == 13) {
@@ -97,9 +97,9 @@ jQuery(document).ready(function () {
       });
     },
     fnRowCallback: function (nRow, aoData, c) {
-      //console.log("nRow:", nRow, "\naoData:", aoData, "\naoKolom:", c);
+      /*console.log("nRow:", nRow, "\naoData:", aoData, "\naoKolom:", c);*/
 
-      // Kolom "Pasien"
+      /* Kolom "Pasien"*/
       $("td", nRow)
         .eq(1)
         .html(
@@ -115,7 +115,7 @@ jQuery(document).ready(function () {
         .css("color", "#da8d5e")
         .css("font-weight", "Bold");
 
-      // Kolom RM
+      /* Kolom RM*/
       $("td", nRow)
         .eq(2)
         .html(
@@ -129,7 +129,7 @@ jQuery(document).ready(function () {
           nRow,
         );
 
-      // Kolom "Dokter"
+      /* Kolom "Dokter"*/
       $("td", nRow)
         .eq(4)
         .html(
@@ -143,7 +143,7 @@ jQuery(document).ready(function () {
           nRow,
         );
 
-      // Kolom Tgl Masuk
+      /* Kolom Tgl Masuk*/
       $("td", nRow)
         .eq(3)
         .html(
@@ -155,7 +155,7 @@ jQuery(document).ready(function () {
           nRow,
         );
 
-      // Kolom Status
+      /* Kolom Status*/
       $("td", nRow)
         .eq(5)
         .html(
@@ -173,7 +173,7 @@ jQuery(document).ready(function () {
   dataTablesPendaftaran.columns.adjust().draw();
 
   $("#form-pendaftaran").submit(function (e) {
-    e.preventDefault(); // avoid to execute the actual submit of the form.
+    e.preventDefault(); /* avoid to execute the actual submit of the form.*/
 
     let startDate = $("#startDate").val();
     let endDate = $("#endDate").val();
@@ -223,7 +223,7 @@ jQuery(document).ready(function () {
             );
             $button.prop("disabled", true);
 
-            // Submit Form Janjian
+            /* Submit Form Janjian*/
             form = $bootbox.find("form")[0];
             $.ajax({
               type: "POST",
@@ -256,14 +256,14 @@ jQuery(document).ready(function () {
                     html: '<div class="toast-content"><i class="far fa-check-circle me-2"></i> Data berhasil diupdate!</div>',
                   });
 
-                  // Load Ajax Datatables
-                  // TODO: Masih ada Bugs CSRF Nyangkut
-                  // settingsPerjanjian.ajax.url = data.message.urlAjax;
-                  // dataTablesPerjanjian.destroy();
-                  // len = $('#tabel-perjanjian').find('thead').find('th').length;
-                  // $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');
-                  // dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);
-                  // dataTablesPerjanjian.draw();
+                  /* Load Ajax Datatables*/
+                  /* TODO: Masih ada Bugs CSRF Nyangkut*/
+                  /* settingsPerjanjian.ajax.url = data.message.urlAjax;*/
+                  /* dataTablesPerjanjian.destroy();*/
+                  /* len = $('#tabel-perjanjian').find('thead').find('th').length;*/
+                  /* $('#tabel-perjanjian').find('tbody').html('<tr>' + '<td colspan="' + len + '" class="text-center">Loading data...</td>' + '</tr>');*/
+                  /* dataTablesPerjanjian = $('#tabel-perjanjian').DataTable(settingsPerjanjian);*/
+                  /* dataTablesPerjanjian.draw();*/
 
                   location.reload();
                 } else {
@@ -294,7 +294,7 @@ jQuery(document).ready(function () {
     );
   };
 
-  // Add Anak
+  /* Add Anak*/
   $("#add-row").on("click", function () {
     $source = $(this).parent().parent();
     $container = $source.parent();
@@ -309,7 +309,7 @@ jQuery(document).ready(function () {
       .removeAttr("class")
       .addClass("fas fa-times");
 
-    // Find DIV row before submit and text muted
+    /* Find DIV row before submit and text muted*/
     index = $container.children().length - 1 - 1;
     console.log(index);
     $last = $container.children().eq(index);
@@ -404,7 +404,7 @@ jQuery(document).ready(function () {
 
     $.getJSON(base_url + urlCabang, function (data) {
       console.log("ff");
-      new_options = generate_options(data.nama_dokter); //console.log(data.nama_dokter);
+      new_options = generate_options(data.nama_dokter); /*console.log(data.nama_dokter);*/
       $cabangDokter.each(function (i, elm) {
         $elm = $(elm);
         teks = "-- Pilih Cabang --";
@@ -456,7 +456,7 @@ jQuery(document).ready(function () {
 
     $.getJSON(base_url + urlCabang, function (data) {
       console.log("ff");
-      new_options = generate_options(data.jadwal_dokter); //console.log(data.nama_dokter);
+      new_options = generate_options(data.jadwal_dokter); /*console.log(data.nama_dokter);*/
       $jadwalDokter.each(function (i, elm) {
         $elm = $(elm);
         teks = "-- Pilih Dokter --";
@@ -475,7 +475,7 @@ jQuery(document).ready(function () {
         $wrapper.remove();
       });
 
-      // enable kode hari
+      /* enable kode hari*/
       $("#kode_hari_mesin").val(data.kode_hari_mesin);
     });
   }
@@ -489,7 +489,7 @@ jQuery(document).ready(function () {
       $(".tp").val("");
       $(".usia_kehamilan").val("");
       $(".tp").prop("required", false);
-      // wajib: kolom tersembunyi yang masih invalid bikin submit diblokir diam-diam
+      /* wajib: kolom tersembunyi yang masih invalid bikin submit diblokir diam-diam*/
       resetValidasi($(".tp").add(".hpht"));
     } else {
       $(".hamil").show();
@@ -497,25 +497,25 @@ jQuery(document).ready(function () {
     }
   }
 
-  // Hapus pesan custom validity; nilai yang diisi datepicker/otomatis tidak
-  // memicu event input/change, jadi pesan "invalid" bisa nyangkut permanen
+  /* Hapus pesan custom validity; nilai yang diisi datepicker/otomatis tidak*/
+  /* memicu event input/change, jadi pesan "invalid" bisa nyangkut permanen*/
   function resetValidasi($elm) {
     $elm.each(function () {
       if (this.setCustomValidity) this.setCustomValidity("");
     });
   }
 
-  // Parse tanggal format "dd-mm-yyyy" -> moment (month di moment 0-indexed)
+  /* Parse tanggal format "dd-mm-yyyy" -> moment (month di moment 0-indexed)*/
   function parseTanggal(value) {
     var parts = value.split("-");
     return moment([
-      Number(parts[2]), // tahun
-      Number(parts[1]) - 1, // bulan (0-indexed)
-      Number(parts[0]), // tanggal
+      Number(parts[2]), /* tahun*/
+      Number(parts[1]) - 1, /* bulan (0-indexed)*/
+      Number(parts[0]), /* tanggal*/
     ]);
   }
 
-  // Hitung & tampilkan usia kehamilan dari HPHT sampai hari ini
+  /* Hitung & tampilkan usia kehamilan dari HPHT sampai hari ini*/
   function tampilkanUsiaKehamilan(hpht) {
     var today = moment().startOf("day");
     var totalHari = today.diff(hpht, "days");
@@ -543,14 +543,14 @@ jQuery(document).ready(function () {
     var hpht = parseTanggal(value);
     if (!hpht.isValid()) return;
 
-    // Rumus Naegele: TP = HPHT + 1 tahun - 3 bulan + 7 hari
+    /* Rumus Naegele: TP = HPHT + 1 tahun - 3 bulan + 7 hari*/
     var tp = hpht
       .clone()
       .add(1, "years")
       .subtract(3, "months")
       .add(7, "days");
 
-    // Format dd-mm-yyyy di Kolom TP
+    /* Format dd-mm-yyyy di Kolom TP*/
     $(".tp").val(tp.format("DD-MM-YYYY"));
     resetValidasi($(".tp").add($elm));
 
@@ -564,14 +564,14 @@ jQuery(document).ready(function () {
     var tp = parseTanggal(value);
     if (!tp.isValid()) return;
 
-    // Kebalikan rumus Naegele: HPHT = TP - 1 tahun + 3 bulan - 7 hari
+    /* Kebalikan rumus Naegele: HPHT = TP - 1 tahun + 3 bulan - 7 hari*/
     var hpht = tp
       .clone()
       .subtract(1, "years")
       .add(3, "months")
       .subtract(7, "days");
 
-    // Format dd-mm-yyyy di Kolom HPHT
+    /* Format dd-mm-yyyy di Kolom HPHT*/
     $(".hpht").val(hpht.format("DD-MM-YYYY"));
     resetValidasi($(".hpht").add($elm));
 
@@ -765,21 +765,21 @@ jQuery(document).ready(function () {
     });
   });
 
-  // const dayJsDefault = [0,1,2,3,4,5,6];
-  // const kodeHariMesin= $("#kode_hari_mesin").val();
-  // moment.locale('id');
+  /* const dayJsDefault = [0,1,2,3,4,5,6];*/
+  /* const kodeHariMesin= $("#kode_hari_mesin").val();*/
+  /* moment.locale('id');*/
 
-  // Rencana datang
+  /* Rencana datang*/
   $("#rencana_datang, #tp, #hpht").datepicker({
-    format: "dd-mm-yyyy hh:ii", // Added time format
+    format: "dd-mm-yyyy hh:ii", /* Added time format*/
     weekStart: 1,
     locale: "id",
     language: "id",
     autoclose: true,
     todayHighlight: true,
-    // Add these lines to enable time selection if the datepicker supports it
-    // startView: 2, // Start with month view
-    // minView: 0,   // Allow selection down to minutes
+    /* Add these lines to enable time selection if the datepicker supports it*/
+    /* startView: 2, // Start with month view*/
+    /* minView: 0,   // Allow selection down to minutes*/
   });
 
   $("#collapseOne").collapse({
@@ -789,8 +789,8 @@ jQuery(document).ready(function () {
   $("form#daftarOnsite").submit(function (e) {
     e.preventDefault();
 
-    // const formData = $(this).serialize();
-    const formData = new FormData(this); // Get form data
+    /* const formData = $(this).serialize();*/
+    const formData = new FormData(this); /* Get form data*/
 
     fetch(base_url + "pendaftaran/create", {
       method: "POST",
@@ -800,19 +800,19 @@ jQuery(document).ready(function () {
         if (!response.ok) {
           throw new Error("Harap Refresh Halaman Ini Kembali!");
         }
-        return response.json(); // or response.text() if not JSON
+        return response.json(); /* or response.text() if not JSON*/
       })
       .then((response) => {
         console.log(response);
         if (response.status === "success") {
-          // URL tujuan setelah hitung mundur (tindakan dokter / evaluasi awal)
+          /* URL tujuan setelah hitung mundur (tindakan dokter / evaluasi awal)*/
           const urlTindakan = response.no_reg
             ? base_url +
               "tindakandokter/add?no_reg=" +
               encodeURIComponent(response.no_reg) +
               "&form=evaluasi-awal"
             : null;
-          const detikMundur = 5; // durasi hitung mundur (detik)
+          const detikMundur = 5; /* durasi hitung mundur (detik)*/
           let timerInterval;
 
           Swal.fire({
@@ -846,14 +846,14 @@ jQuery(document).ready(function () {
           }).then((result) => {
             console.log(result);
             if (result.isConfirmed) {
-              location.reload(); // Input lagi: muat ulang form
+              location.reload(); /* Input lagi: muat ulang form*/
             } else if (result.dismiss === Swal.DismissReason.cancel) {
-              window.location.href = base_url + "pendaftaran"; // Kembali ke list
+              window.location.href = base_url + "pendaftaran"; /* Kembali ke list*/
             } else if (
               result.dismiss === Swal.DismissReason.timer &&
               urlTindakan
             ) {
-              window.location.href = urlTindakan; // Timeout: ke tindakan dokter
+              window.location.href = urlTindakan; /* Timeout: ke tindakan dokter*/
             }
           });
         } else {
@@ -861,13 +861,13 @@ jQuery(document).ready(function () {
           Swal.fire({
             icon: "error",
             title: "Validation Errors",
-            html: formattedErrors, // Use 'html' to render the line breaks
+            html: formattedErrors, /* Use 'html' to render the line breaks*/
             confirmButtonText: "Baiklah!",
           });
         }
       })
       .catch((error) => {
-        // Handle AJAX errors
+        /* Handle AJAX errors*/
         Swal.fire("Error!", error.message, "error");
       });
   });
@@ -876,7 +876,7 @@ jQuery(document).ready(function () {
     e.preventDefault();
 
     const loadingIndicator = document.getElementById("loading-spinner");
-    loadingIndicator.style.display = "block"; // Show the loading indicator
+    loadingIndicator.style.display = "block"; /* Show the loading indicator*/
 
     var dataIdValue = $(this).data("id");
     console.log("Data ID:", dataIdValue);
@@ -890,7 +890,7 @@ jQuery(document).ready(function () {
             "Harap Refresh Halaman Ini Kembali!, Service WA Down!",
           );
         }
-        return response.json(); // or response.text() if not JSON
+        return response.json(); /* or response.text() if not JSON*/
       })
       .then((response) => {
         console.log(response);
@@ -902,15 +902,15 @@ jQuery(document).ready(function () {
         }
       })
       .catch((error) => {
-        // Handle AJAX errors
+        /* Handle AJAX errors*/
         Swal.fire("Error!", error.message, "error");
       })
       .finally(() => {
-        loadingIndicator.style.display = "none"; // Hide the loading indicator
+        loadingIndicator.style.display = "none"; /* Hide the loading indicator*/
       });
   });
 
-  // Cari Dokter
+  /* Cari Dokter*/
   $(".cariDokter")
     .typeahead(
       {
@@ -933,7 +933,7 @@ jQuery(document).ready(function () {
           },
         },
         source: function (query, processSync, processAsync) {
-          // processSync(['This suggestion appears immediately', 'This one too']);
+          /* processSync(['This suggestion appears immediately', 'This one too']);*/
           return $.ajax({
             url: base_url + "master/dokter/typeahead",
             dataType: "json",
@@ -956,7 +956,7 @@ jQuery(document).ready(function () {
                   nik: data[i].nik,
                 };
               }
-              // in this example, json is simply an array of strings
+              /* in this example, json is simply an array of strings*/
               return processAsync(return_list);
             },
           });
@@ -971,14 +971,14 @@ jQuery(document).ready(function () {
       $(e.target).removeClass("sLoading");
     });
 
-  // Kosongkan nik tersembunyi saat input dokter dikosongkan
+  /* Kosongkan nik tersembunyi saat input dokter dikosongkan*/
   $(".cariDokter").on("input typeahead:change", function () {
     if ($(this).val().trim() === "") {
       $("#nik").val("");
     }
   });
 
-  // source: https://stackoverflow.com/a/19540313
+  /* source: https://stackoverflow.com/a/19540313*/
   function onSelectedNamaDokter($e, datum) {
     $("#nama_pegawai").val(datum.nama_pegawai);
     $("#nik").val(datum.nik);

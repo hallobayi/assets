@@ -10,7 +10,7 @@ jQuery(document).ready(function () {
     dateFormat: "Y-m-d",
   });
 
-  // DataTables Logic
+  /* DataTables Logic*/
   let dataTablesKas = "";
   const settings = {
     processing: true,
@@ -28,9 +28,9 @@ jQuery(document).ready(function () {
         d.status = $("select[name=status]").val();
       },
     },
-    order: [1, "desc"], // Order by Tanggal (index 1)
+    order: [1, "desc"], /* Order by Tanggal (index 1)*/
     columnDefs: [
-      { targets: [0, 7], orderable: false }, // Disable sort for No and Action
+      { targets: [0, 7], orderable: false }, /* Disable sort for No and Action*/
     ],
     columns: [
       { data: "ignore_search_urut" },
@@ -59,13 +59,13 @@ jQuery(document).ready(function () {
     dataTablesKas = $("#tabel-kas").DataTable(settings);
   }
 
-  // Filter Form Submit
+  /* Filter Form Submit*/
   $("#form-filter").submit(function (e) {
     e.preventDefault();
     dataTablesKas.ajax.reload();
   });
 
-  // Handle form submission with AJAX using jQuery
+  /* Handle form submission with AJAX using jQuery*/
   $("form:not(#form-filter)").on("submit", function (e) {
     e.preventDefault();
 
@@ -135,14 +135,14 @@ jQuery(document).ready(function () {
     const hiddenEl = document.getElementById(item.hidden);
 
     if (inputEl && hiddenEl) {
-      // Set initial value only if hiddenEl has a value
+      /* Set initial value only if hiddenEl has a value*/
       const initialValue = hiddenEl.value || " ";
       $("#" + item.input).val("Rp. " + initialValue);
 
       inputEl.addEventListener("keyup", function (e) {
-        // Format To Rupiah
+        /* Format To Rupiah*/
         this.value = formatRupiah(this.value, "Rp. ");
-        // Unformat Rupiah to hidden input
+        /* Unformat Rupiah to hidden input*/
         hiddenEl.value = unFormatRupiah(this.value);
         inputEl.value = formatRupiah(this.value, "Rp. ");
       });
@@ -159,7 +159,7 @@ jQuery(document).ready(function () {
       rupiah = split[0].substr(0, sisa),
       ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
-    // tambahkan titik jika yang di input sudah menjadi angka ribuan
+    /* tambahkan titik jika yang di input sudah menjadi angka ribuan*/
     if (ribuan) {
       separator = sisa ? "." : "";
       rupiah += separator + ribuan.join(".");

@@ -154,7 +154,7 @@ e+" ms, words: ["+d+"], charsCount: "+h);return e};a.validateParameters=function
 function(b){return a.servicesEnabled[b]||!1};a.setServiceEnabled(a.services.NATIVE_TTS,!0);a.setServiceEnabled(a.services.FALLBACK_AUDIO,!0);a.forceFallbackMode=function(b){a.forcedFallbackMode=b;a.fallbackMode=b;a.mapRVs();a.Dispatch("OnServiceSwitched")};a.enableWindowClickHook=function(){a.userInteractionEvents.forEach(function(b){window.addEventListener(b,a.clickEvent,!1)})};a.setTextReplacements=function(a){if(null==a)n=null;else{n=[];for(var b=0;b<a.length;b++){var d=a[b],h=d.searchvalue;if("string"==
 typeof h)try{var g=h.match(/^\/(.*?)\/([gimy]*)$/),f=new RegExp(g[1],g[2]);f instanceof RegExp&&(h=f)}catch(e){h=new RegExp(h,"g")}n.push({searchvalue:h,newvalue:d.newvalue,collectionvoices:d.collectionvoices,systemvoices:d.systemvoices})}}};"interactive"===document.readyState?a.init():document.addEventListener("DOMContentLoaded",function(){a.init()})},responsiveVoice=new ResponsiveVoice;
 
-/// -------- RESPONSIVE VOICE ends
+/*/ -------- RESPONSIVE VOICE ends*/
     responsiveVoice.debug = true;
 }
 
@@ -260,31 +260,31 @@ function GetRandomMsg(text) {
 function getHiddenProp(){
     var prefixes = ['webkit', 'moz', 'ms', 'o'];
 
-    // if 'hidden' is natively supported just return it
+    /* if 'hidden' is natively supported just return it*/
     if ('hidden' in document) return 'hidden';
 
-    // otherwise loop over all the known prefixes until we find one
+    /* otherwise loop over all the known prefixes until we find one*/
     for (var i = 0; i < prefixes.length; i++) {
         if ((prefixes[i] + 'Hidden') in document)
             return prefixes[i] + 'Hidden';
     }
 
-    // otherwise it's not supported
+    /* otherwise it's not supported*/
     return null;
 }
 
 function getVisibilityState() {
     var prefixes = ['webkit', 'moz', 'ms', 'o'];
 
-    // if 'visibilityState' is natively supported just return it
+    /* if 'visibilityState' is natively supported just return it*/
     if ('visibilityState' in document) return 'visibilityState';
 
-    // otherwise loop over all the known prefixes until we find one
+    /* otherwise loop over all the known prefixes until we find one*/
     for (var i = 0; i < prefixes.length; i++) {
         if ((prefixes[i] + 'VisibilityState') in document)
             return prefixes[i] + 'VisibilityState';
     }
-    // otherwise it's not supported
+    /* otherwise it's not supported*/
     return null;
 }
 
@@ -297,21 +297,21 @@ function isHidden() {
 
 function isPrerendered() {
     var prop = getVisibilityState();
-    //console.log(prop);
+    /*console.log(prop);*/
     if (!prop) return false;
-    //console.log(document[prop]);
+    /*console.log(document[prop]);*/
     if (document[prop] != "prerender") return false;
     return document[prop];
 }
 console.log("isHidden: " + isHidden());
 console.log("Prerender: " + isPrerendered());
 
-//Analytics
+/*Analytics*/
 
 
 
 
-//Search Message
+/*Search Message*/
 
 var prerenderUsed = false;
 
@@ -327,7 +327,7 @@ if (isPrerendered() && !prerenderUsed) {
             }
         }
 
-        //Search Message Split Test - Impression
+        /*Search Message Split Test - Impression*/
         if (splitTestEnabled) {
             if (splitTest_useGS) {
                 trackEvent('searchMessage', 'impressionAB', 'true');
@@ -343,7 +343,7 @@ if (isPrerendered() && !prerenderUsed) {
 }
 
 window.addEventListener('load', function() {
-//We came from prerender
+/*We came from prerender*/
     var smessInterval = null;
     if (prerenderUsed) {
         smessInterval = setInterval(function () {
@@ -351,7 +351,7 @@ window.addEventListener('load', function() {
 
                 clearInterval(smessInterval);
 
-                //Search Message Split Test - Impression
+                /*Search Message Split Test - Impression*/
                 if (splitTestEnabled) {
                     if (splitTest_useGS) {
                         trackEvent('searchMessage', 'visitAB', 'true');
@@ -367,13 +367,13 @@ window.addEventListener('load', function() {
 
     console.log("Configuring");
 
-    //Speak links
+    /*Speak links*/
     var _allLinks = document.getElementsByTagName('a')
     Array.prototype.forEach.call(_allLinks, function(el) {
         hoverintent(el,
             function () {
                 if (config.speakLinks) {
-                    //responsiveVoice.cancel();
+                    /*responsiveVoice.cancel();*/
                     responsiveVoice.speak(el.textContent, 'Indonesian Female');
                     trackEvent('agentFeature', 'spokenLink');
                 }
@@ -383,7 +383,7 @@ window.addEventListener('load', function() {
     });
 
 
-    //Speak selected text
+    /*Speak selected text*/
     var selectedText      = "";
     var last_selectedText = "";
 
@@ -391,7 +391,7 @@ window.addEventListener('load', function() {
         var text = "";
         if (window.getSelection) {
             text = window.getSelection().toString();
-        } else if (document.selection && document.selection.type != "Control") { // for Internet Explorer 8 and below
+        } else if (document.selection && document.selection.type != "Control") { /* for Internet Explorer 8 and below*/
             text = document.selection.createRange().text;
         }
         return text;
@@ -419,13 +419,13 @@ window.addEventListener('load', function() {
         if (selectedText != last_selectedText && selectedText != "") {
             last_selectedText = selectedText;
 
-            responsiveVoice.cancel(); // stop anything currently being spoken
-            responsiveVoice.speak(selectedText, 'Indonesian Female'); //speak the text as returned by getSelectionText
+            responsiveVoice.cancel(); /* stop anything currently being spoken*/
+            responsiveVoice.speak(selectedText, 'Indonesian Female'); /*speak the text as returned by getSelectionText*/
             trackEvent('agentFeature', 'highlightText');
         }
     }
 
-    //Speak welcome message. Will only play if user didn't came from google.
+    /*Speak welcome message. Will only play if user didn't came from google.*/
     var welcomeMessageLaunched = false;
     if (config.welcomeMessage && (!config.welcomeMessageTime || oneTimeTest("welcomeMessage")) && !isPrerendered() && !prerenderUsed) {
         welcomeMessageLaunched = true;
@@ -438,12 +438,12 @@ window.addEventListener('load', function() {
         }, 1500);
     }
 
-    //Speak welcome message when user came from Google. Won't play if default message played
+    /*Speak welcome message when user came from Google. Won't play if default message played*/
     var welcomeMessage2Launched = false;
     var welcomeMessage2Interval = null;
     if (!welcomeMessageLaunched && config.welcomeMessage2 && (!config.welcomeMessageTime || oneTimeTest("welcomeMessage2"))
         && config.text_welcomeMessage2 != null && config.text_welcomeMessage2 != "") {
-        //Wait until we're visible and launch message
+        /*Wait until we're visible and launch message*/
 
         welcomeMessage2Interval = setInterval(function () {
             console.log("Welcome Message from Google Waiting");
@@ -459,7 +459,7 @@ window.addEventListener('load', function() {
         }, 1000);
     }
 
-    //Speak when scroll end
+    /*Speak when scroll end*/
     function bindScroll() {
         if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 100 && config.text_speakEndPage != null && config.text_speakEndPage != "") {
             console.log("bottom");
@@ -474,7 +474,7 @@ window.addEventListener('load', function() {
         window.addEventListener('scroll', bindScroll);
     }
 
-    //Inactivity
+    /*Inactivity*/
     var idleTime = 0;
     if (config.speakInactivity) {
         setInterval(timerIncrement, 1000);
@@ -498,7 +498,7 @@ window.addEventListener('load', function() {
         }
     }
 
-    //Exit intent
+    /*Exit intent*/
     if (config.speakInactivity) {
         console.info("setting up exit intent");
         document.addEventListener('mouseout', exitIntent);
@@ -511,7 +511,7 @@ window.addEventListener('load', function() {
         }
     }
 
-    //Tab and ctrl to speak - Accessibility Navigation
+    /*Tab and ctrl to speak - Accessibility Navigation*/
     var started = 0;
     if (config.accesibilityNavigation) {
         console.log("accesibilityNavigation");
@@ -610,7 +610,7 @@ function getOrCreateTest(name, prob, days) {
     if (c == null) {
         console.log("Cookie set");
         var v = (Math.random() < (prob != null ? prob : 0.5));
-        //1 hour
+        /*1 hour*/
         createCookie(name, v.toString(), (days != null ? days : (1 / 24)));
         return v;
     }
@@ -625,7 +625,7 @@ function oneTimeTest(name, days) {
 
     if (c == null) {
         console.log("Cookie set - one time True");
-        //1 hour
+        /*1 hour*/
         createCookie(name, (false).toString(), (days != null ? days : (0.5 / 24)));
         return true;
     }

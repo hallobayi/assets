@@ -1,11 +1,11 @@
-// OPEN TTD DIGITAL
+/* OPEN TTD DIGITAL*/
 jQuery(document).ready(function() {
     var idFrm = $('.openSignature').attr('data-id');
     var frmTtd = $('.openSignature');
     frmTtd.click(function (e) { console.log(idFrm)
         e.preventDefault();
 
-        var $signature = null; // referensi pad jSignature yang aktif (untuk reset)
+        var $signature = null; /* referensi pad jSignature yang aktif (untuk reset)*/
 
         var $bootbox = bootbox.dialog({
             title: 'Tambah Tanda Tangan Digital',
@@ -34,7 +34,7 @@ jQuery(document).ready(function() {
                         $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
                         $button.prop('disabled', true);
 
-                        // Submit Tanda Tangan Digitall
+                        /* Submit Tanda Tangan Digitall*/
                         form = $bootbox.find('form')[0];
                         $.ajax({
                             type: 'POST',
@@ -91,17 +91,17 @@ jQuery(document).ready(function() {
             $button.prop('disabled', false);
             $bootbox.find('.modal-body').empty().append(html);
 
-            // Submit dikunci sampai user menekan "Lock TTD"
+            /* Submit dikunci sampai user menekan "Lock TTD"*/
             $bootbox.find('.submitTtd').prop('disabled', true);
 
-            // Inisialisasi pad tanda tangan secara EKSPLISIT di sini.
-            // (Root-cause fix: tidak mengandalkan <script> inline pada fragment
-            //  AJAX, yang bisa di-strip/ditunda Cloudflare Rocket Loader /
-            //  Auto-Minify sehingga TTD tidak aktif di production.)
+            /* Inisialisasi pad tanda tangan secara EKSPLISIT di sini.*/
+            /* (Root-cause fix: tidak mengandalkan <script> inline pada fragment*/
+            /*  AJAX, yang bisa di-strip/ditunda Cloudflare Rocket Loader /*/
+            /*  Auto-Minify sehingga TTD tidak aktif di production.)*/
             initSignaturePad();
         });
 
-        // Inisialisasi jSignature pada modal yang sudah tampil.
+        /* Inisialisasi jSignature pada modal yang sudah tampil.*/
         function initSignaturePad() {
             var $sig = $bootbox.find('#signature');
             if (!$sig.length) return;
@@ -114,22 +114,22 @@ jQuery(document).ready(function() {
                 return;
             }
 
-            // jSignature butuh container yang sudah tampil dan punya lebar nyata.
-            // Jika di-init saat lebar 0px (modal masih beranimasi), canvas tidak
-            // bisa digambar. Tunggu sampai container benar-benar terlihat.
+            /* jSignature butuh container yang sudah tampil dan punya lebar nyata.*/
+            /* Jika di-init saat lebar 0px (modal masih beranimasi), canvas tidak*/
+            /* bisa digambar. Tunggu sampai container benar-benar terlihat.*/
             var attempts = 0;
             (function whenVisible() {
                 if ($sig.is(':visible') && $sig.outerWidth() > 0) {
-                    $sig.empty(); // bersihkan jika ada sisa init sebelumnya
+                    $sig.empty(); /* bersihkan jika ada sisa init sebelumnya*/
 
-                    // Ukuran canvas mengikuti lebar container yang sebenarnya,
-                    // sehingga koordinat gambar akurat (memperbaiki bug "tidak
-                    // bisa digambar / meleset" akibat canvas di-stretch via CSS).
+                    /* Ukuran canvas mengikuti lebar container yang sebenarnya,*/
+                    /* sehingga koordinat gambar akurat (memperbaiki bug "tidak*/
+                    /* bisa digambar / meleset" akibat canvas di-stretch via CSS).*/
                     var w = Math.floor($sig.width()) || 300;
                     $sig.jSignature({ width: w + 'px', height: '220px' });
                     $signature = $sig;
 
-                    // Tombol "#1. Lock TTD": kunci & simpan data TTD ke hidden input
+                    /* Tombol "#1. Lock TTD": kunci & simpan data TTD ke hidden input*/
                     $bootbox.find('#btnSave').off('click').on('click', function () {
                         var sigData = $sig.jSignature('getData', 'base30');
                         $bootbox.find('#hiddenSigData').val(sigData);
@@ -146,7 +146,7 @@ jQuery(document).ready(function() {
 
     });
 
-    // ON TODO:
+    /* ON TODO:*/
     var viewFrmTtd = $('.viewSignature');
     viewFrmTtd.click(function (e) {
         alert('dalam pengembangan');

@@ -4,7 +4,7 @@
  * Nilai dinamis (URL, CSRF) dibaca dari data-attributes pada #btn-submit-rating.
  */
 
-// Animasi klik bintang (existing behavior)
+/* Animasi klik bintang (existing behavior)*/
 document
   .querySelectorAll(".star-rating:not(.readonly) label")
   .forEach((star) => {
@@ -16,7 +16,7 @@ document
     });
   });
 
-// Submit rating pasien
+/* Submit rating pasien*/
 (function () {
   var selectedRating = 0;
   var labels = ["Sangat Buruk", "Buruk", "Cukup", "Baik", "Sangat Baik"];

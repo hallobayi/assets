@@ -1,6 +1,6 @@
 $().ready(function(){
 
-    // Field Jasa Dokter
+    /* Field Jasa Dokter*/
     var rupiahDokter = document.getElementById('field-jasa_dokter');
     var rupiahDokterFormat = document.getElementById('field-jasa_dokter_format');
 
@@ -10,7 +10,7 @@ $().ready(function(){
         rupiahDokterFormat.value = formatRupiah(this.value, 'Rp. ');
     });
 
-    // Field Jasa Klinik
+    /* Field Jasa Klinik*/
     var rupiahKlinik = document.getElementById('field-jasa_klinik');
     var rupiahKlinikFormat = document.getElementById('field-jasa_klinik_format');
 

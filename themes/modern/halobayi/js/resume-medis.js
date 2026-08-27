@@ -9,20 +9,20 @@ jQuery(document).ready(function() {
     console.log('Init Resume Medis');
 
     $(document).ready(function () {
-        // Format: PDF
-        // // Source: https://github.com/hhurz/tableExport.jquery.plugin.git
-        // var namaFile = 'resume-medis';
-        //     $("#btnExport").click(function () {
-        //         $('#tblExport').tableExport({
-        //         fileName: namaFile,
-        //         type: 'pdf',
-        //         // jspdf: {
-        //         //     orientation: 'p',
-        //         //     margins: {left:20, top:10},
-        //         //     autotable: false
-        //         // }
-        //     });
-        // });
+        /* Format: PDF*/
+        /* // Source: https://github.com/hhurz/tableExport.jquery.plugin.git*/
+        /* var namaFile = 'resume-medis';*/
+        /*     $("#btnExport").click(function () {*/
+        /*         $('#tblExport').tableExport({*/
+        /*         fileName: namaFile,*/
+        /*         type: 'pdf',*/
+        /*         // jspdf: {*/
+        /*         //     orientation: 'p',*/
+        /*         //     margins: {left:20, top:10},*/
+        /*         //     autotable: false*/
+        /*         // }*/
+        /*     });*/
+        /* });*/
 
         $("#printableAreaClick").click(function () {
             printDiv('printableArea');
@@ -30,7 +30,7 @@ jQuery(document).ready(function() {
         });
     });
 
-    // source: https://stackoverflow.com/a/7532581
+    /* source: https://stackoverflow.com/a/7532581*/
     function printDiv(divId) {
         var printContents = document.getElementById(divId).innerHTML;
         var originalContents = document.body.innerHTML;

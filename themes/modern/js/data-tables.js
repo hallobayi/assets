@@ -16,7 +16,7 @@ jQuery(document).ready(function () {
 		
 		const addSettings = 
 		{
-			// "dom":"Bfrtip",
+			/* "dom":"Bfrtip",*/
 			"buttons":[
 				{"extend":"copy"
 					,"text":"<i class='far fa-copy'></i> Copy"
@@ -62,16 +62,16 @@ jQuery(document).ready(function () {
 			]
 		}
 		
-		// Merge settings
-		// settings['lengthChange'] = false;
+		/* Merge settings*/
+		/* settings['lengthChange'] = false;*/
 		settings = {...settings, ...addSettings};
 		
-		// settings['buttons'] = [ 'copy', 'excel', 'pdf', 'colvis' ];
+		/* settings['buttons'] = [ 'copy', 'excel', 'pdf', 'colvis' ];*/
 		var table = $('#data-tables').DataTable(settings);
 		table.buttons().container()
 			.appendTo( '#data-tables_wrapper .col-md-6:eq(0)' );
 		
-		// No urut
+		/* No urut*/
 		table.on( 'order.dt search.dt', function () {
 			table.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
 				cell.innerHTML = i+1;

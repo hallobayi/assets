@@ -1,8 +1,8 @@
 $(document).ready(function () {
-  // source: https://stackoverflow.com/a/67184094
-  var tokenHash = $("input[name=csrf_test_name]").val(); //console.log(tokenHash)
+  /* source: https://stackoverflow.com/a/67184094*/
+  var tokenHash = $("input[name=csrf_test_name]").val(); /*console.log(tokenHash)*/
 
-  // ===== GRAFIK KLINIS (Pendaftaran, SOAP, Awal Medis, Obat) =====
+  /* ===== GRAFIK KLINIS (Pendaftaran, SOAP, Awal Medis, Obat) =====*/
   border_color_dark = "#b2b7c7";
   border_color_light = "#FFFFFF";
   grid_color_light = "#e9e9e9";
@@ -26,14 +26,14 @@ $(document).ready(function () {
     "Des",
   ];
 
-  // Format angka ribuan pakai titik
+  /* Format angka ribuan pakai titik*/
   function fmtRibuan(value) {
     return (value == null ? 0 : value)
       .toString()
       .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 
-  // Bangun config chart klinis. withNilai=true -> tampilkan 2 dataset (Jumlah + Nilai Rp)
+  /* Bangun config chart klinis. withNilai=true -> tampilkan 2 dataset (Jumlah + Nilai Rp)*/
   function buildConfigKlinis(labelJumlah, series, withNilai) {
     let datasets = [
       {
@@ -119,7 +119,7 @@ $(document).ready(function () {
     };
   }
 
-  // Registry chart 12-bulan (bar): id canvas, label, apakah pakai nilai rupiah
+  /* Registry chart 12-bulan (bar): id canvas, label, apakah pakai nilai rupiah*/
   const KLINIS_META = {
     pendaftaran: {
       canvas: "chart-klinis-pendaftaran",
@@ -242,7 +242,7 @@ $(document).ready(function () {
     icdChart.fullLabels = icdFullLabels(icdList0);
   }
 
-  // ===== Gauge Pendapatan per Dokter (half-doughnut) =====
+  /* ===== Gauge Pendapatan per Dokter (half-doughnut) =====*/
   const GAUGE_COLORS = [
     "rgb(99 174 206)",
     "rgb(251 179 66)",
@@ -314,7 +314,7 @@ $(document).ready(function () {
     });
   }
 
-  // ===== POLAR AREA CHART Total Tindakan per Layanan =====
+  /* ===== POLAR AREA CHART Total Tindakan per Layanan =====*/
   const TINDAKAN_COLORS = [
     "rgba(99, 174, 206, 0.75)",
     "rgba(251, 179, 66, 0.75)",
@@ -417,9 +417,9 @@ $(document).ready(function () {
     });
   }
 
-  // ===== Filter per-kartu (Tahun + Cabang) =====
-  // Tiap kartu punya <div class="card-filter" data-filter="<key>"> berisi
-  // select #filter-<key>-tahun dan #filter-<key>-cabang.
+  /* ===== Filter per-kartu (Tahun + Cabang) =====*/
+  /* Tiap kartu punya <div class="card-filter" data-filter="<key>"> berisi*/
+  /* select #filter-<key>-tahun dan #filter-<key>-cabang.*/
   const KLINIS_KEYS = ["pendaftaran", "soap", "awal", "tindakan", "obat"];
 
   function filterVal(key, jenis) {
@@ -440,7 +440,7 @@ $(document).ready(function () {
       .html();
   }
 
-  // Ambil ulang data satu kartu grafik klinis saat filternya berubah
+  /* Ambil ulang data satu kartu grafik klinis saat filternya berubah*/
   function reloadKlinis(key) {
     let tahun = filterVal(key, "tahun") || klinisTahunAwal;
     let cabang = filterVal(key, "cabang");
@@ -508,7 +508,7 @@ $(document).ready(function () {
     });
   }
 
-  // Dispatcher: perubahan filter hanya me-reload kartunya sendiri
+  /* Dispatcher: perubahan filter hanya me-reload kartunya sendiri*/
   $(".card-filter").on("change", "select", function () {
     let key = $(this).closest(".card-filter").data("filter");
 
@@ -527,7 +527,7 @@ $(document).ready(function () {
     }
   });
 
-  // Update warna chart klinis saat ganti tema
+  /* Update warna chart klinis saat ganti tema*/
   $("body").delegate(".nav-theme-option button", "click", function () {
     theme_value = $(this).attr("data-theme-value");
     font_color = theme_value == "dark" ? dark_color : light_color;
@@ -589,7 +589,7 @@ $(document).ready(function () {
     }
   });
 
-  // Penjualan Terbesar - Data Tables Ajax
+  /* Penjualan Terbesar - Data Tables Ajax*/
   let dataTablesPenjualanTerbesar = "";
   let column = $.parseJSON($("#penjualan-terbesar-column").html());
   let url = $("#penjualan-terbesar-url").text();
@@ -603,14 +603,14 @@ $(document).ready(function () {
     ajax: {
       url: url,
       type: "POST",
-      // Kirim CSRF via header (CI4 support X-CSRF-TOKEN header)
+      /* Kirim CSRF via header (CI4 support X-CSRF-TOKEN header)*/
       beforeSend: function (xhr) {
         xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
       },
       data: function (d) {
-        // tidak perlu kirim csrf_test_name di body, sudah via header
+        /* tidak perlu kirim csrf_test_name di body, sudah via header*/
       },
-      // Refresh tokenHash dari response header setelah setiap request (termasuk error)
+      /* Refresh tokenHash dari response header setelah setiap request (termasuk error)*/
       xhr: function () {
         var xhr = $.ajaxSettings.xhr();
         xhr.addEventListener("readystatechange", function () {
@@ -624,7 +624,7 @@ $(document).ready(function () {
         });
         return xhr;
       },
-      // Perbarui token dari response body jika ada (fallback)
+      /* Perbarui token dari response body jika ada (fallback)*/
       dataSrc: function (json) {
         if (json.csrf && json.csrf.value) {
           tokenHash = json.csrf.value;
@@ -648,7 +648,7 @@ $(document).ready(function () {
     settings,
   );
 
-  // Update Chart Penjualan
+  /* Update Chart Penjualan*/
   $("#tahun-penjualan-perbulan").change(function () {
     $this = $(this);
     $spinner = $(
@@ -683,7 +683,7 @@ $(document).ready(function () {
     );
   });
 
-  // Update Total Kunjungan Pasien per Layanan (DataTables) sesuai filter kartu
+  /* Update Total Kunjungan Pasien per Layanan (DataTables) sesuai filter kartu*/
   function reloadKunjungan() {
     let tahun = filterVal("kunjungan", "tahun");
     let cabang = filterVal("kunjungan", "cabang");
@@ -710,7 +710,7 @@ $(document).ready(function () {
     );
   }
 
-  // ===== Chart Dokter Favorite (PIE) =====
+  /* ===== Chart Dokter Favorite (PIE) =====*/
   let chartDokterFavorite = null;
   let configChartDokterFavorite = null;
   let dokterFavEl = document.getElementById("pie-container");
@@ -753,7 +753,7 @@ $(document).ready(function () {
     );
   }
 
-  // Update Chart Dokter Favorite sesuai filter kartu
+  /* Update Chart Dokter Favorite sesuai filter kartu*/
   function reloadDokterFavorite() {
     if (!chartDokterFavorite) return;
 
@@ -800,7 +800,7 @@ $(document).ready(function () {
     });
   }
 
-  // Update Total Kunjungan Pasien per Layanan
+  /* Update Total Kunjungan Pasien per Layanan*/
   $("#tahun-kunjungan-pasien").change(function () {
     $this = $(this);
     $spinner = $(
@@ -833,7 +833,7 @@ $(document).ready(function () {
     );
   });
 
-  // Update Pasien Terbaru sesuai filter kartu
+  /* Update Pasien Terbaru sesuai filter kartu*/
   let pasienDt = null;
 
   function reloadPasienTerbaru() {
@@ -919,7 +919,7 @@ $(document).ready(function () {
 
   let rencanaItems = [];
 
-  // Klik satu irisan doughnut -> tampilkan daftar tanggal + pasien pada periode tsb.
+  /* Klik satu irisan doughnut -> tampilkan daftar tanggal + pasien pada periode tsb.*/
   function tampilkanDetailRencana(item) {
     if (!item) return;
 
@@ -1104,7 +1104,7 @@ $(document).ready(function () {
     });
   }
 
-  // ===== DataTables Rencana Datang Kembali (server-side AJAX) =====
+  /* ===== DataTables Rencana Datang Kembali (server-side AJAX) =====*/
   $.fn.dataTable.ext.type.order["tgl-id-pre"] = function (d) {
     let m = String(d).match(/^(\d{2})-(\d{2})-(\d{4})$/);
     return m ? Number(m[3] + m[2] + m[1]) : 0;
@@ -1142,7 +1142,7 @@ $(document).ready(function () {
           xhr.setRequestHeader("X-CSRF-TOKEN", tokenHash);
         },
         data: function (d) {
-          // CSRF dikirim via header, tidak perlu di body
+          /* CSRF dikirim via header, tidak perlu di body*/
         },
         xhr: function () {
           var xhr = $.ajaxSettings.xhr();
@@ -1167,7 +1167,7 @@ $(document).ready(function () {
       },
       columns: datangColumn,
       drawCallback: function () {
-        // Nomor urut otomatis
+        /* Nomor urut otomatis*/
         let api = this.api();
         let start = api.page.info().start;
         api
@@ -1179,7 +1179,7 @@ $(document).ready(function () {
       },
     };
 
-    // Gabung setting tambahan dari span (order, columnDefs, dll.)
+    /* Gabung setting tambahan dari span (order, columnDefs, dll.)*/
     for (let k in datangAddSetting) {
       datangDtSettings[k] = datangAddSetting[k];
     }
@@ -1215,7 +1215,7 @@ $(document).ready(function () {
     datangDt = $("#tabel-datang-kembali").DataTable(datangDtSettings);
   }
 
-  // ===== DataTables Pasien Terbaru =====
+  /* ===== DataTables Pasien Terbaru =====*/
   if ($("#tabel-pasien-terbaru").length) {
     pasienDt = $("#tabel-pasien-terbaru").DataTable({
       order: [],
@@ -1225,7 +1225,7 @@ $(document).ready(function () {
       searching: false,
       info: false,
     });
-    // Nomor urut kolom pertama
+    /* Nomor urut kolom pertama*/
     pasienDt
       .on("order.dt search.dt", function () {
         pasienDt
@@ -1238,9 +1238,9 @@ $(document).ready(function () {
       .draw();
   }
 
-  // ===== Dropdown tahun pada footer kartu statistik =====
-  // Ganti tahun -> ambil ulang angka + growth kartunya saja.
-  // Jenis kartu dibaca dari atribut data-kartu pada select-nya.
+  /* ===== Dropdown tahun pada footer kartu statistik =====*/
+  /* Ganti tahun -> ambil ulang angka + growth kartunya saja.*/
+  /* Jenis kartu dibaca dari atribut data-kartu pada select-nya.*/
   $(".card-year-select").on("change", function () {
     let jenis = $(this).data("kartu");
     let tahun = $(this).val();

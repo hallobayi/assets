@@ -1,7 +1,7 @@
 $().ready(function(){
     console.log('Init Module Inventori Stock');
 
-    // Field Harga Beli Satuan
+    /* Field Harga Beli Satuan*/
     var hargaBeliSatuan = document.getElementById('field-harga_beli_satuan');
     var hargaBeliSatuanFormat = document.getElementById('field-harga_beli_satuan_format');
 
@@ -11,7 +11,7 @@ $().ready(function(){
         hargaBeliSatuanFormat.value = formatRupiah(this.value, 'Rp. ');
     });
 
-    // Field Harga Jual Satuan
+    /* Field Harga Jual Satuan*/
     var hargaJualSatuan = document.getElementById('field-harga_jual_satuan');
     var hargaJualSatuanFormat = document.getElementById('field-harga_jual_satuan_format');
 

@@ -10,7 +10,7 @@ $(document).ready(function(){
 		dateFormat: "Y-m-d H:i",
 		time_24hr: true
 	});
-	// $(".selector").flatpickr(optional_config);
+	/* $(".selector").flatpickr(optional_config);*/
 	
 	$('.feature-image').click(function(){
 		var $this = $(this);
@@ -77,14 +77,14 @@ $(document).ready(function(){
 					}
 				}
 			})
-			// .then(function () {
+			/* .then(function () {*/
 				/* console.log('oke');
 				theme_color = $('html').attr('data-bs-theme');
 				$iframe = $('.card-body').find('iframe');
 				$iframe_content = $iframe.contents();
 				$iframe_content.find('html').attr('data-bs-theme', theme_color); */
 				
-			// })
+			/* })*/
 			
 		},
 		

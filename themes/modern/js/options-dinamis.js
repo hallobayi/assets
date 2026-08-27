@@ -21,7 +21,7 @@ jQuery(document).ready(function () {
 		$clone.find('.upload-file-thumb').hide();
 		$clone.children().eq(0).show();
 		
-		// Find DIV row before submit and text muted
+		/* Find DIV row before submit and text muted*/
 		index = $container.children().length - 1;
 		console.log(index);
 		$last = $container.children().eq(index);

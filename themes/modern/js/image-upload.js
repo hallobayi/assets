@@ -44,11 +44,11 @@ jQuery(document).ready(function () {
 
 		var reader = new FileReader();
 
-		// Closure to capture the file information.
+		/* Closure to capture the file information.*/
 		reader.onload = (function(e) {
 			
-			// Render thumbnail.
-			// $upload_file.find('.file-prop').before(thumb);
+			/* Render thumbnail.*/
+			/* $upload_file.find('.file-prop').before(thumb);*/
 			if (file.type == 'image/png' || file.type == 'image/jpg' || file.type == 'image/jpeg') {
 				var img = new Image;
 				img.src = reader.result;
@@ -86,7 +86,7 @@ jQuery(document).ready(function () {
 			$('<small class="alert alert-danger">Tipe file yang diperbolehkan: .doc, .docx, .xls, .xlsx, dan .pdf</small>').insertAfter($this);
 			return;
 		} */
-		// console.log($upload_file.attr('class'));
+		/* console.log($upload_file.attr('class'));*/
 		/* var file_prop = '<ul><li><small>Name: ' + file.name + '</small></li><li><small>Size: ' + file_size + '</small></li><li><small>Type: ' + file.type + '</small></li></ul>';
 		$upload_file.show().find('span').html(file_prop); */
 	});

@@ -1,4 +1,4 @@
-// source: https://discuss.grocerycrud.com/t/setactionbutton-to-display-grocery-crud-edit-modal-for-an-alternative-edit-form/1240/2
+/* source: https://discuss.grocerycrud.com/t/setactionbutton-to-display-grocery-crud-edit-modal-for-an-alternative-edit-form/1240/2*/
 function popUpKirimKeCabang( idFrm ) {
 
     $bootbox = bootbox.dialog({
@@ -16,7 +16,7 @@ function popUpKirimKeCabang( idFrm ) {
                     $button_submit.prepend('<i class="fas fa-circle-notch fa-spin me-2 fa-lg"></i>');
                     $button.prop('disabled', true);
 
-                    // Submit Tanda Tangan Digitall
+                    /* Submit Tanda Tangan Digitall*/
                     form = $bootbox.find('form')[0];
                     $.ajax({
                         type: 'POST',
@@ -25,7 +25,7 @@ function popUpKirimKeCabang( idFrm ) {
                         processData: false,
                         contentType: false,
                         dataType: 'json',
-                        success: function(data) { //console.log(data)
+                        success: function(data) { /*console.log(data)*/
 
                             $bootbox.modal('hide');
                             if (data.status == 'ok') {
@@ -73,15 +73,15 @@ function popUpKirimKeCabang( idFrm ) {
         $button.prop('disabled', false);
         $bootbox.find('.modal-body').empty().append(html);
 
-        // $('.tglLupaAbsen').flatpickr({
-        //     dateFormat: "d-m-Y"
-        // });
-        // $('.jamLupaAbsen').flatpickr({
-        //     enableTime: true,
-        //     noCalendar: true,
-        //     dateFormat: "H:i",
-        //     time_24hr: true
-        // });
+        /* $('.tglLupaAbsen').flatpickr({*/
+        /*     dateFormat: "d-m-Y"*/
+        /* });*/
+        /* $('.jamLupaAbsen').flatpickr({*/
+        /*     enableTime: true,*/
+        /*     noCalendar: true,*/
+        /*     dateFormat: "H:i",*/
+        /*     time_24hr: true*/
+        /* });*/
     });
 }
 

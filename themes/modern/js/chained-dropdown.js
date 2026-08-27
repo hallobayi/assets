@@ -54,12 +54,12 @@ jQuery(document).ready(function () {
 
 		var reader = new FileReader();
 
-		// Closure to capture the file information.
+		/* Closure to capture the file information.*/
 		
 		
 		reader.onload = (function(e) {
 			
-			// Render thumbnail.
+			/* Render thumbnail.*/
 			var thumb = '<img class="thumb" src="' + e.target.result +
                             '" title="' + escape(file.name) + '"/>';
 			$upload_img.find('.file-prop').before(thumb);
@@ -96,7 +96,7 @@ jQuery(document).ready(function () {
 			$('<small class="alert alert-danger">Tipe file yang diperbolehkan: .doc, .docx, .xls, .xlsx, dan .pdf</small>').insertAfter($this);
 			return;
 		} */
-		// console.log($upload_img.attr('class'));
+		/* console.log($upload_img.attr('class'));*/
 		/* var file_prop = '<ul><li><small>Name: ' + file.name + '</small></li><li><small>Size: ' + file_size + '</small></li><li><small>Type: ' + file.type + '</small></li></ul>';
 		$upload_img.show().find('span').html(file_prop); */
 	});

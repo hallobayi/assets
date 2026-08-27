@@ -1,17 +1,17 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. CONFIGURATION
+  /* 1. CONFIGURATION*/
   const searchModalEl = document.getElementById("searchModal");
   const searchInput = document.getElementById("searchInput");
   const resultsContainer = document.getElementById("searchResults");
 
-  // Key penyimpanan index submenu (isi modul) di localStorage
+  /* Key penyimpanan index submenu (isi modul) di localStorage*/
   const SUBMENU_STORE_KEY = "sidebar_submenu_index";
 
-  // --- SUBMENU (ISI SIDEBAR) ---------------------------------------------
-  // Sidebar Simhai bersifat "flat": tiap modul (mis. Rekam Medis) hanya 1 link,
-  // sedangkan isinya (Pasien, Tarif Tindakan, ICD 9, dst) dirender sebagai kartu
-  // pada halaman modul. Kartu-kartu itu kita rekam ke localStorage supaya tetap
-  // bisa dicari dari halaman manapun (single source of truth = kartu yg dirender).
+  /* --- SUBMENU (ISI SIDEBAR) ---------------------------------------------*/
+  /* Sidebar Simhai bersifat "flat": tiap modul (mis. Rekam Medis) hanya 1 link,*/
+  /* sedangkan isinya (Pasien, Tarif Tindakan, ICD 9, dst) dirender sebagai kartu*/
+  /* pada halaman modul. Kartu-kartu itu kita rekam ke localStorage supaya tetap*/
+  /* bisa dicari dari halaman manapun (single source of truth = kartu yg dirender).*/
 
   function loadSubmenuStore() {
     try {
@@ -29,14 +29,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Rekam kartu (isi modul) pada halaman saat ini ke localStorage.
+  /* Rekam kartu (isi modul) pada halaman saat ini ke localStorage.*/
   function indexPageCards() {
     const cards = document.querySelectorAll(
       "#cardSearchList .card-search-item a.card-icon-link, .card-icon-link",
     );
     if (!cards.length) return;
 
-    // Nama modul diambil dari judul kartu halaman (mis. "Modul Master Data Rekam Medis")
+    /* Nama modul diambil dari judul kartu halaman (mis. "Modul Master Data Rekam Medis")*/
     const titleEl = document.querySelector(
       ".content-wrapper .card .card-title, .content .card-title",
     );
@@ -61,10 +61,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (changed) saveSubmenuStore(store);
   }
 
-  // Rekam kartu halaman ini sesegera mungkin (tidak bergantung pada modal)
+  /* Rekam kartu halaman ini sesegera mungkin (tidak bergantung pada modal)*/
   indexPageCards();
 
-  // Check if elements exist
+  /* Check if elements exist*/
   if (!searchModalEl || !searchInput || !resultsContainer) {
     console.error("Find Menu: Required elements not found", {
       searchModalEl: !!searchModalEl,
@@ -78,9 +78,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let menuItems = [];
 
-  // Fungsi Helper: Menentukan Kategori (Navbar vs Sidebar vs Submenu)
+  /* Fungsi Helper: Menentukan Kategori (Navbar vs Sidebar vs Submenu)*/
   function getCategory(link) {
-    // Cek 1: Apakah di dalam Navbar Dropdown?
+    /* Cek 1: Apakah di dalam Navbar Dropdown?*/
     const dropdownMenu = link.closest(".dropdown-menu");
     if (dropdownMenu) {
       const triggerId = dropdownMenu.getAttribute("aria-labelledby");
@@ -89,13 +89,13 @@ document.addEventListener("DOMContentLoaded", function () {
       return "Navbar Submenu";
     }
 
-    // Cek 2: Apakah di dalam Sidebar Submenu?
-    // Simhai structure: .sidebar nav ul li ul.submenu li a
+    /* Cek 2: Apakah di dalam Sidebar Submenu?*/
+    /* Simhai structure: .sidebar nav ul li ul.submenu li a*/
     const submenu = link.closest(".submenu");
     if (submenu && link.closest(".sidebar")) {
       const parentLi = submenu.parentElement;
       if (parentLi) {
-        // Parent trigger is the <a> sibling of <ul> (usually the first child of li)
+        /* Parent trigger is the <a> sibling of <ul> (usually the first child of li)*/
         const parentLink = parentLi.querySelector("a");
         if (parentLink) {
           const textSpan = parentLink.querySelector(".text");
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Cek 3: Tentukan Parent Utama
+    /* Cek 3: Tentukan Parent Utama*/
     if (link.closest(".nav-header") || link.closest(".nav-account"))
       return "Navbar";
     if (link.closest(".sidebar")) return "Sidebar";
@@ -115,14 +115,14 @@ document.addEventListener("DOMContentLoaded", function () {
     return "General";
   }
 
-  // 2. INDEXING FUNCTION
+  /* 2. INDEXING FUNCTION*/
   function indexMenuItems() {
     menuItems = [];
 
-    // SELECTOR GABUNGAN:
-    // 1. .nav-header a (Link Navbar)
-    // 2. .dropdown-item (Submenu Navbar including Profile)
-    // 3. .sidebar a (Semua link di dalam Sidebar)
+    /* SELECTOR GABUNGAN:*/
+    /* 1. .nav-header a (Link Navbar)*/
+    /* 2. .dropdown-item (Submenu Navbar including Profile)*/
+    /* 3. .sidebar a (Semua link di dalam Sidebar)*/
     const selectors =
       ".nav-header a, .dropdown-menu .dropdown-item, .sidebar a";
 
@@ -130,8 +130,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const seenHref = new Set();
 
     links.forEach((link) => {
-      // Abaikan link disabled, kosong, atau yang hanya berfungsi sebagai toggle (bukan link navigasi nyata)
-      // Simhai sidebar toggles have href="#" or href="javascript:void(0)"
+      /* Abaikan link disabled, kosong, atau yang hanya berfungsi sebagai toggle (bukan link navigasi nyata)*/
+      /* Simhai sidebar toggles have href="#" or href="javascript:void(0)"*/
       const href = link.getAttribute("href");
       if (
         link.classList.contains("disabled") ||
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const category = getCategory(link);
 
-      // Extract name - prioritize .text span for Sidebar items
+      /* Extract name - prioritize .text span for Sidebar items*/
       let name = link.textContent.trim();
       const textSpan = link.querySelector(".text");
       if (textSpan) {
@@ -161,11 +161,11 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    // Gabungkan submenu (isi modul) yang sudah terekam di localStorage,
-    // sehingga isi sidebar tetap bisa dicari dari halaman manapun.
+    /* Gabungkan submenu (isi modul) yang sudah terekam di localStorage,*/
+    /* sehingga isi sidebar tetap bisa dicari dari halaman manapun.*/
     const store = loadSubmenuStore();
     Object.keys(store).forEach((href) => {
-      if (seenHref.has(href)) return; // sudah ada sebagai link nyata di halaman
+      if (seenHref.has(href)) return; /* sudah ada sebagai link nyata di halaman*/
       seenHref.add(href);
       menuItems.push({
         name: store[href].name,
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // 3. SEARCH LOGIC (Sama seperti sebelumnya)
+  /* 3. SEARCH LOGIC (Sama seperti sebelumnya)*/
   searchInput.addEventListener("input", function (e) {
     const query = e.target.value.toLowerCase();
     resultsContainer.innerHTML = "";
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const a = document.createElement("a");
       a.href = item.href;
       a.className = "list-group-item list-group-item-action";
-      // Styling badge kategori
+      /* Styling badge kategori*/
       let badgeClass = "bg-secondary";
       if (item.isSubmenu) {
         badgeClass = "bg-success";
@@ -218,25 +218,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 4. HOTKEY LISTENER (Ctrl + K atau Ctrl + F)
+  /* 4. HOTKEY LISTENER (Ctrl + K atau Ctrl + F)*/
   document.addEventListener("keydown", function (event) {
-    // Ctrl + F (atau Ctrl + K yang umum dipakai untuk Command Palette)
+    /* Ctrl + F (atau Ctrl + K yang umum dipakai untuk Command Palette)*/
     if (
       (event.ctrlKey || event.metaKey) &&
       (event.key === "f" || event.key === "k")
     ) {
       console.log("Find Menu: Hotkey pressed", event.key);
       event.preventDefault();
-      indexMenuItems(); // Re-index saat dibuka untuk memastikan data terbaru
+      indexMenuItems(); /* Re-index saat dibuka untuk memastikan data terbaru*/
       bsModal.show();
     }
   });
 
-  // 5. AUTO FOCUS - Delay to allow Bootstrap to complete aria-hidden update
+  /* 5. AUTO FOCUS - Delay to allow Bootstrap to complete aria-hidden update*/
   searchModalEl.addEventListener("shown.bs.modal", function () {
     searchInput.value = "";
     resultsContainer.innerHTML = "";
-    // Small delay to ensure Bootstrap has removed aria-hidden
+    /* Small delay to ensure Bootstrap has removed aria-hidden*/
     setTimeout(() => {
       searchInput.focus();
     }, 100);

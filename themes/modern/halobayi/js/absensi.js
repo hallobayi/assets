@@ -3,7 +3,7 @@ const validasiAbsensi = (urlToken) => { console.log(urlToken)
     url: urlToken,
     dataType: "json",
     type: "GET",
-    success: function(data) { //console.log(data)
+    success: function(data) { /*console.log(data)*/
         if (data.status === 'ok') {
             Swal.fire({
                 title: "Berhasil Diverifikasi!",

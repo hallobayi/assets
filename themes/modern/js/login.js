@@ -11,7 +11,7 @@ jQuery(document).ready(function () {
 	options.common = {
 		debug: true,
 		onLoad: function () {
-			// $('#messages').text('Start typing password');
+			/* $('#messages').text('Start typing password');*/
 		}
 	};
 	$(':password').pwstrength(options);

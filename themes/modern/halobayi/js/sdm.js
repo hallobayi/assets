@@ -1,18 +1,18 @@
-// source: https://stackoverflow.com/a/42375876
+/* source: https://stackoverflow.com/a/42375876*/
 $( document ).ready(function() {
     var a = document.getElementById("field-start_shift");
     var b = document.getElementById("field-end_shift");
     var c = document.getElementById("field-start_tgl_pekan");
     var d = document.getElementById("field-end_tgl_pekan");
-    // var e = document.getElementById("field-tgl_lahir");
+    /* var e = document.getElementById("field-tgl_lahir");*/
 
     (a != null) ? (a.type = "time") : '';
     (b != null) ? (b.type = "time") : '';  
     (c != null) ? (c.type = "date") : '';          
     (d != null) ? (d.type = "date") : '';         
-    // (e != null) ? (e.type = "date") : '';
+    /* (e != null) ? (e.type = "date") : '';*/
     
-    $('#field-tgl_lahir').datepicker({ format: 'dd/mm/yyyy' }); // format to show
+    $('#field-tgl_lahir').datepicker({ format: 'dd/mm/yyyy' }); /* format to show*/
 
     $('body').delegate('.btn-view-absensi', 'click', function(e) {
         e.preventDefault();

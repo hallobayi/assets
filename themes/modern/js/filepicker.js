@@ -3,14 +3,14 @@ $(document).ready(function() {
 	var select_files_mode = false;
 	var selected_files = {};
 
-	// var item_per_page = ; // lihat file result.php
+	/* var item_per_page = ; // lihat file result.php*/
 	
 	list_filter_tgl = {};
 	$('.filter-tgl').children().each(function(i, elm) {
 		list_filter_tgl[$(elm).attr('value')] = $(elm).text();
 	});
 	
-	// Select Files
+	/* Select Files*/
 	$('.btn-select-files').click(function() {
 		$(this).hide();
 		$('.btn-cancel-select-files').show();
@@ -19,7 +19,7 @@ $(document).ready(function() {
 		$('.list-file-container').addClass('img-blur');
 	});
 	
-	// Cancel Select Files
+	/* Cancel Select Files*/
 	$('.btn-cancel-select-files').click(function() 
 	{
 		$(this).hide();
@@ -33,7 +33,7 @@ $(document).ready(function() {
 		$('.list-file-container').removeClass('img-blur');
 	});
 	
-	// Upload files button
+	/* Upload files button*/
 	$('.btn-upload-files').click(function() 
 	{
 		$form_dropzone = $('#dropzone-container');
@@ -44,7 +44,7 @@ $(document).ready(function() {
 		}
 	});
 	
-	// Delete all checked
+	/* Delete all checked*/
 	$('.btn-delete-checked').click(function() {
 
 		$button = $('.nav-util').find('button, select');
@@ -83,7 +83,7 @@ $(document).ready(function() {
 		});
 	});
 	
-	// Edit image
+	/* Edit image*/
 	$('.gallery-container').delegate('.thumbnail-item', 'click', function() {
 		 
 		$this = $(this);
@@ -152,7 +152,7 @@ $(document).ready(function() {
 	$filter_tgl = $('.filter-tgl');
 	$search = $('.search-file');
 	
-	// Search Files
+	/* Search Files*/
 	var timer;
 	$('body').delegate('.search-file', 'keyup search', function() 
 	{
@@ -179,7 +179,7 @@ $(document).ready(function() {
 		}, 1000);
 	});
 	
-	// Filter Tgl, File
+	/* Filter Tgl, File*/
 	$('body').delegate('.filter-tgl, .filter-file ', 'change', function() 
 	{
 		$('.gallery-container').find('.error-data-notfound').remove();
@@ -205,7 +205,7 @@ $(document).ready(function() {
 		return 'filter_file=' + $filter_file.val() + '&filter_tgl=' + $filter_tgl.val() + '&q=' + $search.val() + '&ajax=true';
 	}
 
-	// SCROLL
+	/* SCROLL*/
 	var $loading_status = $('.loading-status');
 	var $ul = $('#list-file-container');
 	var $li = $ul.children().eq(0).clone();
@@ -224,7 +224,7 @@ $(document).ready(function() {
 
 			if (loading_item < total_item) 
 			{
-				// console.log(page);
+				/* console.log(page);*/
 				$loading_status.fadeIn('fast');
 				loaded = item_per_page * page;
 				showing = loaded + item_per_page
@@ -314,7 +314,7 @@ $(document).ready(function() {
 					show_alert('Error !!!', data.message, 'error');
 				} else {
 					$li.fadeOut('fast', function() {
-						// console.log($li.parent().children().length);
+						/* console.log($li.parent().children().length);*/
 						if ($li.parent().children().length == 1) {
 							$li.attr('data-initial-item', 'true');
 							$toolbox_left.hide();
@@ -398,7 +398,7 @@ $(document).ready(function() {
 		});
 	});
 
-	// DROPZONE
+	/* DROPZONE*/
 	var $preview = $("#dropzone-preview-template").removeAttr('id'),
 				$warning = $("#jwd-dz-error");
 				
@@ -413,17 +413,17 @@ $(document).ready(function() {
 	var FileDropzone = new Dropzone(target, 
 	{
 		url: $(target).attr("action"),
-		// maxFiles: 1,
+		/* maxFiles: 1,*/
 		maxFilesize: 20,
-		// acceptedFiles: "image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.tsv,.ppt,.pptx,.pages,.odt,.rtf",
+		/* acceptedFiles: "image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.tsv,.ppt,.pptx,.pages,.odt,.rtf",*/
 		previewTemplate: previewTemplate,
 		previewsContainer: "#file-previews",
 		clickable: true,
 		dictFallbackMessage: "Browser Anda tidak support drag'n'drop file uploads.",
 		dictFileTooBig: "Ukuran file Anda terlalu besar: ({{filesize}}MiB). Ukuran maksimal file yang diperkenankan: {{maxFilesize}}MiB.",
-		// dictInvalidFileType: "You can't upload files of this type.", // Default: You can't upload files of this type.
+		/* dictInvalidFileType: "You can't upload files of this type.", // Default: You can't upload files of this type.*/
 		dictResponseError: "Server error code: {{statusCode}}.",
-		// dictMaxFilesExceeded: "Maksimal 3 file sekali upload.",
+		/* dictMaxFilesExceeded: "Maksimal 3 file sekali upload.",*/
 		dictFileSizeUnits: {tb: "TB", gb: "GB", mb: "MB", kb: "KB", b: "b"},
 	});
 				
@@ -464,7 +464,7 @@ $(document).ready(function() {
 	});
 
 	FileDropzone.on('dragenter', function () {
-		// $(target).addClass("dropzone-hover");
+		/* $(target).addClass("dropzone-hover");*/
 	});
 
 	FileDropzone.on('dragleave', function () {
@@ -489,14 +489,14 @@ $(document).ready(function() {
 	
 	FileDropzone.on("success", function(file, response) 
 	{
-		// $gallery_container.find('.filter-tgl').val('');
-		// $gallery_container.find('.search-file').val('');
-		// $gallery_container.find('.filter-file').val('').change();
+		/* $gallery_container.find('.filter-tgl').val('');*/
+		/* $gallery_container.find('.search-file').val('');*/
+		/* $gallery_container.find('.filter-file').val('').change();*/
 				
 		let parsedResponse = JSON.parse(response);
 		let meta_file = JSON.parse(parsedResponse.file_info.meta_file);
 		
-		// File Browser
+		/* File Browser*/
 		var $ul = $('.list-file-container');
 		var $li_first = $ul.find('li').eq(0);
 		var $li = $li_first.clone();
@@ -526,7 +526,7 @@ $(document).ready(function() {
 		
 		$ul.prepend($li);
 		
-		// Progress bar
+		/* Progress bar*/
 		$(file.previewElement).find('.progress-bar').addClass('progress-bar-success');
 			
 		for (k in parsedResponse.file_info['bulan_upload']) {
@@ -556,7 +556,7 @@ $(document).ready(function() {
 		}
 	});
 	
-	// FUNCTIONS
+	/* FUNCTIONS*/
 	function get_id_file($elm) 
 	{
 		if ($elm.hasClass('thumbnail-item')) {

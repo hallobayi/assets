@@ -1,8 +1,8 @@
 $(document).ready(function() {
 
-    // Perbarui token CSRF setiap kali selesai AJAX. Server mengirim token baru
-    // lewat header X-CSRF-TOKEN karena regenerate=true di Config\Security,
-    // sehingga token lama di halaman menjadi tidak valid setelah 1x POST.
+    /* Perbarui token CSRF setiap kali selesai AJAX. Server mengirim token baru*/
+    /* lewat header X-CSRF-TOKEN karena regenerate=true di Config\Security,*/
+    /* sehingga token lama di halaman menjadi tidak valid setelah 1x POST.*/
     $(document).ajaxComplete(function(event, xhr) {
         var newToken = xhr.getResponseHeader('X-CSRF-TOKEN');
         if (newToken) {
@@ -34,7 +34,7 @@ $(document).ready(function() {
         hitungTotalDiskon();
     });
 
-    // Memuat detail komponen tagihan (#tb_komponen_tagihan) via AJAX
+    /* Memuat detail komponen tagihan (#tb_komponen_tagihan) via AJAX*/
     function loadKomponenTagihan() {
         var $table = $("#tb_komponen_tagihan");
         if (!$table.length) return;
@@ -138,7 +138,7 @@ $(document).ready(function() {
                                 confirmButtonText: response.url_nota ? '<i class="fa fa-print"></i> Cetak Nota' : 'OK',
                                 cancelButtonText: 'Selesai'
                             }).then((result) => {
-                                // Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker
+                                /* Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker*/
                                 if (result.isConfirmed && response.url_nota) {
                                     window.open(response.url_nota, '_blank');
                                 }
@@ -177,7 +177,7 @@ function formatRupiah(angka, prefix){
 	rupiah     		= split[0].substr(0, sisa),
 	ribuan     		= split[0].substr(sisa).match(/\d{3}/gi);
  
-	// tambahkan titik jika yang di input sudah menjadi angka ribuan
+	/* tambahkan titik jika yang di input sudah menjadi angka ribuan*/
 	if(ribuan){
 		separator = sisa ? '.' : '';
 		rupiah += separator + ribuan.join('.');
@@ -198,25 +198,25 @@ function kembalikasir() {
 
 function tampildatatemppenjualan() {
     console.log('ah oh ah');
-    // $.ajax({
-    //     type: "post",
-    //     url: "https://sim.halobayi.co.id/kasir/tampildatatemp",
-    //     data: {
-    //         jualfaktur: $('#faktur').val(),
-    //         diskonmember: $('#diskonmember').val()
-    //     },
-    //     beforeSend: function() {
-    //         $('.viewtampildetailtemp').html('<i class="fa fa-spin fa-spinner"></i> Tunggu').show();
-    //     },
-    //     success: function(response) {
-    //         $('.viewtampildetailtemp').html(response).show();
-    //         $('#kode').focus();
-    //     },
-    //     error: function(xhr, ajaxOptions, thrownError) {
-    //         alert(xhr.status + "\n" + xhr.responseText + "\n" +
-    //             thrownError);
-    //     }
-    // });
+    /* $.ajax({*/
+    /*     type: "post",*/
+    /*     url: "https://sim.halobayi.co.id/kasir/tampildatatemp",*/
+    /*     data: {*/
+    /*         jualfaktur: $('#faktur').val(),*/
+    /*         diskonmember: $('#diskonmember').val()*/
+    /*     },*/
+    /*     beforeSend: function() {*/
+    /*         $('.viewtampildetailtemp').html('<i class="fa fa-spin fa-spinner"></i> Tunggu').show();*/
+    /*     },*/
+    /*     success: function(response) {*/
+    /*         $('.viewtampildetailtemp').html(response).show();*/
+    /*         $('#kode').focus();*/
+    /*     },*/
+    /*     error: function(xhr, ajaxOptions, thrownError) {*/
+    /*         alert(xhr.status + "\n" + xhr.responseText + "\n" +*/
+    /*             thrownError);*/
+    /*     }*/
+    /* });*/
 }
 $(document).ready(function() {
     tampildatatemppenjualan();
@@ -232,63 +232,63 @@ $(document).ready(function() {
 
             console.log('detail member: ', e.keyCode)
 
-            // $.ajax({
-            //     type: "post",
-            //     url: "https://sim.halobayi.co.id/kasir/detaildatamember",
-            //     data: {
-            //         kodemember: kodemember
-            //     },
-            //     dataType: "json",
-            //     cache: false,
-            //     success: function(response) {
-            //         if (response.sukses) {
-            //             $('#kodemember').prop('readonly', true);
-            //             $('#namamember').val(response.sukses.namamember);
-            //             $('#diskonmember').val(response.sukses.diskonmember);
-            //             $('#tabunganmember').val(response.sukses.tabunganmember);
-            //             tampildatatemppenjualan();
-            //         }
-            //         if (response.error) {
-            //             $.toast({
-            //                 heading: 'Maaf',
-            //                 text: response.error,
-            //                 showHideTransition: 'slide',
-            //                 icon: 'error',
-            //                 position: 'top-right'
-            //             });
-            //             $('#kodemember').val('');
-            //             $('#namamember').val('');
-            //         }
-            //     },
-            //     error: function(xhr, ajaxOptions, thrownError) {
-            //         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            //     }
-            // });
+            /* $.ajax({*/
+            /*     type: "post",*/
+            /*     url: "https://sim.halobayi.co.id/kasir/detaildatamember",*/
+            /*     data: {*/
+            /*         kodemember: kodemember*/
+            /*     },*/
+            /*     dataType: "json",*/
+            /*     cache: false,*/
+            /*     success: function(response) {*/
+            /*         if (response.sukses) {*/
+            /*             $('#kodemember').prop('readonly', true);*/
+            /*             $('#namamember').val(response.sukses.namamember);*/
+            /*             $('#diskonmember').val(response.sukses.diskonmember);*/
+            /*             $('#tabunganmember').val(response.sukses.tabunganmember);*/
+            /*             tampildatatemppenjualan();*/
+            /*         }*/
+            /*         if (response.error) {*/
+            /*             $.toast({*/
+            /*                 heading: 'Maaf',*/
+            /*                 text: response.error,*/
+            /*                 showHideTransition: 'slide',*/
+            /*                 icon: 'error',*/
+            /*                 position: 'top-right'*/
+            /*             });*/
+            /*             $('#kodemember').val('');*/
+            /*             $('#namamember').val('');*/
+            /*         }*/
+            /*     },*/
+            /*     error: function(xhr, ajaxOptions, thrownError) {*/
+            /*         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);*/
+            /*     }*/
+            /* });*/
         }
     });
 
     $(this).keydown(function(e) {
-        if (e.keyCode == 114) { //Press F3 cari Member
+        if (e.keyCode == 114) { /*Press F3 cari Member*/
 
             console.log('Cari Member: ', e)
-            // e.preventDefault();
-            // $.ajax({
-            //     url: "https://sim.halobayi.co.id/kasir/carimember",
-            //     success: function(response) {
-            //         $('.viewmodal').html(response).show();
-            //         const element = document.querySelector('#modalcarimember');
-            //         element.classList.add('animated', 'zoomIn');
-            //         $('#modalcarimember').modal('show');
-            //     },
-            //     error: function(xhr, ajaxOptions, thrownError) {
-            //         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            //     }
-            // });
+            /* e.preventDefault();*/
+            /* $.ajax({*/
+            /*     url: "https://sim.halobayi.co.id/kasir/carimember",*/
+            /*     success: function(response) {*/
+            /*         $('.viewmodal').html(response).show();*/
+            /*         const element = document.querySelector('#modalcarimember');*/
+            /*         element.classList.add('animated', 'zoomIn');*/
+            /*         $('#modalcarimember').modal('show');*/
+            /*     },*/
+            /*     error: function(xhr, ajaxOptions, thrownError) {*/
+            /*         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);*/
+            /*     }*/
+            /* });*/
         }
     });
 
     $(this).keydown(function(e) {
-        if (e.keyCode == 119) { //Press F8
+        if (e.keyCode == 119) { /*Press F8*/
             e.preventDefault();
 
             transaksipembayaran();
@@ -296,7 +296,7 @@ $(document).ready(function() {
     });
 
     $(this).keydown(function(e) {
-        if (e.keyCode == 115) { // Press F4
+        if (e.keyCode == 115) { /* Press F4*/
             e.preventDefault();
             Swal.fire({
                 title: `Batal Transaksi`,
@@ -309,47 +309,47 @@ $(document).ready(function() {
                 cancelButtonText: 'Tidak'
             }).then((result) => {
                 if (result.value) { console.log('Batal Transaksi: ', result)
-                    // $.ajax({
-                    //     type: "post",
-                    //     url: "https://sim.halobayi.co.id/kasir/bataltransaksi",
-                    //     data: {
-                    //         faktur: $('#faktur').val()
-                    //     },
-                    //     dataType: "json",
-                    //     success: function(response) {
-                    //         if (response.sukses) {
-                    //             Swal.fire({
-                    //                 position: 'top-center',
-                    //                 icon: 'success',
-                    //                 title: response.sukses,
-                    //                 showConfirmButton: false,
-                    //                 timer: 1000,
-                    //                 timerProgressBar: true,
-                    //             }).then((result) => {
-                    //                 window.location.reload();
-                    //             })
-                    //         } else {
-                    //             $.toast({
-                    //                 heading: 'Maaf',
-                    //                 text: response.error,
-                    //                 showHideTransition: 'slide',
-                    //                 icon: 'error',
-                    //                 position: 'top-right'
-                    //             });
-                    //         }
+                    /* $.ajax({*/
+                    /*     type: "post",*/
+                    /*     url: "https://sim.halobayi.co.id/kasir/bataltransaksi",*/
+                    /*     data: {*/
+                    /*         faktur: $('#faktur').val()*/
+                    /*     },*/
+                    /*     dataType: "json",*/
+                    /*     success: function(response) {*/
+                    /*         if (response.sukses) {*/
+                    /*             Swal.fire({*/
+                    /*                 position: 'top-center',*/
+                    /*                 icon: 'success',*/
+                    /*                 title: response.sukses,*/
+                    /*                 showConfirmButton: false,*/
+                    /*                 timer: 1000,*/
+                    /*                 timerProgressBar: true,*/
+                    /*             }).then((result) => {*/
+                    /*                 window.location.reload();*/
+                    /*             })*/
+                    /*         } else {*/
+                    /*             $.toast({*/
+                    /*                 heading: 'Maaf',*/
+                    /*                 text: response.error,*/
+                    /*                 showHideTransition: 'slide',*/
+                    /*                 icon: 'error',*/
+                    /*                 position: 'top-right'*/
+                    /*             });*/
+                    /*         }*/
 
-                    //     },
-                    //     error: function(xhr, ajaxOptions, thrownError) {
-                    //         alert(xhr.status + "\n" + xhr.responseText + "\n" +
-                    //             thrownError);
-                    //     }
-                    // });
+                    /*     },*/
+                    /*     error: function(xhr, ajaxOptions, thrownError) {*/
+                    /*         alert(xhr.status + "\n" + xhr.responseText + "\n" +*/
+                    /*             thrownError);*/
+                    /*     }*/
+                    /* });*/
                 }
             })
         }
     });
 
-    //Holding Transaksi Press F9
+    /*Holding Transaksi Press F9*/
     $(this).keydown(function(e) {
         if (e.keyCode == 120) {
             e.preventDefault();
@@ -357,25 +357,25 @@ $(document).ready(function() {
         }
     });
 
-    // Menampilkan Transaksi di Tanan F10
+    /* Menampilkan Transaksi di Tanan F10*/
     $(this).keydown(function(e) {
         if (e.keyCode == 121) { console.log('f10')
-            // e.preventDefault();
-            // $.ajax({
-            //     url: "https://sim.halobayi.co.id/kasir/data-transaksi-ditahan",
-            //     dataType: "json",
-            //     success: function(response) {
-            //         $('.viewmodaltransaksiditahan').html(response.data).show();
-            //         $('#modaltransaksiditahan').modal('show');
-            //     },
-            //     error: function(xhr, ajaxOptions, thrownError) {
-            //         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            //     }
-            // });
+            /* e.preventDefault();*/
+            /* $.ajax({*/
+            /*     url: "https://sim.halobayi.co.id/kasir/data-transaksi-ditahan",*/
+            /*     dataType: "json",*/
+            /*     success: function(response) {*/
+            /*         $('.viewmodaltransaksiditahan').html(response.data).show();*/
+            /*         $('#modaltransaksiditahan').modal('show');*/
+            /*     },*/
+            /*     error: function(xhr, ajaxOptions, thrownError) {*/
+            /*         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);*/
+            /*     }*/
+            /* });*/
         }
     });
 
-    // Pembayaran dengan tabungan member CTRL+F7
+    /* Pembayaran dengan tabungan member CTRL+F7*/
     $(this).keydown(function(e) {
         if (e.ctrlKey && e.keyCode == 118) {
             e.preventDefault();
@@ -399,45 +399,45 @@ $(document).ready(function() {
                     cancelButtonText: 'Tidak',
                 }).then((result) => {
                     if (result.value) { console.log('Pembayaran: ', result)
-                        // $.ajax({
-                        //     type: "post",
-                        //     url: "https://sim.halobayi.co.id/kasir/pembayaranmember",
-                        //     data: {
-                        //         kodemember: kodemember,
-                        //         pembulatan: pembulatan,
-                        //         faktur: $('#faktur').val(),
-                        //         kodemember: $('#kodemember').val(),
-                        //         total_kotor: $('#total_kotor').val(),
-                        //         total_bersih_semua: $('#total_bersih_semua').autoNumeric('get'),
-                        //         dispersensemua: $('#dispersensemua').autoNumeric('get'),
-                        //         disuangsemua: $('#disuangsemua').autoNumeric('get'),
-                        //     },
-                        //     dataType: "json",
-                        //     success: function(response) {
-                        //         if (response.sukses) {
-                        //             Swal.fire({
-                        //                 icon: 'success',
-                        //                 title: 'Berhasil',
-                        //                 html: response.sukses
-                        //             }).then((result) => {
-                        //                 if (result.value) {
-                        //                     window.location.reload();
-                        //                 }
-                        //             });
-                        //         } else {
-                        //             Swal.fire({
-                        //                 icon: 'error',
-                        //                 title: 'Maaf',
-                        //                 html: response.error
-                        //             });
-                        //         }
+                        /* $.ajax({*/
+                        /*     type: "post",*/
+                        /*     url: "https://sim.halobayi.co.id/kasir/pembayaranmember",*/
+                        /*     data: {*/
+                        /*         kodemember: kodemember,*/
+                        /*         pembulatan: pembulatan,*/
+                        /*         faktur: $('#faktur').val(),*/
+                        /*         kodemember: $('#kodemember').val(),*/
+                        /*         total_kotor: $('#total_kotor').val(),*/
+                        /*         total_bersih_semua: $('#total_bersih_semua').autoNumeric('get'),*/
+                        /*         dispersensemua: $('#dispersensemua').autoNumeric('get'),*/
+                        /*         disuangsemua: $('#disuangsemua').autoNumeric('get'),*/
+                        /*     },*/
+                        /*     dataType: "json",*/
+                        /*     success: function(response) {*/
+                        /*         if (response.sukses) {*/
+                        /*             Swal.fire({*/
+                        /*                 icon: 'success',*/
+                        /*                 title: 'Berhasil',*/
+                        /*                 html: response.sukses*/
+                        /*             }).then((result) => {*/
+                        /*                 if (result.value) {*/
+                        /*                     window.location.reload();*/
+                        /*                 }*/
+                        /*             });*/
+                        /*         } else {*/
+                        /*             Swal.fire({*/
+                        /*                 icon: 'error',*/
+                        /*                 title: 'Maaf',*/
+                        /*                 html: response.error*/
+                        /*             });*/
+                        /*         }*/
 
-                        //     },
-                        //     error: function(xhr, ajaxOptions, thrownError) {
-                        //         alert(xhr.status + "\n" + xhr.responseText + "\n" +
-                        //             thrownError);
-                        //     }
-                        // });
+                        /*     },*/
+                        /*     error: function(xhr, ajaxOptions, thrownError) {*/
+                        /*         alert(xhr.status + "\n" + xhr.responseText + "\n" +*/
+                        /*             thrownError);*/
+                        /*     }*/
+                        /* });*/
                     }
                 })
             }
@@ -452,47 +452,47 @@ $(document).ready(function() {
     });
 });
 
-// Transaksi Pembayaran 
+/* Transaksi Pembayaran */
 function transaksipembayaran() { alert('Transaksi Pembayaran')
-    // $.ajax({
-    //     type: "post",
-    //     url: "https://sim.halobayi.co.id/kasir/pembayaran",
-    //     data: {
-    //         faktur: $('#faktur').val(),
-    //         kodemember: $('#kodemember').val(),
-    //         namamember: $('#namamember').val(),
-    //         total_kotor: $('#total_kotor').val(),
-    //         total_bersih_semua: $('#total_bersih_semua').autoNumeric('get'),
-    //         pembulatan: $('#pembulatan').autoNumeric('get'),
-    //         dispersensemua: $('#dispersensemua').autoNumeric('get'),
-    //         disuangsemua: $('#disuangsemua').autoNumeric('get'),
-    //     },
-    //     dataType: "json",
-    //     success: function(response) {
-    //         if (response.sukses) {
-    //             $('.viewmodalpembayaran').html(response.sukses).show();
-    //             $('#modalpembayaran').on('shown.bs.modal', function(e) {
-    //                 $('#jumlahuang').focus();
-    //             });
-    //             $('#modalpembayaran').modal('show');
-    //         } else {
-    //             $.toast({
-    //                 heading: 'Maaf',
-    //                 text: response.error,
-    //                 showHideTransition: 'slide',
-    //                 icon: 'error',
-    //                 position: 'top-right'
-    //             });
-    //         }
+    /* $.ajax({*/
+    /*     type: "post",*/
+    /*     url: "https://sim.halobayi.co.id/kasir/pembayaran",*/
+    /*     data: {*/
+    /*         faktur: $('#faktur').val(),*/
+    /*         kodemember: $('#kodemember').val(),*/
+    /*         namamember: $('#namamember').val(),*/
+    /*         total_kotor: $('#total_kotor').val(),*/
+    /*         total_bersih_semua: $('#total_bersih_semua').autoNumeric('get'),*/
+    /*         pembulatan: $('#pembulatan').autoNumeric('get'),*/
+    /*         dispersensemua: $('#dispersensemua').autoNumeric('get'),*/
+    /*         disuangsemua: $('#disuangsemua').autoNumeric('get'),*/
+    /*     },*/
+    /*     dataType: "json",*/
+    /*     success: function(response) {*/
+    /*         if (response.sukses) {*/
+    /*             $('.viewmodalpembayaran').html(response.sukses).show();*/
+    /*             $('#modalpembayaran').on('shown.bs.modal', function(e) {*/
+    /*                 $('#jumlahuang').focus();*/
+    /*             });*/
+    /*             $('#modalpembayaran').modal('show');*/
+    /*         } else {*/
+    /*             $.toast({*/
+    /*                 heading: 'Maaf',*/
+    /*                 text: response.error,*/
+    /*                 showHideTransition: 'slide',*/
+    /*                 icon: 'error',*/
+    /*                 position: 'top-right'*/
+    /*             });*/
+    /*         }*/
 
-    //     },
-    //     error: function(xhr, ajaxOptions, thrownError) {
-    //         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-    //     }
-    // });
+    /*     },*/
+    /*     error: function(xhr, ajaxOptions, thrownError) {*/
+    /*         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);*/
+    /*     }*/
+    /* });*/
 }
 
-// Holding Transaksi
+/* Holding Transaksi*/
 function holdingtransaksi() {
     let faktur = $('#faktur').val();
     let kodemember = $('#kodemember').val();
@@ -507,36 +507,36 @@ function holdingtransaksi() {
         cancelButtonText: 'Tidak'
     }).then((result) => {
         if (result.value) { console.log(result)
-            // $.ajax({
-            //     type: "post",
-            //     url: "https://sim.halobayi.co.id/kasir/holdingtransaksi",
-            //     data: {
-            //         faktur: faktur,
-            //         kodemember: kodemember,
-            //         total_subtotal: $('#pembulatan').autoNumeric('get')
-            //     },
-            //     dataType: "json",
-            //     success: function(response) {
-            //         if (response.sukses) {
-            //             Swal.fire({
-            //                 icon: 'success',
-            //                 title: 'Transaksi berhasil ditahan',
-            //                 // text: 'Something went wrong!',
-            //                 // footer: '<a href>Why do I have this issue?</a>'
-            //             }).then((result) => {
-            //                 window.location.reload();
-            //             });
-            //         } else {
-            //             $.toast({
-            //                 heading: 'Maaf',
-            //                 text: response.error,
-            //                 showHideTransition: 'slide',
-            //                 icon: 'error',
-            //                 position: 'top-center'
-            //             });
-            //         }
-            //     }
-            // });
+            /* $.ajax({*/
+            /*     type: "post",*/
+            /*     url: "https://sim.halobayi.co.id/kasir/holdingtransaksi",*/
+            /*     data: {*/
+            /*         faktur: faktur,*/
+            /*         kodemember: kodemember,*/
+            /*         total_subtotal: $('#pembulatan').autoNumeric('get')*/
+            /*     },*/
+            /*     dataType: "json",*/
+            /*     success: function(response) {*/
+            /*         if (response.sukses) {*/
+            /*             Swal.fire({*/
+            /*                 icon: 'success',*/
+            /*                 title: 'Transaksi berhasil ditahan',*/
+            /*                 // text: 'Something went wrong!',*/
+            /*                 // footer: '<a href>Why do I have this issue?</a>'*/
+            /*             }).then((result) => {*/
+            /*                 window.location.reload();*/
+            /*             });*/
+            /*         } else {*/
+            /*             $.toast({*/
+            /*                 heading: 'Maaf',*/
+            /*                 text: response.error,*/
+            /*                 showHideTransition: 'slide',*/
+            /*                 icon: 'error',*/
+            /*                 position: 'top-center'*/
+            /*             });*/
+            /*         }*/
+            /*     }*/
+            /* });*/
         }
     })
 }

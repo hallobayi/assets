@@ -6,17 +6,17 @@ jQuery(document).ready(function () {
 	$('.colorpicker').spectrum({
 		showPalette: true,
 		change: function(color) {
-			// alert(color);
-			hex_color = color.toHexString(); // #ff0000
-			// console.log(hex_color);
+			/* alert(color);*/
+			hex_color = color.toHexString(); /* #ff0000*/
+			/* console.log(hex_color);*/
 			$(this).val(color);
 		}
 	});
 	$(".colorpicker").on('move.spectrum', function(e, tinycolor) {
 		$image_preview.css('background-color', tinycolor.toRgbString());
 		$logo_container.css('background-color', tinycolor.toRgbString());
-		// $(e.target).val(tinycolor.toHexString());
-		// console.log(tinycolor.toHexString());
+		/* $(e.target).val(tinycolor.toHexString());*/
+		/* console.log(tinycolor.toHexString());*/
 	});
 	
 	$(".colorpicker").on('hide.spectrum', function(e, tinycolor) {
@@ -35,6 +35,6 @@ jQuery(document).ready(function () {
 		});
 		
 		$ul.next().val($this.attr('data-class'));
-		// $('#input-color-scheme').val(split);
+		/* $('#input-color-scheme').val(split);*/
 	});
 });

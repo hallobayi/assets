@@ -10,7 +10,7 @@ $(function() {
     $('#nama_pasien_span').tooltip({title: "Klik Untuk Dapat Nomor WA Otomatis", delay: {show: 300, hide: 60}, animation: true, placement: 'right'})
     $('.sinkronAwal').tooltip({title: "Klik Sinkronisasi Pasien Ke Satusehat", delay: {show: 300, hide: 60}, animation: true, placement: 'right'})
 
-    // Toolstip Menu
+    /* Toolstip Menu*/
     $('#Sumber_Daya_Manusia').tooltip({title: "Module Master Data SDM", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#Rekam_Medis').tooltip({title: "Module Master Data Rekam Medis", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#Akuntansi').tooltip({title: "Module Master Data Akuntansi", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
@@ -20,7 +20,7 @@ $(function() {
     $('#Integrasi_Sistem').tooltip({title: "Module Master Data Integrasi Sistem", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#Absensi').tooltip({title: "Module Laporan Absensi", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
 
-    // Pendaftaran Form
+    /* Pendaftaran Form*/
     $('#gravida').tooltip({title: "Kehamilan Keberapa?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#para').tooltip({title: "Berapa Kali Kelahiran?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})
     $('#abortus').tooltip({title: "Berapa Kali Abortus?", delay: {show: 500, hide: 100}, animation: true, placement: 'right'})

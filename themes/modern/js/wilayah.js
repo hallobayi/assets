@@ -18,8 +18,8 @@ $(document).ready(function() {
 	 */
 	var CSRF_HEADER = 'X-CSRF-TOKEN';
 
-	// jqXHR pencarian kelurahan yang sedang berjalan (untuk dibatalkan saat
-	// user mengetik lagi, supaya response lama tidak menimpa hasil terbaru).
+	/* jqXHR pencarian kelurahan yang sedang berjalan (untuk dibatalkan saat*/
+	/* user mengetik lagi, supaya response lama tidak menimpa hasil terbaru).*/
 	var typeaheadXhr = null;
 
 	function refreshCsrfToken(xhr) {
@@ -103,7 +103,7 @@ $(document).ready(function() {
 		$wrapper.append($spinner);
 
 		function reenable() {
-			// pastikan dropdown tidak pernah terkunci walau request gagal
+			/* pastikan dropdown tidak pernah terkunci walau request gagal*/
 			$wilayah.prop('disabled', false);
 			$wrapper.remove();
 		}
@@ -136,7 +136,7 @@ $(document).ready(function() {
 				notifyError(humanizeAjaxError(xhr));
 			})
 			.always(function(dataOrXhr, status, xhrOrError) {
-				// getJSON sukses -> arg ke-3 xhr; gagal -> arg ke-1 xhr
+				/* getJSON sukses -> arg ke-3 xhr; gagal -> arg ke-1 xhr*/
 				refreshCsrfToken(status === 'success' ? xhrOrError : dataOrXhr);
 			});
 	}
@@ -145,8 +145,8 @@ $(document).ready(function() {
 		set_options($(this));
 	});
 
-	// Pencarian Kelurahan
-	// source: https://stackoverflow.com/a/30340490
+	/* Pencarian Kelurahan*/
+	/* source: https://stackoverflow.com/a/30340490*/
 	$('.kelurahanTypeahead').typeahead({
 		hint: true,
 		highlight: true,
@@ -167,7 +167,7 @@ $(document).ready(function() {
 			}
 		},
 		source: function(query, processSync, processAsync) {
-			// Batalkan pencarian sebelumnya yang masih jalan.
+			/* Batalkan pencarian sebelumnya yang masih jalan.*/
 			if (typeaheadXhr) {
 				typeaheadXhr.abort();
 			}
@@ -175,10 +175,10 @@ $(document).ready(function() {
 			typeaheadXhr = $.ajax({
 				url: base_url + 'wilayah/typeahead',
 				dataType: 'json',
-				// GET, BUKAN POST. Pencarian ini read-only dan CI4 hanya
-				// memverifikasi CSRF pada POST/PUT/PATCH/DELETE. Dengan POST,
-				// tiap request yang lolos me-regenerate token sehingga request
-				// per-ketikan yang tumpang tindih saling menjegal -> 403.
+				/* GET, BUKAN POST. Pencarian ini read-only dan CI4 hanya*/
+				/* memverifikasi CSRF pada POST/PUT/PATCH/DELETE. Dengan POST,*/
+				/* tiap request yang lolos me-regenerate token sehingga request*/
+				/* per-ketikan yang tumpang tindih saling menjegal -> 403.*/
 				type: 'GET',
 				data: {
 					max_rows: 15,
@@ -207,13 +207,13 @@ $(document).ready(function() {
 					return processAsync(return_list);
 				},
 				error: function(xhr, textStatus) {
-					// Request yang kita batalkan sendiri bukan error -> jangan
-					// tampilkan toast dan jangan kosongkan suggestion.
+					/* Request yang kita batalkan sendiri bukan error -> jangan*/
+					/* tampilkan toast dan jangan kosongkan suggestion.*/
 					if (textStatus === 'abort' || xhr.statusText === 'abort') {
 						return;
 					}
-					// PENTING: tetap panggil processAsync([]) supaya spinner berhenti
-					// dan template "empty" tampil, bukan muter tanpa akhir.
+					/* PENTING: tetap panggil processAsync([]) supaya spinner berhenti*/
+					/* dan template "empty" tampil, bukan muter tanpa akhir.*/
 					processAsync([]);
 					notifyError(humanizeAjaxError(xhr));
 				},
@@ -221,7 +221,7 @@ $(document).ready(function() {
 					if (typeaheadXhr === xhr) {
 						typeaheadXhr = null;
 					}
-					// simpan token terbaru untuk submit form berikutnya
+					/* simpan token terbaru untuk submit form berikutnya*/
 					refreshCsrfToken(xhr);
 				}
 			});
@@ -234,14 +234,14 @@ $(document).ready(function() {
 		$(e.target).removeClass('sLoading');
 	});
 
-	// source: https://stackoverflow.com/a/19540313
+	/* source: https://stackoverflow.com/a/19540313*/
 	function onSelectedKelurahan($e, datum) {
 
 		$('#propinsiTypeahead').val(datum.nama_propinsi);
 		$('#kabupatenTypeahead').val(datum.nama_kabupaten);
 		$('#kecamatanTypeahead').val(datum.nama_kecamatan);
 
-		// source: https://github.com/twitter/typeahead.js/issues/860#issuecomment-48430835
+		/* source: https://github.com/twitter/typeahead.js/issues/860#issuecomment-48430835*/
 		$('#kelurahanTypeahead').typeahead('val', datum.nama_kelurahan);
 
 		$('#id_wilayah_propinsi').val(datum.kd_propinsi);

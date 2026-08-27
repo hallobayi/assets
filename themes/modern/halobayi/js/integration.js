@@ -1,4 +1,4 @@
-const getPractioner = (urlToken) => { //console.log(urlToken)
+const getPractioner = (urlToken) => { /*console.log(urlToken)*/
     $.ajax({
     url: urlToken,
     dataType: "json",
@@ -19,12 +19,12 @@ const getPractioner = (urlToken) => { //console.log(urlToken)
  });
 }
 
-const createOrg = (urlToken) => { //console.log(urlToken)
+const createOrg = (urlToken) => { /*console.log(urlToken)*/
     $.ajax({
     url: urlToken,
     dataType: "json",
     type: "GET",
-    success: function(data) { //console.log(data)
+    success: function(data) { /*console.log(data)*/
         if (data.status === 'success') {
             Swal.fire({
                 title: "Berhasil Update Organisasi",
@@ -40,12 +40,12 @@ const createOrg = (urlToken) => { //console.log(urlToken)
  });
 }
 
-const createLocation = (urlToken) => { //console.log(urlToken)
+const createLocation = (urlToken) => { /*console.log(urlToken)*/
     $.ajax({
     url: urlToken,
     dataType: "json",
     type: "GET",
-    success: function(data) { //console.log(data)
+    success: function(data) { /*console.log(data)*/
         if (data.status === 'success') {
             Swal.fire({
                 title: "Berhasil Update Lokasi",

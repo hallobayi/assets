@@ -5,7 +5,7 @@ $(document).ready(function() {
 	chart_font_color = cookie_jwd_adm_theme == 'dark' ? dark_color : light_color;
 	chart_grid_color = cookie_jwd_adm_theme == 'dark' ? grid_dark_color : grid_light_color;
 	
-	// Chart Penjualan Perbulan
+	/* Chart Penjualan Perbulan*/
 	let randomBackground = [];		
 	for (i = 0; i < 12; i++){
 		randomBackground.push(dynamicColors());
@@ -68,8 +68,8 @@ $(document).ready(function() {
 			tooltips: {
 				callbacks: {
 					label: function(tooltipItems, data) {
-						// return data.labels[tooltipItems.index] + ": " + data.datasets[0].data[tooltipItems.index].toLocaleString();
-						// return "Total : " + data.datasets[0].data[tooltipItems.index].toLocaleString();
+						/* return data.labels[tooltipItems.index] + ": " + data.datasets[0].data[tooltipItems.index].toLocaleString();*/
+						/* return "Total : " + data.datasets[0].data[tooltipItems.index].toLocaleString();*/
 						return "Total : " + data.datasets[0].data[tooltipItems.index].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 					}
 				}
@@ -88,7 +88,7 @@ $(document).ready(function() {
 					ticks: {
 						color: chart_font_color,
 						callback: function(value, index, values) {
-							// return value.toLocaleString();
+							/* return value.toLocaleString();*/
 							return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 						}
 					},
@@ -101,7 +101,7 @@ $(document).ready(function() {
 	}
 
 
-	// Pie Chart
+	/* Pie Chart*/
 	let item_terjual_bg = [];
 	item_terjual.map( () => {
 		item_terjual_bg.push(dynamicColors());

@@ -10,8 +10,8 @@
         return hookCallback.apply(null, arguments);
     }
 
-    // This is done to register the method called with moment()
-    // without creating circular dependencies.
+    /* This is done to register the method called with moment()*/
+    /* without creating circular dependencies.*/
     function setHookCallback(callback) {
         hookCallback = callback;
     }
@@ -24,8 +24,8 @@
     }
 
     function isObject(input) {
-        // IE8 will treat undefined and null as object if it wasn't for
-        // input != null
+        /* IE8 will treat undefined and null as object if it wasn't for*/
+        /* input != null*/
         return (
             input != null &&
             Object.prototype.toString.call(input) === '[object Object]'
@@ -101,7 +101,7 @@
     }
 
     function defaultParsingFlags() {
-        // We need to deep clone this object.
+        /* We need to deep clone this object.*/
         return {
             empty: false,
             unusedTokens: [],
@@ -195,8 +195,8 @@
         return m;
     }
 
-    // Plugins that add properties should also add the key here (null value),
-    // so we can properly clone ourselves.
+    /* Plugins that add properties should also add the key here (null value),*/
+    /* so we can properly clone ourselves.*/
     var momentProperties = (hooks.momentProperties = []),
         updateInProgress = false;
 
@@ -250,15 +250,15 @@
         return to;
     }
 
-    // Moment prototype object
+    /* Moment prototype object*/
     function Moment(config) {
         copyConfig(this, config);
         this._d = new Date(config._d != null ? config._d.getTime() : NaN);
         if (!this.isValid()) {
             this._d = new Date(NaN);
         }
-        // Prevent infinite loop in case updateOffset creates new moment
-        // objects.
+        /* Prevent infinite loop in case updateOffset creates new moment*/
+        /* objects.*/
         if (updateInProgress === false) {
             updateInProgress = true;
             hooks.updateOffset(this);
@@ -304,7 +304,7 @@
                                 arg += key + ': ' + arguments[0][key] + ', ';
                             }
                         }
-                        arg = arg.slice(0, -2); // Remove trailing comma and space
+                        arg = arg.slice(0, -2); /* Remove trailing comma and space*/
                     } else {
                         arg = arguments[i];
                     }
@@ -358,9 +358,9 @@
             }
         }
         this._config = config;
-        // Lenient ordinal parsing accepts just a number in addition to
-        // number + (possibly) stuff coming from _dayOfMonthOrdinalParse.
-        // TODO: Remove "ordinalParse" fallback in next major release.
+        /* Lenient ordinal parsing accepts just a number in addition to*/
+        /* number + (possibly) stuff coming from _dayOfMonthOrdinalParse.*/
+        /* TODO: Remove "ordinalParse" fallback in next major release.*/
         this._dayOfMonthOrdinalParseLenient = new RegExp(
             (this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) +
                 '|' +
@@ -390,7 +390,7 @@
                 !hasOwnProp(childConfig, prop) &&
                 isObject(parentConfig[prop])
             ) {
-                // make sure changes to properties don't modify parent config
+                /* make sure changes to properties don't modify parent config*/
                 res[prop] = extend({}, res[prop]);
             }
         }
@@ -451,10 +451,10 @@
         formatFunctions = {},
         formatTokenFunctions = {};
 
-    // token:    'M'
-    // padded:   ['MM', 2]
-    // ordinal:  'Mo'
-    // callback: function () { this.month() + 1 }
+    /* token:    'M'*/
+    /* padded:   ['MM', 2]*/
+    /* ordinal:  'Mo'*/
+    /* callback: function () { this.month() + 1 }*/
     function addFormatToken(token, padded, ordinal, callback) {
         var func = callback;
         if (typeof callback === 'string') {
@@ -512,7 +512,7 @@
         };
     }
 
-    // format date using native date object
+    /* format date using native date object*/
     function formatMoment(m, format) {
         if (!m.isValid()) {
             return m.localeData().invalidDate();
@@ -731,28 +731,28 @@
         return units;
     }
 
-    var match1 = /\d/, //       0 - 9
-        match2 = /\d\d/, //      00 - 99
-        match3 = /\d{3}/, //     000 - 999
-        match4 = /\d{4}/, //    0000 - 9999
-        match6 = /[+-]?\d{6}/, // -999999 - 999999
-        match1to2 = /\d\d?/, //       0 - 99
-        match3to4 = /\d\d\d\d?/, //     999 - 9999
-        match5to6 = /\d\d\d\d\d\d?/, //   99999 - 999999
-        match1to3 = /\d{1,3}/, //       0 - 999
-        match1to4 = /\d{1,4}/, //       0 - 9999
-        match1to6 = /[+-]?\d{1,6}/, // -999999 - 999999
-        matchUnsigned = /\d+/, //       0 - inf
-        matchSigned = /[+-]?\d+/, //    -inf - inf
-        matchOffset = /Z|[+-]\d\d:?\d\d/gi, // +00:00 -00:00 +0000 -0000 or Z
-        matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi, // +00 -00 +00:00 -00:00 +0000 -0000 or Z
-        matchTimestamp = /[+-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
-        // any word (or two) characters or numbers including two/three word month in arabic.
-        // includes scottish gaelic two word and hyphenated months
+    var match1 = /\d/, /*       0 - 9*/
+        match2 = /\d\d/, /*      00 - 99*/
+        match3 = /\d{3}/, /*     000 - 999*/
+        match4 = /\d{4}/, /*    0000 - 9999*/
+        match6 = /[+-]?\d{6}/, /* -999999 - 999999*/
+        match1to2 = /\d\d?/, /*       0 - 99*/
+        match3to4 = /\d\d\d\d?/, /*     999 - 9999*/
+        match5to6 = /\d\d\d\d\d\d?/, /*   99999 - 999999*/
+        match1to3 = /\d{1,3}/, /*       0 - 999*/
+        match1to4 = /\d{1,4}/, /*       0 - 9999*/
+        match1to6 = /[+-]?\d{1,6}/, /* -999999 - 999999*/
+        matchUnsigned = /\d+/, /*       0 - inf*/
+        matchSigned = /[+-]?\d+/, /*    -inf - inf*/
+        matchOffset = /Z|[+-]\d\d:?\d\d/gi, /* +00:00 -00:00 +0000 -0000 or Z*/
+        matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi, /* +00 -00 +00:00 -00:00 +0000 -0000 or Z*/
+        matchTimestamp = /[+-]?\d+(\.\d{1,3})?/, /* 123456789 123456789.123*/
+        /* any word (or two) characters or numbers including two/three word month in arabic.*/
+        /* includes scottish gaelic two word and hyphenated months*/
         matchWord =
             /[0-9]{0,256}['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFF07\uFF10-\uFFEF]{1,256}|[\u0600-\u06FF\/]{1,256}(\s*?[\u0600-\u06FF]{1,256}){1,2}/i,
-        match1to2NoLeadingZero = /^[1-9]\d?/, //         1-99
-        match1to2HasZero = /^([1-9]\d|\d)/, //           0-99
+        match1to2NoLeadingZero = /^[1-9]\d?/, /*         1-99*/
+        match1to2HasZero = /^([1-9]\d|\d)/, /*           0-99*/
         regexes;
 
     regexes = {};
@@ -773,7 +773,7 @@
         return regexes[token](config._strict, config._locale);
     }
 
-    // Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+    /* Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript*/
     function unescapeFormat(s) {
         return regexEscape(
             s
@@ -793,7 +793,7 @@
 
     function absFloor(number) {
         if (number < 0) {
-            // -0 -> 0
+            /* -0 -> 0*/
             return Math.ceil(number) || 0;
         } else {
             return Math.floor(number);
@@ -858,7 +858,7 @@
         WEEK = 7,
         WEEKDAY = 8;
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('Y', 0, 0, function () {
         var y = this.year();
@@ -873,7 +873,7 @@
     addFormatToken(0, ['YYYYY', 5], 0, 'year');
     addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('Y', matchSigned);
     addRegexToken('YY', match1to2, match2);
@@ -893,19 +893,19 @@
         array[YEAR] = parseInt(input, 10);
     });
 
-    // HELPERS
+    /* HELPERS*/
 
     function daysInYear(year) {
         return isLeapYear(year) ? 366 : 365;
     }
 
-    // HOOKS
+    /* HOOKS*/
 
     hooks.parseTwoDigitYear = function (input) {
         return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
     };
 
-    // MOMENTS
+    /* MOMENTS*/
 
     var getSetYear = makeGetSet('FullYear', true);
 
@@ -951,7 +951,7 @@
             case 'FullYear':
                 return isUTC ? d.getUTCFullYear() : d.getFullYear();
             default:
-                return NaN; // Just in case
+                return NaN; /* Just in case*/
         }
     }
 
@@ -978,14 +978,14 @@
                 return void (isUTC ? d.setUTCHours(value) : d.setHours(value));
             case 'Date':
                 return void (isUTC ? d.setUTCDate(value) : d.setDate(value));
-            // case 'Day': // Not real
-            //    return void (isUTC ? d.setUTCDay(value) : d.setDay(value));
-            // case 'Month': // Not used because we need to pass two variables
-            //     return void (isUTC ? d.setUTCMonth(value) : d.setMonth(value));
+            /* case 'Day': // Not real*/
+            /*    return void (isUTC ? d.setUTCDay(value) : d.setDay(value));*/
+            /* case 'Month': // Not used because we need to pass two variables*/
+            /*     return void (isUTC ? d.setUTCMonth(value) : d.setMonth(value));*/
             case 'FullYear':
-                break; // See below ...
+                break; /* See below ...*/
             default:
-                return; // Just in case
+                return; /* Just in case*/
         }
 
         year = value;
@@ -997,7 +997,7 @@
             : d.setFullYear(year, month, date));
     }
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function stringGet(units) {
         units = normalizeUnits(units);
@@ -1035,7 +1035,7 @@
         indexOf = Array.prototype.indexOf;
     } else {
         indexOf = function (o) {
-            // I know
+            /* I know*/
             var i;
             for (i = 0; i < this.length; ++i) {
                 if (this[i] === o) {
@@ -1059,7 +1059,7 @@
             : 31 - ((modMonth % 7) % 2);
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('M', ['MM', 2], 'Mo', function () {
         return this.month() + 1;
@@ -1073,7 +1073,7 @@
         return this.localeData().months(this, format);
     });
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('M', match1to2, match1to2NoLeadingZero);
     addRegexToken('MM', match1to2, match2);
@@ -1090,7 +1090,7 @@
 
     addParseToken(['MMM', 'MMMM'], function (input, array, config, token) {
         var month = config._locale.monthsParse(input, token, config._strict);
-        // if we didn't find a month name, mark the date as invalid.
+        /* if we didn't find a month name, mark the date as invalid.*/
         if (month != null) {
             array[MONTH] = month;
         } else {
@@ -1098,7 +1098,7 @@
         }
     });
 
-    // LOCALES
+    /* LOCALES*/
 
     var defaultLocaleMonths =
             'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -1144,7 +1144,7 @@
             mom,
             llc = monthName.toLocaleLowerCase();
         if (!this._monthsParse) {
-            // this is not used
+            /* this is not used*/
             this._monthsParse = [];
             this._longMonthsParse = [];
             this._shortMonthsParse = [];
@@ -1198,11 +1198,11 @@
             this._shortMonthsParse = [];
         }
 
-        // TODO: add sorting
-        // Sorting makes sure if one month (or abbr) is a prefix of another
-        // see sorting in computeMonthsParse
+        /* TODO: add sorting*/
+        /* Sorting makes sure if one month (or abbr) is a prefix of another*/
+        /* see sorting in computeMonthsParse*/
         for (i = 0; i < 12; i++) {
-            // make the regex if we don't have it already
+            /* make the regex if we don't have it already*/
             mom = createUTC([2000, i]);
             if (strict && !this._longMonthsParse[i]) {
                 this._longMonthsParse[i] = new RegExp(
@@ -1219,7 +1219,7 @@
                     '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
                 this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
             }
-            // test the regex
+            /* test the regex*/
             if (
                 strict &&
                 format === 'MMMM' &&
@@ -1238,11 +1238,11 @@
         }
     }
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function setMonth(mom, value) {
         if (!mom.isValid()) {
-            // No op
+            /* No op*/
             return mom;
         }
 
@@ -1251,7 +1251,7 @@
                 value = toInt(value);
             } else {
                 value = mom.localeData().monthsParse(value);
-                // TODO: Another silent failure?
+                /* TODO: Another silent failure?*/
                 if (!isNumber(value)) {
                     return mom;
                 }
@@ -1335,7 +1335,7 @@
             shortP,
             longP;
         for (i = 0; i < 12; i++) {
-            // make the regex if we don't have it already
+            /* make the regex if we don't have it already*/
             mom = createUTC([2000, i]);
             shortP = regexEscape(this.monthsShort(mom, ''));
             longP = regexEscape(this.months(mom, ''));
@@ -1344,8 +1344,8 @@
             mixedPieces.push(longP);
             mixedPieces.push(shortP);
         }
-        // Sorting makes sure if one month (or abbr) is a prefix of another it
-        // will match the longer piece.
+        /* Sorting makes sure if one month (or abbr) is a prefix of another it*/
+        /* will match the longer piece.*/
         shortPieces.sort(cmpLenRev);
         longPieces.sort(cmpLenRev);
         mixedPieces.sort(cmpLenRev);
@@ -1363,12 +1363,12 @@
     }
 
     function createDate(y, m, d, h, M, s, ms) {
-        // can't just apply() to create a date:
-        // https://stackoverflow.com/q/181348
+        /* can't just apply() to create a date:*/
+        /* https://stackoverflow.com/q/181348*/
         var date;
-        // the date constructor remaps years 0-99 to 1900-1999
+        /* the date constructor remaps years 0-99 to 1900-1999*/
         if (y < 100 && y >= 0) {
-            // preserve leap years using a full 400 year cycle, then reset
+            /* preserve leap years using a full 400 year cycle, then reset*/
             date = new Date(y + 400, m, d, h, M, s, ms);
             if (isFinite(date.getFullYear())) {
                 date.setFullYear(y);
@@ -1382,10 +1382,10 @@
 
     function createUTCDate(y) {
         var date, args;
-        // the Date.UTC function remaps years 0-99 to 1900-1999
+        /* the Date.UTC function remaps years 0-99 to 1900-1999*/
         if (y < 100 && y >= 0) {
             args = Array.prototype.slice.call(arguments);
-            // preserve leap years using a full 400 year cycle, then reset
+            /* preserve leap years using a full 400 year cycle, then reset*/
             args[0] = y + 400;
             date = new Date(Date.UTC.apply(null, args));
             if (isFinite(date.getUTCFullYear())) {
@@ -1398,17 +1398,17 @@
         return date;
     }
 
-    // start-of-first-week - start-of-year
+    /* start-of-first-week - start-of-year*/
     function firstWeekOffset(year, dow, doy) {
-        var // first-week day -- which january is always in the first week (4 for iso, 1 for other)
+        var /* first-week day -- which january is always in the first week (4 for iso, 1 for other)*/
             fwd = 7 + dow - doy,
-            // first-week day local weekday -- which local weekday is fwd
+            /* first-week day local weekday -- which local weekday is fwd*/
             fwdlw = (7 + createUTCDate(year, 0, fwd).getUTCDay() - dow) % 7;
 
         return -fwdlw + fwd - 1;
     }
 
-    // https://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
+    /* https://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday*/
     function dayOfYearFromWeeks(year, week, weekday, dow, doy) {
         var localWeekday = (7 + weekday - dow) % 7,
             weekOffset = firstWeekOffset(year, dow, doy),
@@ -1462,12 +1462,12 @@
         return (daysInYear(year) - weekOffset + weekOffsetNext) / 7;
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('w', ['ww', 2], 'wo', 'week');
     addFormatToken('W', ['WW', 2], 'Wo', 'isoWeek');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('w', match1to2, match1to2NoLeadingZero);
     addRegexToken('ww', match1to2, match2);
@@ -1481,17 +1481,17 @@
         }
     );
 
-    // HELPERS
+    /* HELPERS*/
 
-    // LOCALES
+    /* LOCALES*/
 
     function localeWeek(mom) {
         return weekOfYear(mom, this._week.dow, this._week.doy).week;
     }
 
     var defaultLocaleWeek = {
-        dow: 0, // Sunday is the first day of the week.
-        doy: 6, // The week that contains Jan 6th is the first week of the year.
+        dow: 0, /* Sunday is the first day of the week.*/
+        doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
     };
 
     function localeFirstDayOfWeek() {
@@ -1502,7 +1502,7 @@
         return this._week.doy;
     }
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getSetWeek(input) {
         var week = this.localeData().week(this);
@@ -1514,7 +1514,7 @@
         return input == null ? week : this.add((input - week) * 7, 'd');
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('d', 0, 'do', 'day');
 
@@ -1533,7 +1533,7 @@
     addFormatToken('e', 0, 0, 'weekday');
     addFormatToken('E', 0, 0, 'isoWeekday');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('d', match1to2);
     addRegexToken('e', match1to2);
@@ -1550,7 +1550,7 @@
 
     addWeekParseToken(['dd', 'ddd', 'dddd'], function (input, week, config, token) {
         var weekday = config._locale.weekdaysParse(input, token, config._strict);
-        // if we didn't get a weekday name, mark the date as invalid
+        /* if we didn't get a weekday name, mark the date as invalid*/
         if (weekday != null) {
             week.d = weekday;
         } else {
@@ -1562,7 +1562,7 @@
         week[token] = toInt(input);
     });
 
-    // HELPERS
+    /* HELPERS*/
 
     function parseWeekday(input, locale) {
         if (typeof input !== 'string') {
@@ -1588,7 +1588,7 @@
         return isNaN(input) ? null : input;
     }
 
-    // LOCALES
+    /* LOCALES*/
     function shiftWeekdays(ws, n) {
         return ws.slice(n, 7).concat(ws.slice(0, n));
     }
@@ -1720,7 +1720,7 @@
         }
 
         for (i = 0; i < 7; i++) {
-            // make the regex if we don't have it already
+            /* make the regex if we don't have it already*/
 
             mom = createUTC([2000, 1]).day(i);
             if (strict && !this._fullWeekdaysParse[i]) {
@@ -1747,7 +1747,7 @@
                     this.weekdaysMin(mom, '');
                 this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
             }
-            // test the regex
+            /* test the regex*/
             if (
                 strict &&
                 format === 'dddd' &&
@@ -1772,7 +1772,7 @@
         }
     }
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getSetDayOfWeek(input) {
         if (!this.isValid()) {
@@ -1801,9 +1801,9 @@
             return input != null ? this : NaN;
         }
 
-        // behaves the same as moment#day except
-        // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
-        // as a setter, sunday should belong to the previous week.
+        /* behaves the same as moment#day except*/
+        /* as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)*/
+        /* as a setter, sunday should belong to the previous week.*/
 
         if (input != null) {
             var weekday = parseIsoWeekday(input, this.localeData());
@@ -1888,7 +1888,7 @@
             shortp,
             longp;
         for (i = 0; i < 7; i++) {
-            // make the regex if we don't have it already
+            /* make the regex if we don't have it already*/
             mom = createUTC([2000, 1]).day(i);
             minp = regexEscape(this.weekdaysMin(mom, ''));
             shortp = regexEscape(this.weekdaysShort(mom, ''));
@@ -1900,8 +1900,8 @@
             mixedPieces.push(shortp);
             mixedPieces.push(longp);
         }
-        // Sorting makes sure if one weekday (or abbr) is a prefix of another it
-        // will match the longer piece.
+        /* Sorting makes sure if one weekday (or abbr) is a prefix of another it*/
+        /* will match the longer piece.*/
         minPieces.sort(cmpLenRev);
         shortPieces.sort(cmpLenRev);
         longPieces.sort(cmpLenRev);
@@ -1925,7 +1925,7 @@
         );
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     function hFormat() {
         return this.hours() % 12 || 12;
@@ -1978,7 +1978,7 @@
     meridiem('a', true);
     meridiem('A', false);
 
-    // PARSING
+    /* PARSING*/
 
     function matchMeridiem(isStrict, locale) {
         return locale._meridiemParse;
@@ -2038,19 +2038,19 @@
         array[SECOND] = toInt(input.substr(pos2));
     });
 
-    // LOCALES
+    /* LOCALES*/
 
     function localeIsPM(input) {
-        // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
-        // Using charAt should be more compatible.
+        /* IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays*/
+        /* Using charAt should be more compatible.*/
         return (input + '').toLowerCase().charAt(0) === 'p';
     }
 
     var defaultLocaleMeridiemParse = /[ap]\.?m?\.?/i,
-        // Setting the hour should keep the time, because the user explicitly
-        // specified which hour they want. So trying to maintain the same hour (in
-        // a new timezone) makes sense. Adding/subtracting hours does not follow
-        // this rule.
+        /* Setting the hour should keep the time, because the user explicitly*/
+        /* specified which hour they want. So trying to maintain the same hour (in*/
+        /* a new timezone) makes sense. Adding/subtracting hours does not follow*/
+        /* this rule.*/
         getSetHour = makeGetSet('Hours', true);
 
     function localeMeridiem(hours, minutes, isLower) {
@@ -2081,7 +2081,7 @@
         meridiemParse: defaultLocaleMeridiemParse,
     };
 
-    // internal storage for locale config files
+    /* internal storage for locale config files*/
     var locales = {},
         localeFamilies = {},
         globalLocale;
@@ -2101,9 +2101,9 @@
         return key ? key.toLowerCase().replace('_', '-') : key;
     }
 
-    // pick the locale from the array
-    // try ['en-au', 'en-gb'] as 'en-au', 'en-gb', 'en', as in move through the list trying each
-    // substring from most specific to least, but move to the next array item if it's a more specific variant than the current root
+    /* pick the locale from the array*/
+    /* try ['en-au', 'en-gb'] as 'en-au', 'en-gb', 'en', as in move through the list trying each*/
+    /* substring from most specific to least, but move to the next array item if it's a more specific variant than the current root*/
     function chooseLocale(names) {
         var i = 0,
             j,
@@ -2126,7 +2126,7 @@
                     next.length >= j &&
                     commonPrefix(split, next) >= j - 1
                 ) {
-                    //the next array item is better than a shallower substring of this one
+                    /*the next array item is better than a shallower substring of this one*/
                     break;
                 }
                 j--;
@@ -2137,15 +2137,15 @@
     }
 
     function isLocaleNameSane(name) {
-        // Prevent names that look like filesystem paths, i.e contain '/' or '\'
-        // Ensure name is available and function returns boolean
+        /* Prevent names that look like filesystem paths, i.e contain '/' or '\'*/
+        /* Ensure name is available and function returns boolean*/
         return !!(name && name.match('^[^/\\\\]*$'));
     }
 
     function loadLocale(name) {
         var oldLocale = null,
             aliasedRequire;
-        // TODO: Find a better way to register and load all the locales in Node
+        /* TODO: Find a better way to register and load all the locales in Node*/
         if (
             locales[name] === undefined &&
             typeof module !== 'undefined' &&
@@ -2159,17 +2159,17 @@
                 aliasedRequire('./locale/' + name);
                 getSetGlobalLocale(oldLocale);
             } catch (e) {
-                // mark as not found to avoid repeating expensive file require call causing high CPU
-                // when trying to find en-US, en_US, en-us for every format call
-                locales[name] = null; // null means not found
+                /* mark as not found to avoid repeating expensive file require call causing high CPU*/
+                /* when trying to find en-US, en_US, en-us for every format call*/
+                locales[name] = null; /* null means not found*/
             }
         }
         return locales[name];
     }
 
-    // This function will load locale and then set the global locale.  If
-    // no arguments are passed in, it will simply return the current global
-    // locale key.
+    /* This function will load locale and then set the global locale.  If*/
+    /* no arguments are passed in, it will simply return the current global*/
+    /* locale key.*/
     function getSetGlobalLocale(key, values) {
         var data;
         if (key) {
@@ -2180,11 +2180,11 @@
             }
 
             if (data) {
-                // moment.duration._locale = moment._locale = data;
+                /* moment.duration._locale = moment._locale = data;*/
                 globalLocale = data;
             } else {
                 if (typeof console !== 'undefined' && console.warn) {
-                    //warn user if arguments are passed but the locale could not be set
+                    /*warn user if arguments are passed but the locale could not be set*/
                     console.warn(
                         'Locale ' + key + ' not found. Did you forget to load it?'
                     );
@@ -2236,14 +2236,14 @@
                 });
             }
 
-            // backwards compat for now: also set the locale
-            // make sure we set the locale AFTER all child locales have been
-            // created, so we won't end up with the child locale set.
+            /* backwards compat for now: also set the locale*/
+            /* make sure we set the locale AFTER all child locales have been*/
+            /* created, so we won't end up with the child locale set.*/
             getSetGlobalLocale(name);
 
             return locales[name];
         } else {
-            // useful for testing
+            /* useful for testing*/
             delete locales[name];
             return null;
         }
@@ -2256,19 +2256,19 @@
                 parentConfig = baseConfig;
 
             if (locales[name] != null && locales[name].parentLocale != null) {
-                // Update existing child locale in-place to avoid memory-leaks
+                /* Update existing child locale in-place to avoid memory-leaks*/
                 locales[name].set(mergeConfigs(locales[name]._config, config));
             } else {
-                // MERGE
+                /* MERGE*/
                 tmpLocale = loadLocale(name);
                 if (tmpLocale != null) {
                     parentConfig = tmpLocale._config;
                 }
                 config = mergeConfigs(parentConfig, config);
                 if (tmpLocale == null) {
-                    // updateLocale is called for creating a new locale
-                    // Set abbr so it will have a name (getters return
-                    // undefined otherwise).
+                    /* updateLocale is called for creating a new locale*/
+                    /* Set abbr so it will have a name (getters return*/
+                    /* undefined otherwise).*/
                     config.abbr = name;
                 }
                 locale = new Locale(config);
@@ -2276,10 +2276,10 @@
                 locales[name] = locale;
             }
 
-            // backwards compat for now: also set the locale
+            /* backwards compat for now: also set the locale*/
             getSetGlobalLocale(name);
         } else {
-            // pass null for config to unupdate, useful for tests
+            /* pass null for config to unupdate, useful for tests*/
             if (locales[name] != null) {
                 if (locales[name].parentLocale != null) {
                     locales[name] = locales[name].parentLocale;
@@ -2294,7 +2294,7 @@
         return locales[name];
     }
 
-    // returns locale data
+    /* returns locale data*/
     function getLocale(key) {
         var locale;
 
@@ -2307,7 +2307,7 @@
         }
 
         if (!isArray(key)) {
-            //short-circuit everything else
+            /*short-circuit everything else*/
             locale = loadLocale(key);
             if (locale) {
                 return locale;
@@ -2366,8 +2366,8 @@
         return m;
     }
 
-    // iso 8601 regex
-    // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
+    /* iso 8601 regex*/
+    /* 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)*/
     var extendedIsoRegex =
             /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([+-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
         basicIsoRegex =
@@ -2388,7 +2388,7 @@
             ['YYYYMM', /\d{6}/, false],
             ['YYYY', /\d{4}/, false],
         ],
-        // iso time formats and regexes
+        /* iso time formats and regexes*/
         isoTimes = [
             ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
             ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
@@ -2401,7 +2401,7 @@
             ['HH', /\d\d/],
         ],
         aspNetJsonRegex = /^\/?Date\((-?\d+)/i,
-        // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
+        /* RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3*/
         rfc2822 =
             /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/,
         obsOffsets = {
@@ -2417,7 +2417,7 @@
             PST: -8 * 60,
         };
 
-    // date from iso format
+    /* date from iso format*/
     function configFromISO(config) {
         var i,
             l,
@@ -2446,7 +2446,7 @@
             if (match[3]) {
                 for (i = 0, l = isoTimesLen; i < l; i++) {
                     if (isoTimes[i][1].exec(match[3])) {
-                        // match[2] should be 'T' or space
+                        /* match[2] should be 'T' or space*/
                         timeFormat = (match[2] || ' ') + isoTimes[i][0];
                         break;
                     }
@@ -2509,7 +2509,7 @@
     }
 
     function preprocessRFC2822(s) {
-        // Remove comments and folding whitespace and replace multiple-spaces with a single space
+        /* Remove comments and folding whitespace and replace multiple-spaces with a single space*/
         return s
             .replace(/\([^()]*\)|[\n\t]/g, ' ')
             .replace(/(\s\s+)/g, ' ')
@@ -2519,7 +2519,7 @@
 
     function checkWeekday(weekdayStr, parsedInput, config) {
         if (weekdayStr) {
-            // TODO: Replace the vanilla JS Date object with an independent day-of-week check.
+            /* TODO: Replace the vanilla JS Date object with an independent day-of-week check.*/
             var weekdayProvided = defaultLocaleWeekdaysShort.indexOf(weekdayStr),
                 weekdayActual = new Date(
                     parsedInput[0],
@@ -2539,7 +2539,7 @@
         if (obsOffset) {
             return obsOffsets[obsOffset];
         } else if (militaryOffset) {
-            // the only allowed military tz is Z
+            /* the only allowed military tz is Z*/
             return 0;
         } else {
             var hm = parseInt(numOffset, 10),
@@ -2549,7 +2549,7 @@
         }
     }
 
-    // date and time from ref 2822 format
+    /* date and time from ref 2822 format*/
     function configFromRFC2822(config) {
         var match = rfc2822.exec(preprocessRFC2822(config._i)),
             parsedArray;
@@ -2578,7 +2578,7 @@
         }
     }
 
-    // date from 1) ASP.NET, 2) ISO, 3) RFC 2822 formats, or 4) optional fallback if parsing isn't strict
+    /* date from 1) ASP.NET, 2) ISO, 3) RFC 2822 formats, or 4) optional fallback if parsing isn't strict*/
     function configFromString(config) {
         var matched = aspNetJsonRegex.exec(config._i);
         if (matched !== null) {
@@ -2603,7 +2603,7 @@
         if (config._strict) {
             config._isValid = false;
         } else {
-            // Final attempt, use Input Fallback
+            /* Final attempt, use Input Fallback*/
             hooks.createFromInputFallback(config);
         }
     }
@@ -2617,7 +2617,7 @@
         }
     );
 
-    // Pick the first defined of two or three arguments.
+    /* Pick the first defined of two or three arguments.*/
     function defaults(a, b, c) {
         if (a != null) {
             return a;
@@ -2629,7 +2629,7 @@
     }
 
     function currentDateArray(config) {
-        // hooks is actually the exported moment object
+        /* hooks is actually the exported moment object*/
         var nowValue = new Date(hooks.now());
         if (config._useUTC) {
             return [
@@ -2641,10 +2641,10 @@
         return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
     }
 
-    // convert an array to a date.
-    // the array should mirror the parameters below
-    // note: all values past the year are optional and will default to the lowest possible value.
-    // [year, month, day , hour, minute, second, millisecond]
+    /* convert an array to a date.*/
+    /* the array should mirror the parameters below*/
+    /* note: all values past the year are optional and will default to the lowest possible value.*/
+    /* [year, month, day , hour, minute, second, millisecond]*/
     function configFromArray(config) {
         var i,
             date,
@@ -2659,12 +2659,12 @@
 
         currentDate = currentDateArray(config);
 
-        //compute day of the year from weeks and weekdays
+        /*compute day of the year from weeks and weekdays*/
         if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
             dayOfYearFromWeekInfo(config);
         }
 
-        //if the day of the year is set, figure out what it is
+        /*if the day of the year is set, figure out what it is*/
         if (config._dayOfYear != null) {
             yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
 
@@ -2680,22 +2680,22 @@
             config._a[DATE] = date.getUTCDate();
         }
 
-        // Default to current date.
-        // * if no year, month, day of month are given, default to today
-        // * if day of month is given, default month and year
-        // * if month is given, default only year
-        // * if year is given, don't default anything
+        /* Default to current date.*/
+        /* * if no year, month, day of month are given, default to today*/
+        /* * if day of month is given, default month and year*/
+        /* * if month is given, default only year*/
+        /* * if year is given, don't default anything*/
         for (i = 0; i < 3 && config._a[i] == null; ++i) {
             config._a[i] = input[i] = currentDate[i];
         }
 
-        // Zero out whatever was not defaulted, including time
+        /* Zero out whatever was not defaulted, including time*/
         for (; i < 7; i++) {
             config._a[i] = input[i] =
                 config._a[i] == null ? (i === 2 ? 1 : 0) : config._a[i];
         }
 
-        // Check for 24:00:00.000
+        /* Check for 24:00:00.000*/
         if (
             config._a[HOUR] === 24 &&
             config._a[MINUTE] === 0 &&
@@ -2714,8 +2714,8 @@
             ? config._d.getUTCDay()
             : config._d.getDay();
 
-        // Apply timezone offset from input. The actual utcOffset can be changed
-        // with parseZone.
+        /* Apply timezone offset from input. The actual utcOffset can be changed*/
+        /* with parseZone.*/
         if (config._tzm != null) {
             config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
         }
@@ -2724,7 +2724,7 @@
             config._a[HOUR] = 24;
         }
 
-        // check for mismatching day of week
+        /* check for mismatching day of week*/
         if (
             config._w &&
             typeof config._w.d !== 'undefined' &&
@@ -2742,10 +2742,10 @@
             dow = 1;
             doy = 4;
 
-            // TODO: We need to take the current isoWeekYear, but that depends on
-            // how we interpret now (local, utc, fixed offset). So create
-            // a now version of current config (take local/utc/offset flags, and
-            // create now).
+            /* TODO: We need to take the current isoWeekYear, but that depends on*/
+            /* how we interpret now (local, utc, fixed offset). So create*/
+            /* a now version of current config (take local/utc/offset flags, and*/
+            /* create now).*/
             weekYear = defaults(
                 w.GG,
                 config._a[YEAR],
@@ -2764,23 +2764,23 @@
 
             weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
 
-            // Default to current week.
+            /* Default to current week.*/
             week = defaults(w.w, curWeek.week);
 
             if (w.d != null) {
-                // weekday -- low day numbers are considered next week
+                /* weekday -- low day numbers are considered next week*/
                 weekday = w.d;
                 if (weekday < 0 || weekday > 6) {
                     weekdayOverflow = true;
                 }
             } else if (w.e != null) {
-                // local weekday -- counting starts from beginning of week
+                /* local weekday -- counting starts from beginning of week*/
                 weekday = w.e + dow;
                 if (w.e < 0 || w.e > 6) {
                     weekdayOverflow = true;
                 }
             } else {
-                // default to beginning of week
+                /* default to beginning of week*/
                 weekday = dow;
             }
         }
@@ -2795,15 +2795,15 @@
         }
     }
 
-    // constant that refers to the ISO standard
+    /* constant that refers to the ISO standard*/
     hooks.ISO_8601 = function () {};
 
-    // constant that refers to the RFC 2822 form
+    /* constant that refers to the RFC 2822 form*/
     hooks.RFC_2822 = function () {};
 
-    // date from string and format string
+    /* date from string and format string*/
     function configFromStringAndFormat(config) {
-        // TODO: Move this to another part of the creation flow to prevent circular deps
+        /* TODO: Move this to another part of the creation flow to prevent circular deps*/
         if (config._f === hooks.ISO_8601) {
             configFromISO(config);
             return;
@@ -2815,7 +2815,7 @@
         config._a = [];
         getParsingFlags(config).empty = true;
 
-        // This array is used to make a Date, either with `new Date` or `Date.UTC`
+        /* This array is used to make a Date, either with `new Date` or `Date.UTC`*/
         var string = '' + config._i,
             i,
             parsedInput,
@@ -2844,7 +2844,7 @@
                 );
                 totalParsedInputLength += parsedInput.length;
             }
-            // don't parse if it's not a known token
+            /* don't parse if it's not a known token*/
             if (formatTokenFunctions[token]) {
                 if (parsedInput) {
                     getParsingFlags(config).empty = false;
@@ -2857,14 +2857,14 @@
             }
         }
 
-        // add remaining unparsed input length to the string
+        /* add remaining unparsed input length to the string*/
         getParsingFlags(config).charsLeftOver =
             stringLength - totalParsedInputLength;
         if (string.length > 0) {
             getParsingFlags(config).unusedInput.push(string);
         }
 
-        // clear _12h flag if hour is <= 12
+        /* clear _12h flag if hour is <= 12*/
         if (
             config._a[HOUR] <= 12 &&
             getParsingFlags(config).bigHour === true &&
@@ -2875,14 +2875,14 @@
 
         getParsingFlags(config).parsedDateParts = config._a.slice(0);
         getParsingFlags(config).meridiem = config._meridiem;
-        // handle meridiem
+        /* handle meridiem*/
         config._a[HOUR] = meridiemFixWrap(
             config._locale,
             config._a[HOUR],
             config._meridiem
         );
 
-        // handle era
+        /* handle era*/
         era = getParsingFlags(config).era;
         if (era !== null) {
             config._a[YEAR] = config._locale.erasConvertYear(era, config._a[YEAR]);
@@ -2896,13 +2896,13 @@
         var isPm;
 
         if (meridiem == null) {
-            // nothing to do
+            /* nothing to do*/
             return hour;
         }
         if (locale.meridiemHour != null) {
             return locale.meridiemHour(hour, meridiem);
         } else if (locale.isPM != null) {
-            // Fallback
+            /* Fallback*/
             isPm = locale.isPM(meridiem);
             if (isPm && hour < 12) {
                 hour += 12;
@@ -2912,12 +2912,12 @@
             }
             return hour;
         } else {
-            // this is not supposed to happen
+            /* this is not supposed to happen*/
             return hour;
         }
     }
 
-    // date from string and array of format strings
+    /* date from string and array of format strings*/
     function configFromStringAndArray(config) {
         var tempConfig,
             bestMoment,
@@ -2948,10 +2948,10 @@
                 validFormatFound = true;
             }
 
-            // if there is any input that was not parsed add a penalty for that format
+            /* if there is any input that was not parsed add a penalty for that format*/
             currentScore += getParsingFlags(tempConfig).charsLeftOver;
 
-            //or tokens
+            /*or tokens*/
             currentScore += getParsingFlags(tempConfig).unusedTokens.length * 10;
 
             getParsingFlags(tempConfig).score = currentScore;
@@ -2999,7 +2999,7 @@
     function createFromConfig(config) {
         var res = new Moment(checkOverflow(prepareConfig(config)));
         if (res._nextDay) {
-            // Adding is smart enough around DST
+            /* Adding is smart enough around DST*/
             res.add(1, 'd');
             res._nextDay = undefined;
         }
@@ -3056,7 +3056,7 @@
         } else if (isObject(input)) {
             configFromObject(config);
         } else if (isNumber(input)) {
-            // from milliseconds
+            /* from milliseconds*/
             config._d = new Date(input);
         } else {
             hooks.createFromInputFallback(config);
@@ -3082,8 +3082,8 @@
         ) {
             input = undefined;
         }
-        // object construction must be done this way.
-        // https://github.com/moment/moment/issues/1423
+        /* object construction must be done this way.*/
+        /* https://github.com/moment/moment/issues/1423*/
         c._isAMomentObject = true;
         c._useUTC = c._isUTC = isUTC;
         c._l = locale;
@@ -3121,11 +3121,11 @@
             }
         );
 
-    // Pick a moment m from moments so that m[fn](other) is true for all
-    // other. This relies on the function fn to be transitive.
-    //
-    // moments should either be an array of moment objects or an array, whose
-    // first element is an array of moment objects.
+    /* Pick a moment m from moments so that m[fn](other) is true for all*/
+    /* other. This relies on the function fn to be transitive.*/
+    /**/
+    /* moments should either be an array of moment objects or an array, whose*/
+    /* first element is an array of moment objects.*/
     function pickBy(fn, moments) {
         var res, i;
         if (moments.length === 1 && isArray(moments[0])) {
@@ -3143,7 +3143,7 @@
         return res;
     }
 
-    // TODO: Use [].sort instead?
+    /* TODO: Use [].sort instead?*/
     function min() {
         var args = [].slice.call(arguments, 0);
 
@@ -3192,7 +3192,7 @@
         for (i = 0; i < orderLen; ++i) {
             if (m[ordering[i]]) {
                 if (unitHasDecimal) {
-                    return false; // only allow non-integers for smallest unit
+                    return false; /* only allow non-integers for smallest unit*/
                 }
                 if (parseFloat(m[ordering[i]]) !== toInt(m[ordering[i]])) {
                     unitHasDecimal = true;
@@ -3225,18 +3225,18 @@
 
         this._isValid = isDurationValid(normalizedInput);
 
-        // representation for dateAddRemove
+        /* representation for dateAddRemove*/
         this._milliseconds =
             +milliseconds +
-            seconds * 1e3 + // 1000
-            minutes * 6e4 + // 1000 * 60
-            hours * 1000 * 60 * 60; //using 1000 * 60 * 60 instead of 36e5 to avoid floating point rounding errors https://github.com/moment/moment/issues/2978
-        // Because of dateAddRemove treats 24 hours as different from a
-        // day when working around DST, we need to store them separately
+            seconds * 1e3 + /* 1000*/
+            minutes * 6e4 + /* 1000 * 60*/
+            hours * 1000 * 60 * 60; /*using 1000 * 60 * 60 instead of 36e5 to avoid floating point rounding errors https://github.com/moment/moment/issues/2978*/
+        /* Because of dateAddRemove treats 24 hours as different from a*/
+        /* day when working around DST, we need to store them separately*/
         this._days = +days + weeks * 7;
-        // It is impossible to translate months into days without knowing
-        // which months you are are talking about, so we have to store
-        // it separately.
+        /* It is impossible to translate months into days without knowing*/
+        /* which months you are are talking about, so we have to store*/
+        /* it separately.*/
         this._months = +months + quarters * 3 + years * 12;
 
         this._data = {};
@@ -3258,7 +3258,7 @@
         }
     }
 
-    // compare two arrays, return the number of differences
+    /* compare two arrays, return the number of differences*/
     function compareArrays(array1, array2, dontConvert) {
         var len = Math.min(array1.length, array2.length),
             lengthDiff = Math.abs(array1.length - array2.length),
@@ -3275,7 +3275,7 @@
         return diffs + lengthDiff;
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     function offset(token, separator) {
         addFormatToken(token, 0, 0, function () {
@@ -3297,7 +3297,7 @@
     offset('Z', ':');
     offset('ZZ', '');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('Z', matchShortOffset);
     addRegexToken('ZZ', matchShortOffset);
@@ -3306,11 +3306,11 @@
         config._tzm = offsetFromString(matchShortOffset, input);
     });
 
-    // HELPERS
+    /* HELPERS*/
 
-    // timezone chunker
-    // '+10:00' > ['10',  '00']
-    // '-1530'  > ['-15', '30']
+    /* timezone chunker*/
+    /* '+10:00' > ['10',  '00']*/
+    /* '-1530'  > ['-15', '30']*/
     var chunkOffset = /([\+\-]|\d\d)/gi;
 
     function offsetFromString(matcher, string) {
@@ -3330,7 +3330,7 @@
         return minutes === 0 ? 0 : parts[0] === '+' ? minutes : -minutes;
     }
 
-    // Return a moment from input, that is local/utc/zone equivalent to model.
+    /* Return a moment from input, that is local/utc/zone equivalent to model.*/
     function cloneWithOffset(input, model) {
         var res, diff;
         if (model._isUTC) {
@@ -3339,7 +3339,7 @@
                 (isMoment(input) || isDate(input)
                     ? input.valueOf()
                     : createLocal(input).valueOf()) - res.valueOf();
-            // Use low-level api, because this fn is low-level api.
+            /* Use low-level api, because this fn is low-level api.*/
             res._d.setTime(res._d.valueOf() + diff);
             hooks.updateOffset(res, false);
             return res;
@@ -3349,29 +3349,29 @@
     }
 
     function getDateOffset(m) {
-        // On Firefox.24 Date#getTimezoneOffset returns a floating point.
-        // https://github.com/moment/moment/pull/1871
+        /* On Firefox.24 Date#getTimezoneOffset returns a floating point.*/
+        /* https://github.com/moment/moment/pull/1871*/
         return -Math.round(m._d.getTimezoneOffset());
     }
 
-    // HOOKS
+    /* HOOKS*/
 
-    // This function will be called whenever a moment is mutated.
-    // It is intended to keep the offset in sync with the timezone.
+    /* This function will be called whenever a moment is mutated.*/
+    /* It is intended to keep the offset in sync with the timezone.*/
     hooks.updateOffset = function () {};
 
-    // MOMENTS
+    /* MOMENTS*/
 
-    // keepLocalTime = true means only change the timezone, without
-    // affecting the local hour. So 5:31:26 +0300 --[utcOffset(2, true)]-->
-    // 5:31:26 +0200 It is possible that 5:31:26 doesn't exist with offset
-    // +0200, so we adjust the time as needed, to be valid.
-    //
-    // Keeping the time actually adds/subtracts (one hour)
-    // from the actual represented time. That is why we call updateOffset
-    // a second time. In case it wants us to change the offset again
-    // _changeInProgress == true case, then we have to adjust, because
-    // there is no such time in the given timezone.
+    /* keepLocalTime = true means only change the timezone, without*/
+    /* affecting the local hour. So 5:31:26 +0300 --[utcOffset(2, true)]-->*/
+    /* 5:31:26 +0200 It is possible that 5:31:26 doesn't exist with offset*/
+    /* +0200, so we adjust the time as needed, to be valid.*/
+    /**/
+    /* Keeping the time actually adds/subtracts (one hour)*/
+    /* from the actual represented time. That is why we call updateOffset*/
+    /* a second time. In case it wants us to change the offset again*/
+    /* _changeInProgress == true case, then we have to adjust, because*/
+    /* there is no such time in the given timezone.*/
     function getSetOffset(input, keepLocalTime, keepMinutes) {
         var offset = this._offset || 0,
             localAdjust;
@@ -3509,17 +3509,17 @@
         return this.isValid() ? this._isUTC && this._offset === 0 : false;
     }
 
-    // ASP.NET json date format regex
+    /* ASP.NET json date format regex*/
     var aspNetRegex = /^(-|\+)?(?:(\d*)[. ])?(\d+):(\d+)(?::(\d+)(\.\d*)?)?$/,
-        // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
-        // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
-        // and further modified to allow for strings containing both week and day
+        /* from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html*/
+        /* somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere*/
+        /* and further modified to allow for strings containing both week and day*/
         isoRegex =
             /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
 
     function createDuration(input, key) {
         var duration = input,
-            // matching against regexp is expensive, do it on demand
+            /* matching against regexp is expensive, do it on demand*/
             match = null,
             sign,
             ret,
@@ -3546,7 +3546,7 @@
                 h: toInt(match[HOUR]) * sign,
                 m: toInt(match[MINUTE]) * sign,
                 s: toInt(match[SECOND]) * sign,
-                ms: toInt(absRound(match[MILLISECOND] * 1000)) * sign, // the millisecond decimal point is included in the match
+                ms: toInt(absRound(match[MILLISECOND] * 1000)) * sign, /* the millisecond decimal point is included in the match*/
             };
         } else if ((match = isoRegex.exec(input))) {
             sign = match[1] === '-' ? -1 : 1;
@@ -3560,7 +3560,7 @@
                 s: parseIso(match[8], sign),
             };
         } else if (duration == null) {
-            // checks for null or undefined
+            /* checks for null or undefined*/
             duration = {};
         } else if (
             typeof duration === 'object' &&
@@ -3593,11 +3593,11 @@
     createDuration.invalid = createInvalid$1;
 
     function parseIso(inp, sign) {
-        // We'd normally use ~~inp for this, but unfortunately it also
-        // converts floats to ints.
-        // inp may be undefined, so careful calling replace on it.
+        /* We'd normally use ~~inp for this, but unfortunately it also*/
+        /* converts floats to ints.*/
+        /* inp may be undefined, so careful calling replace on it.*/
         var res = inp && parseFloat(inp.replace(',', '.'));
-        // apply sign while we're at it
+        /* apply sign while we're at it*/
         return (isNaN(res) ? 0 : res) * sign;
     }
 
@@ -3633,11 +3633,11 @@
         return res;
     }
 
-    // TODO: remove 'name' arg after deprecation is removed
+    /* TODO: remove 'name' arg after deprecation is removed*/
     function createAdder(direction, name) {
         return function (val, period) {
             var dur, tmp;
-            //invert the arguments, but complain about it
+            /*invert the arguments, but complain about it*/
             if (period !== null && !isNaN(+period)) {
                 deprecateSimple(
                     name,
@@ -3665,7 +3665,7 @@
             months = absRound(duration._months);
 
         if (!mom.isValid()) {
-            // No op
+            /* No op*/
             return;
         }
 
@@ -3692,7 +3692,7 @@
         return typeof input === 'string' || input instanceof String;
     }
 
-    // type MomentInput = Moment | Date | string | number | (number | string)[] | MomentInputObject | void; // null | undefined
+    /* type MomentInput = Moment | Date | string | number | (number | string)[] | MomentInputObject | void; // null | undefined*/
     function isMomentInput(input) {
         return (
             isMoment(input) ||
@@ -3799,7 +3799,7 @@
     }
 
     function calendar$1(time, formats) {
-        // Support for single parameter, formats only overload to the calendar function
+        /* Support for single parameter, formats only overload to the calendar function*/
         if (arguments.length === 1) {
             if (!arguments[0]) {
                 time = undefined;
@@ -3812,8 +3812,8 @@
                 time = undefined;
             }
         }
-        // We want to compare the start of today, vs this.
-        // Getting start-of-today depends on whether we're local/utc/offset or not.
+        /* We want to compare the start of today, vs this.*/
+        /* Getting start-of-today depends on whether we're local/utc/offset or not.*/
         var now = time || createLocal(),
             sod = cloneWithOffset(now, this).startOf('day'),
             format = hooks.calendarFormat(this, sod) || 'sameElse',
@@ -3930,19 +3930,19 @@
                 break;
             case 'second':
                 output = (this - that) / 1e3;
-                break; // 1000
+                break; /* 1000*/
             case 'minute':
                 output = (this - that) / 6e4;
-                break; // 1000 * 60
+                break; /* 1000 * 60*/
             case 'hour':
                 output = (this - that) / 36e5;
-                break; // 1000 * 60 * 60
+                break; /* 1000 * 60 * 60*/
             case 'day':
                 output = (this - that - zoneDelta) / 864e5;
-                break; // 1000 * 60 * 60 * 24, negate dst
+                break; /* 1000 * 60 * 60 * 24, negate dst*/
             case 'week':
                 output = (this - that - zoneDelta) / 6048e5;
-                break; // 1000 * 60 * 60 * 24 * 7, negate dst
+                break; /* 1000 * 60 * 60 * 24 * 7, negate dst*/
             default:
                 output = this - that;
         }
@@ -3952,28 +3952,28 @@
 
     function monthDiff(a, b) {
         if (a.date() < b.date()) {
-            // end-of-month calculations work correct when the start month has more
-            // days than the end month.
+            /* end-of-month calculations work correct when the start month has more*/
+            /* days than the end month.*/
             return -monthDiff(b, a);
         }
-        // difference in months
+        /* difference in months*/
         var wholeMonthDiff = (b.year() - a.year()) * 12 + (b.month() - a.month()),
-            // b is in (anchor - 1 month, anchor + 1 month)
+            /* b is in (anchor - 1 month, anchor + 1 month)*/
             anchor = a.clone().add(wholeMonthDiff, 'months'),
             anchor2,
             adjust;
 
         if (b - anchor < 0) {
             anchor2 = a.clone().add(wholeMonthDiff - 1, 'months');
-            // linear across the month
+            /* linear across the month*/
             adjust = (b - anchor) / (anchor - anchor2);
         } else {
             anchor2 = a.clone().add(wholeMonthDiff + 1, 'months');
-            // linear across the month
+            /* linear across the month*/
             adjust = (b - anchor) / (anchor2 - anchor);
         }
 
-        //check for negative zero, return zero if negative zero
+        /*check for negative zero, return zero if negative zero*/
         return -(wholeMonthDiff + adjust) || 0;
     }
 
@@ -3999,7 +3999,7 @@
             );
         }
         if (isFunction(Date.prototype.toISOString)) {
-            // native implementation is ~50x faster, use it when we can
+            /* native implementation is ~50x faster, use it when we can*/
             if (utc) {
                 return this.toDate().toISOString();
             } else {
@@ -4086,9 +4086,9 @@
         return this.to(createLocal(), withoutSuffix);
     }
 
-    // If passed a locale key, it will set the locale for this
-    // instance.  Otherwise, it will return the locale configuration
-    // variables for this instance.
+    /* If passed a locale key, it will set the locale for this*/
+    /* instance.  Otherwise, it will return the locale configuration*/
+    /* variables for this instance.*/
     function locale(key) {
         var newLocaleData;
 
@@ -4123,15 +4123,15 @@
         MS_PER_HOUR = 60 * MS_PER_MINUTE,
         MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
 
-    // actual modulo - handles negative numbers (for dates before 1970):
+    /* actual modulo - handles negative numbers (for dates before 1970):*/
     function mod$1(dividend, divisor) {
         return ((dividend % divisor) + divisor) % divisor;
     }
 
     function localStartOfDate(y, m, d) {
-        // the date constructor remaps years 0-99 to 1900-1999
+        /* the date constructor remaps years 0-99 to 1900-1999*/
         if (y < 100 && y >= 0) {
-            // preserve leap years using a full 400 year cycle, then reset
+            /* preserve leap years using a full 400 year cycle, then reset*/
             return new Date(y + 400, m, d) - MS_PER_400_YEARS;
         } else {
             return new Date(y, m, d).valueOf();
@@ -4139,9 +4139,9 @@
     }
 
     function utcStartOfDate(y, m, d) {
-        // Date.UTC remaps years 0-99 to 1900-1999
+        /* Date.UTC remaps years 0-99 to 1900-1999*/
         if (y < 100 && y >= 0) {
-            // preserve leap years using a full 400 year cycle, then reset
+            /* preserve leap years using a full 400 year cycle, then reset*/
             return Date.UTC(y + 400, m, d) - MS_PER_400_YEARS;
         } else {
             return Date.UTC(y, m, d);
@@ -4319,7 +4319,7 @@
     }
 
     function toJSON() {
-        // new Date(NaN).toJSON() === null
+        /* new Date(NaN).toJSON() === null*/
         return this.isValid() ? this.toISOString() : null;
     }
 
@@ -4402,7 +4402,7 @@
         for (i = 0, l = eras.length; i < l; ++i) {
             switch (typeof eras[i].since) {
                 case 'string':
-                    // truncate time
+                    /* truncate time*/
                     date = hooks(eras[i].since).startOf('day');
                     eras[i].since = date.valueOf();
                     break;
@@ -4413,7 +4413,7 @@
                     eras[i].until = +Infinity;
                     break;
                 case 'string':
-                    // truncate time
+                    /* truncate time*/
                     date = hooks(eras[i].until).startOf('day').valueOf();
                     eras[i].until = date.valueOf();
                     break;
@@ -4479,7 +4479,7 @@
             val,
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
-            // truncate time
+            /* truncate time*/
             val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
@@ -4499,7 +4499,7 @@
             val,
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
-            // truncate time
+            /* truncate time*/
             val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
@@ -4519,7 +4519,7 @@
             val,
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
-            // truncate time
+            /* truncate time*/
             val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
@@ -4542,7 +4542,7 @@
         for (i = 0, l = eras.length; i < l; ++i) {
             dir = eras[i].since <= eras[i].until ? +1 : -1;
 
-            // truncate time
+            /* truncate time*/
             val = this.clone().startOf('day').valueOf();
 
             if (
@@ -4630,7 +4630,7 @@
         );
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken(0, ['gg', 2], 0, function () {
         return this.weekYear() % 100;
@@ -4649,9 +4649,9 @@
     addWeekYearFormatToken('GGGG', 'isoWeekYear');
     addWeekYearFormatToken('GGGGG', 'isoWeekYear');
 
-    // ALIASES
+    /* ALIASES*/
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('G', matchSigned);
     addRegexToken('g', matchSigned);
@@ -4673,7 +4673,7 @@
         week[token] = hooks.parseTwoDigitYear(input);
     });
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getSetWeekYear(input) {
         return getSetWeekYearHelper.call(
@@ -4738,18 +4738,18 @@
         return this;
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('Q', 0, 'Qo', 'quarter');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('Q', match1);
     addParseToken('Q', function (input, array) {
         array[MONTH] = (toInt(input) - 1) * 3;
     });
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getSetQuarter(input) {
         return input == null
@@ -4757,16 +4757,16 @@
             : this.month((input - 1) * 3 + (this.month() % 3));
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('D', ['DD', 2], 'Do', 'date');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('D', match1to2, match1to2NoLeadingZero);
     addRegexToken('DD', match1to2, match2);
     addRegexToken('Do', function (isStrict, locale) {
-        // TODO: Remove "ordinalParse" fallback in next major release.
+        /* TODO: Remove "ordinalParse" fallback in next major release.*/
         return isStrict
             ? locale._dayOfMonthOrdinalParse || locale._ordinalParse
             : locale._dayOfMonthOrdinalParseLenient;
@@ -4777,15 +4777,15 @@
         array[DATE] = toInt(input.match(match1to2)[0]);
     });
 
-    // MOMENTS
+    /* MOMENTS*/
 
     var getSetDayOfMonth = makeGetSet('Date', true);
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'dayOfYear');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('DDD', match1to3);
     addRegexToken('DDDD', match3);
@@ -4793,9 +4793,9 @@
         config._dayOfYear = toInt(input);
     });
 
-    // HELPERS
+    /* HELPERS*/
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getSetDayOfYear(input) {
         var dayOfYear =
@@ -4805,35 +4805,35 @@
         return input == null ? dayOfYear : this.add(input - dayOfYear, 'd');
     }
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('m', ['mm', 2], 0, 'minute');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('m', match1to2, match1to2HasZero);
     addRegexToken('mm', match1to2, match2);
     addParseToken(['m', 'mm'], MINUTE);
 
-    // MOMENTS
+    /* MOMENTS*/
 
     var getSetMinute = makeGetSet('Minutes', false);
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('s', ['ss', 2], 0, 'second');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('s', match1to2, match1to2HasZero);
     addRegexToken('ss', match1to2, match2);
     addParseToken(['s', 'ss'], SECOND);
 
-    // MOMENTS
+    /* MOMENTS*/
 
     var getSetSecond = makeGetSet('Seconds', false);
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('S', 0, 0, function () {
         return ~~(this.millisecond() / 100);
@@ -4863,7 +4863,7 @@
         return this.millisecond() * 1000000;
     });
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('S', match1to3, match1);
     addRegexToken('SS', match1to3, match2);
@@ -4884,12 +4884,12 @@
 
     getSetMillisecond = makeGetSet('Milliseconds', false);
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('z', 0, 0, 'zoneAbbr');
     addFormatToken('zz', 0, 0, 'zoneName');
 
-    // MOMENTS
+    /* MOMENTS*/
 
     function getZoneAbbr() {
         return this._isUTC ? 'UTC' : '';
@@ -5080,14 +5080,14 @@
         return out;
     }
 
-    // ()
-    // (5)
-    // (fmt, 5)
-    // (fmt)
-    // (true)
-    // (true, 5)
-    // (true, fmt, 5)
-    // (true, fmt)
+    /* ()*/
+    /* (5)*/
+    /* (fmt, 5)*/
+    /* (fmt)*/
+    /* (true)*/
+    /* (true, 5)*/
+    /* (true, fmt, 5)*/
+    /* (true, fmt)*/
     function listWeekdaysImpl(localeSorted, format, index, field) {
         if (typeof localeSorted === 'boolean') {
             if (isNumber(format)) {
@@ -5180,7 +5180,7 @@
         },
     });
 
-    // Side effect imports
+    /* Side effect imports*/
 
     hooks.lang = deprecate(
         'moment.lang is deprecated. Use moment.locale instead.',
@@ -5220,12 +5220,12 @@
         return duration._bubble();
     }
 
-    // supports only 2.0-style add(1, 's') or add(duration)
+    /* supports only 2.0-style add(1, 's') or add(duration)*/
     function add$1(input, value) {
         return addSubtract$1(this, input, value, 1);
     }
 
-    // supports only 2.0-style subtract(1, 's') or subtract(duration)
+    /* supports only 2.0-style subtract(1, 's') or subtract(duration)*/
     function subtract$1(input, value) {
         return addSubtract$1(this, input, value, -1);
     }
@@ -5249,8 +5249,8 @@
             years,
             monthsFromDays;
 
-        // if we have a mix of positive and negative values, bubble down first
-        // check: https://github.com/moment/moment/issues/2166
+        /* if we have a mix of positive and negative values, bubble down first*/
+        /* check: https://github.com/moment/moment/issues/2166*/
         if (
             !(
                 (milliseconds >= 0 && days >= 0 && months >= 0) ||
@@ -5262,8 +5262,8 @@
             months = 0;
         }
 
-        // The following code bubbles up values, see the tests for
-        // examples of what that means.
+        /* The following code bubbles up values, see the tests for*/
+        /* examples of what that means.*/
         data.milliseconds = milliseconds % 1000;
 
         seconds = absFloor(milliseconds / 1000);
@@ -5277,12 +5277,12 @@
 
         days += absFloor(hours / 24);
 
-        // convert days to months
+        /* convert days to months*/
         monthsFromDays = absFloor(daysToMonths(days));
         months += monthsFromDays;
         days -= absCeil(monthsToDays(monthsFromDays));
 
-        // 12 months -> 1 year
+        /* 12 months -> 1 year*/
         years = absFloor(months / 12);
         months %= 12;
 
@@ -5294,13 +5294,13 @@
     }
 
     function daysToMonths(days) {
-        // 400 years have 146097 days (taking into account leap year rules)
-        // 400 years have 12 months === 4800
+        /* 400 years have 146097 days (taking into account leap year rules)*/
+        /* 400 years have 12 months === 4800*/
         return (days * 4800) / 146097;
     }
 
     function monthsToDays(months) {
-        // the reverse of daysToMonths
+        /* the reverse of daysToMonths*/
         return (months * 146097) / 4800;
     }
 
@@ -5326,7 +5326,7 @@
                     return months / 12;
             }
         } else {
-            // handle milliseconds separately because of floating point math errors (issue #1867)
+            /* handle milliseconds separately because of floating point math errors (issue #1867)*/
             days = this._days + Math.round(monthsToDays(this._months));
             switch (units) {
                 case 'week':
@@ -5339,7 +5339,7 @@
                     return days * 1440 + milliseconds / 6e4;
                 case 'second':
                     return days * 86400 + milliseconds / 1000;
-                // Math.floor prevents floating point math errors here
+                /* Math.floor prevents floating point math errors here*/
                 case 'millisecond':
                     return Math.floor(days * 864e5) + milliseconds;
                 default:
@@ -5394,16 +5394,16 @@
 
     var round = Math.round,
         thresholds = {
-            ss: 44, // a few seconds to seconds
-            s: 45, // seconds to minute
-            m: 45, // minutes to hour
-            h: 22, // hours to day
-            d: 26, // days to month/week
-            w: null, // weeks to month
-            M: 11, // months to year
+            ss: 44, /* a few seconds to seconds*/
+            s: 45, /* seconds to minute*/
+            m: 45, /* minutes to hour*/
+            h: 22, /* hours to day*/
+            d: 26, /* days to month/week*/
+            w: null, /* weeks to month*/
+            M: 11, /* months to year*/
         };
 
-    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
+    /* helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize*/
     function substituteTimeAgo(string, number, withoutSuffix, isFuture, locale) {
         return locale.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
     }
@@ -5444,7 +5444,7 @@
         return substituteTimeAgo.apply(null, a);
     }
 
-    // This function allows you to set the rounding function for relative time strings
+    /* This function allows you to set the rounding function for relative time strings*/
     function getSetRelativeTimeRounding(roundingFunction) {
         if (roundingFunction === undefined) {
             return round;
@@ -5456,7 +5456,7 @@
         return false;
     }
 
-    // This function allows you to set a threshold for relative time strings
+    /* This function allows you to set a threshold for relative time strings*/
     function getSetRelativeTimeThreshold(threshold, limit) {
         if (thresholds[threshold] === undefined) {
             return false;
@@ -5512,13 +5512,13 @@
     }
 
     function toISOString$1() {
-        // for ISO strings we do not use the normal bubbling rules:
-        //  * milliseconds bubble up until they become hours
-        //  * days do not bubble at all
-        //  * months bubble up until they become years
-        // This is because there is no context-free conversion between hours and days
-        // (think of clock changes)
-        // and also not between days and months (28-31 days per month)
+        /* for ISO strings we do not use the normal bubbling rules:*/
+        /*  * milliseconds bubble up until they become hours*/
+        /*  * days do not bubble at all*/
+        /*  * months bubble up until they become years*/
+        /* This is because there is no context-free conversion between hours and days*/
+        /* (think of clock changes)*/
+        /* and also not between days and months (28-31 days per month)*/
         if (!this.isValid()) {
             return this.localeData().invalidDate();
         }
@@ -5537,22 +5537,22 @@
             hmsSign;
 
         if (!total) {
-            // this is the same as C#'s (Noda) and python (isodate)...
-            // but not other JS (goog.date)
+            /* this is the same as C#'s (Noda) and python (isodate)...*/
+            /* but not other JS (goog.date)*/
             return 'P0D';
         }
 
-        // 3600 seconds -> 60 minutes -> 1 hour
+        /* 3600 seconds -> 60 minutes -> 1 hour*/
         minutes = absFloor(seconds / 60);
         hours = absFloor(minutes / 60);
         seconds %= 60;
         minutes %= 60;
 
-        // 12 months -> 1 year
+        /* 12 months -> 1 year*/
         years = absFloor(months / 12);
         months %= 12;
 
-        // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
+        /* inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js*/
         s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
 
         totalSign = total < 0 ? '-' : '';
@@ -5614,12 +5614,12 @@
     );
     proto$2.lang = lang;
 
-    // FORMATTING
+    /* FORMATTING*/
 
     addFormatToken('X', 0, 0, 'unix');
     addFormatToken('x', 0, 0, 'valueOf');
 
-    // PARSING
+    /* PARSING*/
 
     addRegexToken('x', matchSigned);
     addRegexToken('X', matchTimestamp);
@@ -5630,7 +5630,7 @@
         config._d = new Date(toInt(input));
     });
 
-    //! moment.js
+    /*! moment.js*/
 
     hooks.version = '2.30.1';
 
@@ -5664,20 +5664,20 @@
     hooks.calendarFormat = getCalendarFormat;
     hooks.prototype = proto;
 
-    // currently HTML5 input type only supports 24-hour formats
+    /* currently HTML5 input type only supports 24-hour formats*/
     hooks.HTML5_FMT = {
-        DATETIME_LOCAL: 'YYYY-MM-DDTHH:mm', // <input type="datetime-local" />
-        DATETIME_LOCAL_SECONDS: 'YYYY-MM-DDTHH:mm:ss', // <input type="datetime-local" step="1" />
-        DATETIME_LOCAL_MS: 'YYYY-MM-DDTHH:mm:ss.SSS', // <input type="datetime-local" step="0.001" />
-        DATE: 'YYYY-MM-DD', // <input type="date" />
-        TIME: 'HH:mm', // <input type="time" />
-        TIME_SECONDS: 'HH:mm:ss', // <input type="time" step="1" />
-        TIME_MS: 'HH:mm:ss.SSS', // <input type="time" step="0.001" />
-        WEEK: 'GGGG-[W]WW', // <input type="week" />
-        MONTH: 'YYYY-MM', // <input type="month" />
+        DATETIME_LOCAL: 'YYYY-MM-DDTHH:mm', /* <input type="datetime-local" />*/
+        DATETIME_LOCAL_SECONDS: 'YYYY-MM-DDTHH:mm:ss', /* <input type="datetime-local" step="1" />*/
+        DATETIME_LOCAL_MS: 'YYYY-MM-DDTHH:mm:ss.SSS', /* <input type="datetime-local" step="0.001" />*/
+        DATE: 'YYYY-MM-DD', /* <input type="date" />*/
+        TIME: 'HH:mm', /* <input type="time" />*/
+        TIME_SECONDS: 'HH:mm:ss', /* <input type="time" step="1" />*/
+        TIME_MS: 'HH:mm:ss.SSS', /* <input type="time" step="0.001" />*/
+        WEEK: 'GGGG-[W]WW', /* <input type="week" />*/
+        MONTH: 'YYYY-MM', /* <input type="month" />*/
     };
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('af', {
         months: 'Januarie_Februarie_Maart_April_Mei_Junie_Julie_Augustus_September_Oktober_November_Desember'.split(
@@ -5737,15 +5737,15 @@
             return (
                 number +
                 (number === 1 || number === 8 || number >= 20 ? 'ste' : 'de')
-            ); // Thanks to Joris Röling : https://github.com/jjupiter
+            ); /* Thanks to Joris Röling : https://github.com/jjupiter*/
         },
         week: {
-            dow: 1, // Maandag is die eerste dag van die week.
-            doy: 4, // Die week wat die 4de Januarie bevat is die eerste week van die jaar.
+            dow: 1, /* Maandag is die eerste dag van die week.*/
+            doy: 4, /* Die week wat die 4de Januarie bevat is die eerste week van die jaar.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var pluralForm = function (n) {
             return n === 0
@@ -5889,12 +5889,12 @@
             return string.replace(/,/g, '،');
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ar-kw', {
         months: 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split(
@@ -5941,12 +5941,12 @@
             yy: '%d سنوات',
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap = {
             1: '1',
@@ -6109,12 +6109,12 @@
                 .replace(/,/g, '،');
         },
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ar-ma', {
         months: 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split(
@@ -6161,12 +6161,12 @@
             yy: '%d سنوات',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$1 = {
             1: '١',
@@ -6251,7 +6251,7 @@
                 .replace(/[٣٤٥٦٧٨٩٠]/g, function (match) {
                     return numberMap[match];
                 })
-                .split('') // reversed since negative lookbehind not supported everywhere
+                .split('') /* reversed since negative lookbehind not supported everywhere*/
                 .reverse()
                 .join('')
                 .replace(/[١٢](?![\u062a\u0643])/g, function (match) {
@@ -6270,12 +6270,12 @@
                 .replace(/,/g, '،');
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$2 = {
             1: '١',
@@ -6372,12 +6372,12 @@
                 .replace(/,/g, '،');
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ar-tn', {
         months: 'جانفي_فيفري_مارس_أفريل_ماي_جوان_جويلية_أوت_سبتمبر_أكتوبر_نوفمبر_ديسمبر'.split(
@@ -6424,12 +6424,12 @@
             yy: '%d سنوات',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$3 = {
             1: '١',
@@ -6608,12 +6608,12 @@
                 .replace(/,/g, '،');
         },
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes = {
         1: '-inci',
@@ -6698,7 +6698,7 @@
         dayOfMonthOrdinalParse: /\d{1,2}-(ıncı|inci|nci|üncü|ncı|uncu)/,
         ordinal: function (number) {
             if (number === 0) {
-                // special case for zero
+                /* special case for zero*/
                 return number + '-ıncı';
             }
             var a = number % 10,
@@ -6707,12 +6707,12 @@
             return number + (suffixes[a] || suffixes[b] || suffixes[c]);
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function plural(word, num) {
         var forms = word.split('_');
@@ -6844,12 +6844,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('bg', {
         months: 'януари_февруари_март_април_май_юни_юли_август_септември_октомври_ноември_декември'.split(
@@ -6928,12 +6928,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('bm', {
         months: 'Zanwuyekalo_Fewuruyekalo_Marisikalo_Awirilikalo_Mɛkalo_Zuwɛnkalo_Zuluyekalo_Utikalo_Sɛtanburukalo_ɔkutɔburukalo_Nowanburukalo_Desanburukalo'.split(
@@ -6976,12 +6976,12 @@
             yy: 'san %d',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$4 = {
             1: '১',
@@ -7102,12 +7102,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$5 = {
             1: '১',
@@ -7218,12 +7218,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$6 = {
             1: '༡',
@@ -7339,12 +7339,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function relativeTimeWithMutation(number, withoutSuffix, key) {
         var format = {
@@ -7497,10 +7497,10 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
-        meridiemParse: /a.m.|g.m./, // goude merenn | a-raok merenn
+        meridiemParse: /a.m.|g.m./, /* goude merenn | a-raok merenn*/
         isPM: function (token) {
             return token === 'g.m.';
         },
@@ -7509,7 +7509,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime(number, withoutSuffix, key, isFuture) {
         switch (key) {
@@ -7659,12 +7659,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ca', {
         months: {
@@ -7756,12 +7756,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$4 = {
             standalone:
@@ -7788,8 +7788,8 @@
             /^lis/i,
             /^pro/i,
         ],
-        // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
-        // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+        /* NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.*/
+        /* Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.*/
         monthsRegex$2 =
             /^(leden|únor|březen|duben|květen|červenec|července|červen|června|srpen|září|říjen|listopad|prosinec|led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i;
 
@@ -7799,49 +7799,49 @@
     function translate$1(number, withoutSuffix, key, isFuture) {
         var result = number + ' ';
         switch (key) {
-            case 's': // a few seconds / in a few seconds / a few seconds ago
+            case 's': /* a few seconds / in a few seconds / a few seconds ago*/
                 return withoutSuffix || isFuture ? 'pár sekund' : 'pár sekundami';
-            case 'ss': // 9 seconds / in 9 seconds / 9 seconds ago
+            case 'ss': /* 9 seconds / in 9 seconds / 9 seconds ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'sekundy' : 'sekund');
                 } else {
                     return result + 'sekundami';
                 }
-            case 'm': // a minute / in a minute / a minute ago
+            case 'm': /* a minute / in a minute / a minute ago*/
                 return withoutSuffix ? 'minuta' : isFuture ? 'minutu' : 'minutou';
-            case 'mm': // 9 minutes / in 9 minutes / 9 minutes ago
+            case 'mm': /* 9 minutes / in 9 minutes / 9 minutes ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'minuty' : 'minut');
                 } else {
                     return result + 'minutami';
                 }
-            case 'h': // an hour / in an hour / an hour ago
+            case 'h': /* an hour / in an hour / an hour ago*/
                 return withoutSuffix ? 'hodina' : isFuture ? 'hodinu' : 'hodinou';
-            case 'hh': // 9 hours / in 9 hours / 9 hours ago
+            case 'hh': /* 9 hours / in 9 hours / 9 hours ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'hodiny' : 'hodin');
                 } else {
                     return result + 'hodinami';
                 }
-            case 'd': // a day / in a day / a day ago
+            case 'd': /* a day / in a day / a day ago*/
                 return withoutSuffix || isFuture ? 'den' : 'dnem';
-            case 'dd': // 9 days / in 9 days / 9 days ago
+            case 'dd': /* 9 days / in 9 days / 9 days ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'dny' : 'dní');
                 } else {
                     return result + 'dny';
                 }
-            case 'M': // a month / in a month / a month ago
+            case 'M': /* a month / in a month / a month ago*/
                 return withoutSuffix || isFuture ? 'měsíc' : 'měsícem';
-            case 'MM': // 9 months / in 9 months / 9 months ago
+            case 'MM': /* 9 months / in 9 months / 9 months ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'měsíce' : 'měsíců');
                 } else {
                     return result + 'měsíci';
                 }
-            case 'y': // a year / in a year / a year ago
+            case 'y': /* a year / in a year / a year ago*/
                 return withoutSuffix || isFuture ? 'rok' : 'rokem';
-            case 'yy': // 9 years / in 9 years / 9 years ago
+            case 'yy': /* 9 years / in 9 years / 9 years ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$1(number) ? 'roky' : 'let');
                 } else {
@@ -7855,8 +7855,8 @@
         monthsShort: monthsShort,
         monthsRegex: monthsRegex$2,
         monthsShortRegex: monthsRegex$2,
-        // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
-        // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+        /* NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.*/
+        /* Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.*/
         monthsStrictRegex:
             /^(leden|ledna|února|únor|březen|března|duben|dubna|květen|května|červenec|července|červen|června|srpen|srpna|září|říjen|října|listopadu|listopad|prosinec|prosince)/i,
         monthsShortStrictRegex:
@@ -7934,12 +7934,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('cv', {
         months: 'кӑрлач_нарӑс_пуш_ака_май_ҫӗртме_утӑ_ҫурла_авӑн_юпа_чӳк_раштав'.split(
@@ -7994,12 +7994,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}-мӗш/,
         ordinal: '%d-мӗш',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('cy', {
         months: 'Ionawr_Chwefror_Mawrth_Ebrill_Mai_Mehefin_Gorffennaf_Awst_Medi_Hydref_Tachwedd_Rhagfyr'.split(
@@ -8015,7 +8015,7 @@
         weekdaysShort: 'Sul_Llun_Maw_Mer_Iau_Gwe_Sad'.split('_'),
         weekdaysMin: 'Su_Ll_Ma_Me_Ia_Gw_Sa'.split('_'),
         weekdaysParseExact: true,
-        // time formats are the same as en-gb
+        /* time formats are the same as en-gb*/
         longDateFormat: {
             LT: 'HH:mm',
             LTS: 'HH:mm:ss',
@@ -8049,7 +8049,7 @@
             yy: '%d flynedd',
         },
         dayOfMonthOrdinalParse: /\d{1,2}(fed|ain|af|il|ydd|ed|eg)/,
-        // traditional ordinal numbers above 31 are not commonly used in colloquial Welsh
+        /* traditional ordinal numbers above 31 are not commonly used in colloquial Welsh*/
         ordinal: function (number) {
             var b = number,
                 output = '',
@@ -8064,7 +8064,7 @@
                     'ed',
                     'fed',
                     'fed',
-                    'fed', // 1af to 10fed
+                    'fed', /* 1af to 10fed*/
                     'eg',
                     'fed',
                     'eg',
@@ -8074,11 +8074,11 @@
                     'eg',
                     'fed',
                     'eg',
-                    'fed', // 11eg to 20fed
+                    'fed', /* 11eg to 20fed*/
                 ];
             if (b > 20) {
                 if (b === 40 || b === 50 || b === 60 || b === 80 || b === 100) {
-                    output = 'fed'; // not 30ain, 70ain or 90ain
+                    output = 'fed'; /* not 30ain, 70ain or 90ain*/
                 } else {
                     output = 'ain';
                 }
@@ -8088,12 +8088,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('da', {
         months: 'januar_februar_marts_april_maj_juni_juli_august_september_oktober_november_december'.split(
@@ -8138,12 +8138,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$1(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -8211,12 +8211,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$2(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -8284,12 +8284,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$3(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -8357,12 +8357,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$5 = [
             'ޖެނުއަރީ',
@@ -8444,12 +8444,12 @@
             return string.replace(/,/g, '،');
         },
         week: {
-            dow: 7, // Sunday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 7, /* Sunday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function isFunction$1(input) {
         return (
@@ -8474,7 +8474,7 @@
                 typeof format === 'string' &&
                 /D/.test(format.substring(0, format.indexOf('MMMM')))
             ) {
-                // if there is a day number before 'MMMM'
+                /* if there is a day number before 'MMMM'*/
                 return this._monthsGenitiveEl[momentToFormat.month()];
             } else {
                 return this._monthsNominativeEl[momentToFormat.month()];
@@ -8547,12 +8547,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}η/,
         ordinal: '%dη',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4st is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4st is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-au', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8612,12 +8612,12 @@
             return number + output;
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-ca', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8678,7 +8678,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-gb', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8738,12 +8738,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-ie', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8803,12 +8803,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-il', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8869,7 +8869,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-in', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8929,12 +8929,12 @@
             return number + output;
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 1st is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 1st is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-nz', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -8994,12 +8994,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('en-sg', {
         months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
@@ -9059,12 +9059,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('eo', {
         months: 'januaro_februaro_marto_aprilo_majo_junio_julio_aŭgusto_septembro_oktobro_novembro_decembro'.split(
@@ -9111,7 +9111,7 @@
             mm: '%d minutoj',
             h: 'unu horo',
             hh: '%d horoj',
-            d: 'unu tago', //ne 'diurno', ĉar estas uzita por proksimumo
+            d: 'unu tago', /*ne 'diurno', ĉar estas uzita por proksimumo*/
             dd: '%d tagoj',
             M: 'unu monato',
             MM: '%d monatoj',
@@ -9121,12 +9121,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}a/,
         ordinal: '%da',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortDot =
             'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
@@ -9227,12 +9227,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortDot$1 =
             'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
@@ -9333,13 +9333,13 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
         invalidDate: 'Fecha inválida',
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortDot$2 =
             'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
@@ -9440,12 +9440,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortDot$3 =
             'ene._feb._mar._abr._may._jun._jul._ago._sep._oct._nov._dic.'.split(
@@ -9546,13 +9546,13 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
         invalidDate: 'Fecha inválida',
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$4(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -9621,12 +9621,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('eu', {
         months: 'urtarrila_otsaila_martxoa_apirila_maiatza_ekaina_uztaila_abuztua_iraila_urria_azaroa_abendua'.split(
@@ -9683,12 +9683,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$7 = {
             1: '۱',
@@ -9793,12 +9793,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}م/,
         ordinal: '%dم',
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var numbersPast =
             'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(
@@ -9914,12 +9914,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('fil', {
         months: 'Enero_Pebrero_Marso_Abril_Mayo_Hunyo_Hulyo_Agosto_Setyembre_Oktubre_Nobyembre_Disyembre'.split(
@@ -9968,12 +9968,12 @@
             return number;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('fo', {
         months: 'januar_februar_mars_apríl_mai_juni_juli_august_september_oktober_november_desember'.split(
@@ -10021,12 +10021,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('fr-ca', {
         months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split(
@@ -10076,7 +10076,7 @@
         dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
         ordinal: function (number, period) {
             switch (period) {
-                // Words with masculine grammatical gender: mois, trimestre, jour
+                /* Words with masculine grammatical gender: mois, trimestre, jour*/
                 default:
                 case 'M':
                 case 'Q':
@@ -10085,7 +10085,7 @@
                 case 'd':
                     return number + (number === 1 ? 'er' : 'e');
 
-                // Words with feminine grammatical gender: semaine
+                /* Words with feminine grammatical gender: semaine*/
                 case 'w':
                 case 'W':
                     return number + (number === 1 ? 're' : 'e');
@@ -10093,7 +10093,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('fr-ch', {
         months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split(
@@ -10143,7 +10143,7 @@
         dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
         ordinal: function (number, period) {
             switch (period) {
-                // Words with masculine grammatical gender: mois, trimestre, jour
+                /* Words with masculine grammatical gender: mois, trimestre, jour*/
                 default:
                 case 'M':
                 case 'Q':
@@ -10152,19 +10152,19 @@
                 case 'd':
                     return number + (number === 1 ? 'er' : 'e');
 
-                // Words with feminine grammatical gender: semaine
+                /* Words with feminine grammatical gender: semaine*/
                 case 'w':
                 case 'W':
                     return number + (number === 1 ? 're' : 'e');
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsStrictRegex$1 =
             /^(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)/i,
@@ -10243,13 +10243,13 @@
         dayOfMonthOrdinalParse: /\d{1,2}(er|)/,
         ordinal: function (number, period) {
             switch (period) {
-                // TODO: Return 'e' when day of month > 1. Move this case inside
-                // block for masculine words below.
-                // See https://github.com/moment/moment/issues/3375
+                /* TODO: Return 'e' when day of month > 1. Move this case inside*/
+                /* block for masculine words below.*/
+                /* See https://github.com/moment/moment/issues/3375*/
                 case 'D':
                     return number + (number === 1 ? 'er' : '');
 
-                // Words with masculine grammatical gender: mois, trimestre, jour
+                /* Words with masculine grammatical gender: mois, trimestre, jour*/
                 default:
                 case 'M':
                 case 'Q':
@@ -10257,19 +10257,19 @@
                 case 'd':
                     return number + (number === 1 ? 'er' : 'e');
 
-                // Words with feminine grammatical gender: semaine
+                /* Words with feminine grammatical gender: semaine*/
                 case 'w':
                 case 'W':
                     return number + (number === 1 ? 're' : 'e');
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortWithDots =
             'jan._feb._mrt._apr._mai_jun._jul._aug._sep._okt._nov._des.'.split('_'),
@@ -10336,12 +10336,12 @@
             );
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$6 = [
             'Eanáir',
@@ -10428,12 +10428,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$7 = [
             'Am Faoilleach',
@@ -10520,12 +10520,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('gl', {
         months: 'xaneiro_febreiro_marzo_abril_maio_xuño_xullo_agosto_setembro_outubro_novembro_decembro'.split(
@@ -10592,12 +10592,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$5(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -10673,7 +10673,7 @@
         dayOfMonthOrdinalParse: /\d{1,2}(वेर)/,
         ordinal: function (number, period) {
             switch (period) {
-                // the ordinal 'वेर' only applies to day of the month
+                /* the ordinal 'वेर' only applies to day of the month*/
                 case 'D':
                     return number + 'वेर';
                 default:
@@ -10687,8 +10687,8 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week
-            doy: 3, // The week that contains Jan 4th is the first week of the year (7 + 0 - 4)
+            dow: 0, /* Sunday is the first day of the week*/
+            doy: 3, /* The week that contains Jan 4th is the first week of the year (7 + 0 - 4)*/
         },
         meridiemParse: /राती|सकाळीं|दनपारां|सांजे/,
         meridiemHour: function (hour, meridiem) {
@@ -10720,7 +10720,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$6(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -10794,7 +10794,7 @@
         dayOfMonthOrdinalParse: /\d{1,2}(er)/,
         ordinal: function (number, period) {
             switch (period) {
-                // the ordinal 'er' only applies to day of the month
+                /* the ordinal 'er' only applies to day of the month*/
                 case 'D':
                     return number + 'er';
                 default:
@@ -10808,8 +10808,8 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week
-            doy: 3, // The week that contains Jan 4th is the first week of the year (7 + 0 - 4)
+            dow: 0, /* Sunday is the first day of the week*/
+            doy: 3, /* The week that contains Jan 4th is the first week of the year (7 + 0 - 4)*/
         },
         meridiemParse: /rati|sokallim|donparam|sanje/,
         meridiemHour: function (hour, meridiem) {
@@ -10841,7 +10841,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$8 = {
             1: '૧',
@@ -10924,8 +10924,8 @@
                 return symbolMap$8[match];
             });
         },
-        // Gujarati notation for meridiems are quite fuzzy in practice. While there exists
-        // a rigid notion of a 'Pahar' it is not used as rigidly in modern Gujarati.
+        /* Gujarati notation for meridiems are quite fuzzy in practice. While there exists*/
+        /* a rigid notion of a 'Pahar' it is not used as rigidly in modern Gujarati.*/
         meridiemParse: /રાત|બપોર|સવાર|સાંજ/,
         meridiemHour: function (hour, meridiem) {
             if (hour === 12) {
@@ -10955,12 +10955,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('he', {
         months: 'ינואר_פברואר_מרץ_אפריל_מאי_יוני_יולי_אוגוסט_ספטמבר_אוקטובר_נובמבר_דצמבר'.split(
@@ -11049,7 +11049,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$9 = {
             1: '१',
@@ -11178,8 +11178,8 @@
                 return symbolMap$9[match];
             });
         },
-        // Hindi notation for meridiems are quite fuzzy in practice. While there exists
-        // a rigid notion of a 'Pahar' it is not used as rigidly in modern Hindi.
+        /* Hindi notation for meridiems are quite fuzzy in practice. While there exists*/
+        /* a rigid notion of a 'Pahar' it is not used as rigidly in modern Hindi.*/
         meridiemParse: /रात|सुबह|दोपहर|शाम/,
         meridiemHour: function (hour, meridiem) {
             if (hour === 12) {
@@ -11209,12 +11209,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function translate$3(number, withoutSuffix, key) {
         var result = number + ' ';
@@ -11362,12 +11362,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var weekEndings =
         'vasárnap hétfőn kedden szerdán csütörtökön pénteken szombaton'.split(' ');
@@ -11476,12 +11476,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('hy-am', {
         months: {
@@ -11567,12 +11567,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('id', {
         months: 'Januari_Februari_Maret_April_Mei_Juni_Juli_Agustus_September_Oktober_November_Desember'.split(
@@ -11639,12 +11639,12 @@
             yy: '%d tahun',
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function plural$2(n) {
         if (n % 100 === 11) {
@@ -11776,12 +11776,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('it-ch', {
         months: 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split(
@@ -11837,12 +11837,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('it', {
         months: 'gennaio_febbraio_marzo_aprile_maggio_giugno_luglio_agosto_settembre_ottobre_novembre_dicembre'.split(
@@ -11938,12 +11938,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ja', {
         eras: [
@@ -12088,7 +12088,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('jv', {
         months: 'Januari_Februari_Maret_April_Mei_Juni_Juli_Agustus_September_Oktober_Nopember_Desember'.split(
@@ -12155,12 +12155,12 @@
             yy: '%d taun',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ka', {
         months: 'იანვარი_თებერვალი_მარტი_აპრილი_მაისი_ივნისი_ივლისი_აგვისტო_სექტემბერი_ოქტომბერი_ნოემბერი_დეკემბერი'.split(
@@ -12249,7 +12249,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes$1 = {
         0: '-ші',
@@ -12323,12 +12323,12 @@
             return number + (suffixes$1[number] || suffixes$1[a] || suffixes$1[b]);
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$a = {
             1: '១',
@@ -12423,12 +12423,12 @@
             });
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$b = {
             1: '೧',
@@ -12544,12 +12544,12 @@
             return number + 'ನೇ';
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ko', {
         months: '1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월'.split('_'),
@@ -12620,7 +12620,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$7(num, withoutSuffix, key, isFuture) {
         var format = {
@@ -12641,14 +12641,14 @@
         };
         return withoutSuffix ? format[key][0] : format[key][1];
     }
-    // function obliqueNumSuffix(num) {
-    //     if(num.includes(':'))
-    //         num = parseInt(num.split(':')[0]);
-    //     else
-    //         num = parseInt(num);
-    //     return num == 0 || num % 10 == 1 ? 'ê'
-    //                         : (num > 10 && num % 10 == 0 ? 'î' : 'an');
-    // }
+    /* function obliqueNumSuffix(num) {*/
+    /*     if(num.includes(':'))*/
+    /*         num = parseInt(num.split(':')[0]);*/
+    /*     else*/
+    /*         num = parseInt(num);*/
+    /*     return num == 0 || num % 10 == 1 ? 'ê'*/
+    /*                         : (num > 10 && num % 10 == 0 ? 'î' : 'an');*/
+    /* }*/
     function ezafeNumSuffix(num) {
         num = '' + num;
         var l = num.substring(num.length - 1),
@@ -12662,9 +12662,9 @@
     }
 
     hooks.defineLocale('ku-kmr', {
-        // According to the spelling rules defined by the work group of Weqfa Mezopotamyayê (Mesopotamia Foundation)
-        // this should be: 'Kanûna Paşîn_Sibat_Adar_Nîsan_Gulan_Hezîran_Tîrmeh_Tebax_Îlon_Çirîya Pêşîn_Çirîya Paşîn_Kanûna Pêşîn'
-        // But the names below are more well known and handy
+        /* According to the spelling rules defined by the work group of Weqfa Mezopotamyayê (Mesopotamia Foundation)*/
+        /* this should be: 'Kanûna Paşîn_Sibat_Adar_Nîsan_Gulan_Hezîran_Tîrmeh_Tebax_Îlon_Çirîya Pêşîn_Çirîya Paşîn_Kanûna Pêşîn'*/
+        /* But the names below are more well known and handy*/
         months: 'Rêbendan_Sibat_Adar_Nîsan_Gulan_Hezîran_Tîrmeh_Tebax_Îlon_Cotmeh_Mijdar_Berfanbar'.split(
             '_'
         ),
@@ -12726,12 +12726,12 @@
             return num + ezafeNumSuffix(num);
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$c = {
             1: '١',
@@ -12841,12 +12841,12 @@
                 .replace(/,/g, '،');
         },
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes$2 = {
         0: '-чү',
@@ -12922,12 +12922,12 @@
             return number + (suffixes$2[number] || suffixes$2[a] || suffixes$2[b]);
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$8(number, withoutSuffix, key, isFuture) {
         var format = {
@@ -12966,16 +12966,16 @@
             return false;
         }
         if (number < 0) {
-            // Negative Number --> always true
+            /* Negative Number --> always true*/
             return true;
         } else if (number < 10) {
-            // Only 1 digit
+            /* Only 1 digit*/
             if (4 <= number && number <= 7) {
                 return true;
             }
             return false;
         } else if (number < 100) {
-            // 2 digits
+            /* 2 digits*/
             var lastDigit = number % 10,
                 firstDigit = number / 10;
             if (lastDigit === 0) {
@@ -12983,13 +12983,13 @@
             }
             return eifelerRegelAppliesToNumber(lastDigit);
         } else if (number < 10000) {
-            // 3 or 4 digits --> recursively check first digit
+            /* 3 or 4 digits --> recursively check first digit*/
             while (number >= 10) {
                 number = number / 10;
             }
             return eifelerRegelAppliesToNumber(number);
         } else {
-            // Anything larger than 4 digits: recursively check first n-3 digits
+            /* Anything larger than 4 digits: recursively check first n-3 digits*/
             number = number / 1000;
             return eifelerRegelAppliesToNumber(number);
         }
@@ -13026,7 +13026,7 @@
             nextWeek: 'dddd [um] LT',
             lastDay: '[Gëschter um] LT',
             lastWeek: function () {
-                // Different date string for 'Dënschdeg' (Tuesday) and 'Donneschdeg' (Thursday) due to phonological rule
+                /* Different date string for 'Dënschdeg' (Tuesday) and 'Donneschdeg' (Thursday) due to phonological rule*/
                 switch (this.day()) {
                     case 2:
                     case 4:
@@ -13055,12 +13055,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('lo', {
         months: 'ມັງກອນ_ກຸມພາ_ມີນາ_ເມສາ_ພຶດສະພາ_ມິຖຸນາ_ກໍລະກົດ_ສິງຫາ_ກັນຍາ_ຕຸລາ_ພະຈິກ_ທັນວາ'.split(
@@ -13123,7 +13123,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var units = {
         ss: 'sekundė_sekundžių_sekundes',
@@ -13240,12 +13240,12 @@
             return number + '-oji';
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var units$1 = {
         ss: 'sekundes_sekundēm_sekunde_sekundes'.split('_'),
@@ -13265,11 +13265,11 @@
      */
     function format$1(forms, number, withoutSuffix) {
         if (withoutSuffix) {
-            // E.g. "21 minūte", "3 minūtes".
+            /* E.g. "21 minūte", "3 minūtes".*/
             return number % 10 === 1 && number % 100 !== 11 ? forms[2] : forms[3];
         } else {
-            // E.g. "21 minūtes" as in "pēc 21 minūtes".
-            // E.g. "3 minūtēm" as in "pēc 3 minūtēm".
+            /* E.g. "21 minūtes" as in "pēc 21 minūtes".*/
+            /* E.g. "3 minūtēm" as in "pēc 3 minūtēm".*/
             return number % 10 === 1 && number % 100 !== 11 ? forms[0] : forms[1];
         }
     }
@@ -13330,16 +13330,16 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var translator = {
         words: {
-            //Different grammatical cases
+            /*Different grammatical cases*/
             ss: ['sekund', 'sekunda', 'sekundi'],
             m: ['jedan minut', 'jednog minuta'],
             mm: ['minut', 'minuta', 'minuta'],
@@ -13444,12 +13444,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('mi', {
         months: 'Kohi-tāte_Hui-tanguru_Poutū-te-rangi_Paenga-whāwhā_Haratua_Pipiri_Hōngoingoi_Here-turi-kōkā_Mahuru_Whiringa-ā-nuku_Whiringa-ā-rangi_Hakihea'.split(
@@ -13501,12 +13501,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('mk', {
         months: 'јануари_февруари_март_април_мај_јуни_јули_август_септември_октомври_ноември_декември'.split(
@@ -13583,12 +13583,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ml', {
         months: 'ജനുവരി_ഫെബ്രുവരി_മാർച്ച്_ഏപ്രിൽ_മേയ്_ജൂൺ_ജൂലൈ_ഓഗസ്റ്റ്_സെപ്റ്റംബർ_ഒക്ടോബർ_നവംബർ_ഡിസംബർ'.split(
@@ -13667,7 +13667,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function translate$7(number, withoutSuffix, key, isFuture) {
         switch (key) {
@@ -13764,7 +13764,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$d = {
             1: '१',
@@ -13958,12 +13958,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ms-my', {
         months: 'Januari_Februari_Mac_April_Mei_Jun_Julai_Ogos_September_Oktober_November_Disember'.split(
@@ -14030,12 +14030,12 @@
             yy: '%d tahun',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ms', {
         months: 'Januari_Februari_Mac_April_Mei_Jun_Julai_Ogos_September_Oktober_November_Disember'.split(
@@ -14102,12 +14102,12 @@
             yy: '%d tahun',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('mt', {
         months: 'Jannar_Frar_Marzu_April_Mejju_Ġunju_Lulju_Awwissu_Settembru_Ottubru_Novembru_Diċembru'.split(
@@ -14155,12 +14155,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$e = {
             1: '၁',
@@ -14241,12 +14241,12 @@
             });
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('nb', {
         months: 'januar_februar_mars_april_mai_juni_juli_august_september_oktober_november_desember'.split(
@@ -14296,12 +14296,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$f = {
             1: '१',
@@ -14414,12 +14414,12 @@
             yy: '%d बर्ष',
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortWithDots$1 =
             'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_'),
@@ -14512,12 +14512,12 @@
             );
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsShortWithDots$2 =
             'jan._feb._mrt._apr._mei_jun._jul._aug._sep._okt._nov._dec.'.split('_'),
@@ -14612,12 +14612,12 @@
             );
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('nn', {
         months: 'januar_februar_mars_april_mai_juni_juli_august_september_oktober_november_desember'.split(
@@ -14667,12 +14667,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('oc-lnc', {
         months: {
@@ -14749,12 +14749,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
+            dow: 1, /* Monday is the first day of the week.*/
             doy: 4,
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$g = {
             1: '੧',
@@ -14782,7 +14782,7 @@
         };
 
     hooks.defineLocale('pa-in', {
-        // There are months name as per Nanakshahi Calendar but they are not used as rigidly in modern Punjabi.
+        /* There are months name as per Nanakshahi Calendar but they are not used as rigidly in modern Punjabi.*/
         months: 'ਜਨਵਰੀ_ਫ਼ਰਵਰੀ_ਮਾਰਚ_ਅਪ੍ਰੈਲ_ਮਈ_ਜੂਨ_ਜੁਲਾਈ_ਅਗਸਤ_ਸਤੰਬਰ_ਅਕਤੂਬਰ_ਨਵੰਬਰ_ਦਸੰਬਰ'.split(
             '_'
         ),
@@ -14837,8 +14837,8 @@
                 return symbolMap$g[match];
             });
         },
-        // Punjabi notation for meridiems are quite fuzzy in practice. While there exists
-        // a rigid notion of a 'Pahar' it is not used as rigidly in modern Punjabi.
+        /* Punjabi notation for meridiems are quite fuzzy in practice. While there exists*/
+        /* a rigid notion of a 'Pahar' it is not used as rigidly in modern Punjabi.*/
         meridiemParse: /ਰਾਤ|ਸਵੇਰ|ਦੁਪਹਿਰ|ਸ਼ਾਮ/,
         meridiemHour: function (hour, meridiem) {
             if (hour === 12) {
@@ -14868,12 +14868,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var monthsNominative =
             'styczeń_luty_marzec_kwiecień_maj_czerwiec_lipiec_sierpień_wrzesień_październik_listopad_grudzień'.split(
@@ -15005,12 +15005,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('pt-br', {
         months: 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split(
@@ -15039,8 +15039,8 @@
             lastDay: '[Ontem às] LT',
             lastWeek: function () {
                 return this.day() === 0 || this.day() === 6
-                    ? '[Último] dddd [às] LT' // Saturday + Sunday
-                    : '[Última] dddd [às] LT'; // Monday - Friday
+                    ? '[Último] dddd [às] LT' /* Saturday + Sunday*/
+                    : '[Última] dddd [às] LT'; /* Monday - Friday*/
             },
             sameElse: 'L',
         },
@@ -15065,7 +15065,7 @@
         invalidDate: 'Data inválida',
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('pt', {
         months: 'janeiro_fevereiro_março_abril_maio_junho_julho_agosto_setembro_outubro_novembro_dezembro'.split(
@@ -15094,8 +15094,8 @@
             lastDay: '[Ontem às] LT',
             lastWeek: function () {
                 return this.day() === 0 || this.day() === 6
-                    ? '[Último] dddd [às] LT' // Saturday + Sunday
-                    : '[Última] dddd [às] LT'; // Monday - Friday
+                    ? '[Último] dddd [às] LT' /* Saturday + Sunday*/
+                    : '[Última] dddd [às] LT'; /* Monday - Friday*/
             },
             sameElse: 'L',
         },
@@ -15120,12 +15120,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}º/,
         ordinal: '%dº',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function relativeTimeWithPlural$2(number, withoutSuffix, key) {
         var format = {
@@ -15191,12 +15191,12 @@
             yy: relativeTimeWithPlural$2,
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function plural$4(word, num) {
         var forms = word.split('_');
@@ -15237,9 +15237,9 @@
         /^дек/i,
     ];
 
-    // http://new.gramota.ru/spravka/rules/139-prop : § 103
-    // Сокращения месяцев: http://new.gramota.ru/spravka/buro/search-answer?s=242637
-    // CLDR data:          http://www.unicode.org/cldr/charts/28/summary/ru.html#1753
+    /* http://new.gramota.ru/spravka/rules/139-prop : § 103*/
+    /* Сокращения месяцев: http://new.gramota.ru/spravka/buro/search-answer?s=242637*/
+    /* CLDR data:          http://www.unicode.org/cldr/charts/28/summary/ru.html#1753*/
     hooks.defineLocale('ru', {
         months: {
             format: 'января_февраля_марта_апреля_мая_июня_июля_августа_сентября_октября_ноября_декабря'.split(
@@ -15251,7 +15251,7 @@
                 ),
         },
         monthsShort: {
-            // по CLDR именно "июл." и "июн.", но какой смысл менять букву на точку?
+            /* по CLDR именно "июл." и "июн.", но какой смысл менять букву на точку?*/
             format: 'янв._февр._мар._апр._мая_июня_июля_авг._сент._окт._нояб._дек.'.split(
                 '_'
             ),
@@ -15276,19 +15276,19 @@
         longMonthsParse: monthsParse$b,
         shortMonthsParse: monthsParse$b,
 
-        // полные названия с падежами, по три буквы, для некоторых, по 4 буквы, сокращения с точкой и без точки
+        /* полные названия с падежами, по три буквы, для некоторых, по 4 буквы, сокращения с точкой и без точки*/
         monthsRegex:
             /^(январ[ья]|янв\.?|феврал[ья]|февр?\.?|марта?|мар\.?|апрел[ья]|апр\.?|ма[йя]|июн[ья]|июн\.?|июл[ья]|июл\.?|августа?|авг\.?|сентябр[ья]|сент?\.?|октябр[ья]|окт\.?|ноябр[ья]|нояб?\.?|декабр[ья]|дек\.?)/i,
 
-        // копия предыдущего
+        /* копия предыдущего*/
         monthsShortRegex:
             /^(январ[ья]|янв\.?|феврал[ья]|февр?\.?|марта?|мар\.?|апрел[ья]|апр\.?|ма[йя]|июн[ья]|июн\.?|июл[ья]|июл\.?|августа?|авг\.?|сентябр[ья]|сент?\.?|октябр[ья]|окт\.?|ноябр[ья]|нояб?\.?|декабр[ья]|дек\.?)/i,
 
-        // полные названия с падежами
+        /* полные названия с падежами*/
         monthsStrictRegex:
             /^(январ[яь]|феврал[яь]|марта?|апрел[яь]|ма[яй]|июн[яь]|июл[яь]|августа?|сентябр[яь]|октябр[яь]|ноябр[яь]|декабр[яь])/i,
 
-        // Выражение, которое соответствует только сокращённым формам
+        /* Выражение, которое соответствует только сокращённым формам*/
         monthsShortStrictRegex:
             /^(янв\.|февр?\.|мар[т.]|апр\.|ма[яй]|июн[ья.]|июл[ья.]|авг\.|сент?\.|окт\.|нояб?\.|дек\.)/i,
         longDateFormat: {
@@ -15399,12 +15399,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$9 = [
             'جنوري',
@@ -15477,12 +15477,12 @@
             return string.replace(/,/g, '،');
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('se', {
         months: 'ođđajagemánnu_guovvamánnu_njukčamánnu_cuoŋománnu_miessemánnu_geassemánnu_suoidnemánnu_borgemánnu_čakčamánnu_golggotmánnu_skábmamánnu_juovlamánnu'.split(
@@ -15531,12 +15531,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     /*jshint -W100*/
     hooks.defineLocale('si', {
@@ -15602,7 +15602,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$a =
             'január_február_marec_apríl_máj_jún_júl_august_september_október_november_december'.split(
@@ -15615,49 +15615,49 @@
     function translate$9(number, withoutSuffix, key, isFuture) {
         var result = number + ' ';
         switch (key) {
-            case 's': // a few seconds / in a few seconds / a few seconds ago
+            case 's': /* a few seconds / in a few seconds / a few seconds ago*/
                 return withoutSuffix || isFuture ? 'pár sekúnd' : 'pár sekundami';
-            case 'ss': // 9 seconds / in 9 seconds / 9 seconds ago
+            case 'ss': /* 9 seconds / in 9 seconds / 9 seconds ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'sekundy' : 'sekúnd');
                 } else {
                     return result + 'sekundami';
                 }
-            case 'm': // a minute / in a minute / a minute ago
+            case 'm': /* a minute / in a minute / a minute ago*/
                 return withoutSuffix ? 'minúta' : isFuture ? 'minútu' : 'minútou';
-            case 'mm': // 9 minutes / in 9 minutes / 9 minutes ago
+            case 'mm': /* 9 minutes / in 9 minutes / 9 minutes ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'minúty' : 'minút');
                 } else {
                     return result + 'minútami';
                 }
-            case 'h': // an hour / in an hour / an hour ago
+            case 'h': /* an hour / in an hour / an hour ago*/
                 return withoutSuffix ? 'hodina' : isFuture ? 'hodinu' : 'hodinou';
-            case 'hh': // 9 hours / in 9 hours / 9 hours ago
+            case 'hh': /* 9 hours / in 9 hours / 9 hours ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'hodiny' : 'hodín');
                 } else {
                     return result + 'hodinami';
                 }
-            case 'd': // a day / in a day / a day ago
+            case 'd': /* a day / in a day / a day ago*/
                 return withoutSuffix || isFuture ? 'deň' : 'dňom';
-            case 'dd': // 9 days / in 9 days / 9 days ago
+            case 'dd': /* 9 days / in 9 days / 9 days ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'dni' : 'dní');
                 } else {
                     return result + 'dňami';
                 }
-            case 'M': // a month / in a month / a month ago
+            case 'M': /* a month / in a month / a month ago*/
                 return withoutSuffix || isFuture ? 'mesiac' : 'mesiacom';
-            case 'MM': // 9 months / in 9 months / 9 months ago
+            case 'MM': /* 9 months / in 9 months / 9 months ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'mesiace' : 'mesiacov');
                 } else {
                     return result + 'mesiacmi';
                 }
-            case 'y': // a year / in a year / a year ago
+            case 'y': /* a year / in a year / a year ago*/
                 return withoutSuffix || isFuture ? 'rok' : 'rokom';
-            case 'yy': // 9 years / in 9 years / 9 years ago
+            case 'yy': /* 9 years / in 9 years / 9 years ago*/
                 if (withoutSuffix || isFuture) {
                     return result + (plural$5(number) ? 'roky' : 'rokov');
                 } else {
@@ -15738,12 +15738,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function processRelativeTime$9(number, withoutSuffix, key, isFuture) {
         var result = number + ' ';
@@ -15906,12 +15906,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('sq', {
         months: 'Janar_Shkurt_Mars_Prill_Maj_Qershor_Korrik_Gusht_Shtator_Tetor_Nëntor_Dhjetor'.split(
@@ -15966,16 +15966,16 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var translator$1 = {
         words: {
-            //Different grammatical cases
+            /*Different grammatical cases*/
             ss: ['секунда', 'секунде', 'секунди'],
             m: ['један минут', 'једног минута'],
             mm: ['минут', 'минута', 'минута'],
@@ -16003,13 +16003,13 @@
                 word;
 
             if (key.length === 1) {
-                // Nominativ
+                /* Nominativ*/
                 if (key === 'y' && withoutSuffix) return 'једна година';
                 return isFuture || withoutSuffix ? wordKey[0] : wordKey[1];
             }
 
             word = translator$1.correctGrammaticalCase(number, wordKey);
-            // Nominativ
+            /* Nominativ*/
             if (key === 'yy' && withoutSuffix && word === 'годину') {
                 return number + ' година';
             }
@@ -16089,16 +16089,16 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 1st is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 1st is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var translator$2 = {
         words: {
-            //Different grammatical cases
+            /*Different grammatical cases*/
             ss: ['sekunda', 'sekunde', 'sekundi'],
             m: ['jedan minut', 'jednog minuta'],
             mm: ['minut', 'minuta', 'minuta'],
@@ -16126,13 +16126,13 @@
                 word;
 
             if (key.length === 1) {
-                // Nominativ
+                /* Nominativ*/
                 if (key === 'y' && withoutSuffix) return 'jedna godina';
                 return isFuture || withoutSuffix ? wordKey[0] : wordKey[1];
             }
 
             word = translator$2.correctGrammaticalCase(number, wordKey);
-            // Nominativ
+            /* Nominativ*/
             if (key === 'yy' && withoutSuffix && word === 'godinu') {
                 return number + ' godina';
             }
@@ -16214,12 +16214,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ss', {
         months: "Bhimbidvwane_Indlovana_Indlov'lenkhulu_Mabasa_Inkhwekhweti_Inhlaba_Kholwane_Ingci_Inyoni_Imphala_Lweti_Ingongoni".split(
@@ -16295,12 +16295,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}/,
         ordinal: '%d',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('sv', {
         months: 'januari_februari_mars_april_maj_juni_juli_augusti_september_oktober_november_december'.split(
@@ -16360,12 +16360,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('sw', {
         months: 'Januari_Februari_Machi_Aprili_Mei_Juni_Julai_Agosti_Septemba_Oktoba_Novemba_Desemba'.split(
@@ -16412,12 +16412,12 @@
             yy: 'miaka %d',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var symbolMap$h = {
             1: '௧',
@@ -16506,21 +16506,21 @@
                 return symbolMap$h[match];
             });
         },
-        // refer http://ta.wikipedia.org/s/1er1
+        /* refer http://ta.wikipedia.org/s/1er1*/
         meridiemParse: /யாமம்|வைகறை|காலை|நண்பகல்|எற்பாடு|மாலை/,
         meridiem: function (hour, minute, isLower) {
             if (hour < 2) {
                 return ' யாமம்';
             } else if (hour < 6) {
-                return ' வைகறை'; // வைகறை
+                return ' வைகறை'; /* வைகறை*/
             } else if (hour < 10) {
-                return ' காலை'; // காலை
+                return ' காலை'; /* காலை*/
             } else if (hour < 14) {
-                return ' நண்பகல்'; // நண்பகல்
+                return ' நண்பகல்'; /* நண்பகல்*/
             } else if (hour < 18) {
-                return ' எற்பாடு'; // எற்பாடு
+                return ' எற்பாடு'; /* எற்பாடு*/
             } else if (hour < 22) {
-                return ' மாலை'; // மாலை
+                return ' மாலை'; /* மாலை*/
             } else {
                 return ' யாமம்';
             }
@@ -16540,12 +16540,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('te', {
         months: 'జనవరి_ఫిబ్రవరి_మార్చి_ఏప్రిల్_మే_జూన్_జులై_ఆగస్టు_సెప్టెంబర్_అక్టోబర్_నవంబర్_డిసెంబర్'.split(
@@ -16625,12 +16625,12 @@
             }
         },
         week: {
-            dow: 0, // Sunday is the first day of the week.
-            doy: 6, // The week that contains Jan 6th is the first week of the year.
+            dow: 0, /* Sunday is the first day of the week.*/
+            doy: 6, /* The week that contains Jan 6th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('tet', {
         months: 'Janeiru_Fevereiru_Marsu_Abril_Maiu_Juñu_Jullu_Agustu_Setembru_Outubru_Novembru_Dezembru'.split(
@@ -16688,12 +16688,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes$3 = {
         0: '-ум',
@@ -16802,12 +16802,12 @@
             return number + (suffixes$3[number] || suffixes$3[a] || suffixes$3[b]);
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 1th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 1th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('th', {
         months: 'มกราคม_กุมภาพันธ์_มีนาคม_เมษายน_พฤษภาคม_มิถุนายน_กรกฎาคม_สิงหาคม_กันยายน_ตุลาคม_พฤศจิกายน_ธันวาคม'.split(
@@ -16819,7 +16819,7 @@
             ),
         monthsParseExact: true,
         weekdays: 'อาทิตย์_จันทร์_อังคาร_พุธ_พฤหัสบดี_ศุกร์_เสาร์'.split('_'),
-        weekdaysShort: 'อาทิตย์_จันทร์_อังคาร_พุธ_พฤหัส_ศุกร์_เสาร์'.split('_'), // yes, three characters difference
+        weekdaysShort: 'อาทิตย์_จันทร์_อังคาร_พุธ_พฤหัส_ศุกร์_เสาร์'.split('_'), /* yes, three characters difference*/
         weekdaysMin: 'อา._จ._อ._พ._พฤ._ศ._ส.'.split('_'),
         weekdaysParseExact: true,
         longDateFormat: {
@@ -16869,7 +16869,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes$4 = {
         1: "'inji",
@@ -16942,7 +16942,7 @@
                     return number;
                 default:
                     if (number === 0) {
-                        // special case for zero
+                        /* special case for zero*/
                         return number + "'unjy";
                     }
                     var a = number % 10,
@@ -16952,12 +16952,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('tl-ph', {
         months: 'Enero_Pebrero_Marso_Abril_Mayo_Hunyo_Hulyo_Agosto_Setyembre_Oktubre_Nobyembre_Disyembre'.split(
@@ -17006,12 +17006,12 @@
             return number;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var numbersNouns = 'pagh_wa’_cha’_wej_loS_vagh_jav_Soch_chorgh_Hut'.split('_');
 
@@ -17127,12 +17127,12 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var suffixes$5 = {
         1: "'inci",
@@ -17219,7 +17219,7 @@
                     return number;
                 default:
                     if (number === 0) {
-                        // special case for zero
+                        /* special case for zero*/
                         return number + "'ıncı";
                     }
                     var a = number % 10,
@@ -17229,15 +17229,15 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
-    // After the year there should be a slash and the amount of years since December 26, 1979 in Roman numerals.
-    // This is currently too difficult (maybe even impossible) to add.
+    /* After the year there should be a slash and the amount of years since December 26, 1979 in Roman numerals.*/
+    /* This is currently too difficult (maybe even impossible) to add.*/
     hooks.defineLocale('tzl', {
         months: 'Januar_Fevraglh_Març_Avrïu_Mai_Gün_Julia_Guscht_Setemvar_Listopäts_Noemvar_Zecemvar'.split(
             '_'
@@ -17292,8 +17292,8 @@
         dayOfMonthOrdinalParse: /\d{1,2}\./,
         ordinal: '%d.',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
@@ -17319,7 +17319,7 @@
               : format[key][1];
     }
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('tzm-latn', {
         months: 'innayr_brˤayrˤ_marˤsˤ_ibrir_mayyw_ywnyw_ywlywz_ɣwšt_šwtanbir_ktˤwbrˤ_nwwanbir_dwjnbir'.split(
@@ -17365,12 +17365,12 @@
             yy: '%d isgasn',
         },
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('tzm', {
         months: 'ⵉⵏⵏⴰⵢⵔ_ⴱⵕⴰⵢⵕ_ⵎⴰⵕⵚ_ⵉⴱⵔⵉⵔ_ⵎⴰⵢⵢⵓ_ⵢⵓⵏⵢⵓ_ⵢⵓⵍⵢⵓⵣ_ⵖⵓⵛⵜ_ⵛⵓⵜⴰⵏⴱⵉⵔ_ⴽⵟⵓⴱⵕ_ⵏⵓⵡⴰⵏⴱⵉⵔ_ⴷⵓⵊⵏⴱⵉⵔ'.split(
@@ -17416,12 +17416,12 @@
             yy: '%d ⵉⵙⴳⴰⵙⵏ',
         },
         week: {
-            dow: 6, // Saturday is the first day of the week.
-            doy: 12, // The week that contains Jan 12th is the first week of the year.
+            dow: 6, /* Saturday is the first day of the week.*/
+            doy: 12, /* The week that contains Jan 12th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('ug-cn', {
         months: 'يانۋار_فېۋرال_مارت_ئاپرېل_ماي_ئىيۇن_ئىيۇل_ئاۋغۇست_سېنتەبىر_ئۆكتەبىر_نويابىر_دېكابىر'.split(
@@ -17523,13 +17523,13 @@
             return string.replace(/,/g, '،');
         },
         week: {
-            // GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 1st is the first week of the year.
+            /* GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效*/
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 1st is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     function plural$6(word, num) {
         var forms = word.split('_');
@@ -17655,7 +17655,7 @@
             y: 'рік',
             yy: relativeTimeWithPlural$4,
         },
-        // M. E.: those two are virtually unused but a user might want to implement them for his/her website for some reason
+        /* M. E.: those two are virtually unused but a user might want to implement them for his/her website for some reason*/
         meridiemParse: /ночі|ранку|дня|вечора/,
         isPM: function (input) {
             return /^(дня|вечора)$/.test(input);
@@ -17687,12 +17687,12 @@
             }
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     var months$b = [
             'جنوری',
@@ -17765,12 +17765,12 @@
             return string.replace(/,/g, '،');
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('uz-latn', {
         months: 'Yanvar_Fevral_Mart_Aprel_May_Iyun_Iyul_Avgust_Sentabr_Oktabr_Noyabr_Dekabr'.split(
@@ -17816,12 +17816,12 @@
             yy: '%d yil',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 7th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 7th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('uz', {
         months: 'январ_феврал_март_апрел_май_июн_июл_август_сентябр_октябр_ноябр_декабр'.split(
@@ -17864,12 +17864,12 @@
             yy: '%d йил',
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 7, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 7, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('vi', {
         months: 'tháng 1_tháng 2_tháng 3_tháng 4_tháng 5_tháng 6_tháng 7_tháng 8_tháng 9_tháng 10_tháng 11_tháng 12'.split(
@@ -17940,12 +17940,12 @@
             return number;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('x-pseudo', {
         months: 'J~áñúá~rý_F~ébrú~árý_~Márc~h_Áp~ríl_~Máý_~Júñé~_Júl~ý_Áú~gúst~_Sép~témb~ér_Ó~ctób~ér_Ñ~óvém~bér_~Décé~mbér'.split(
@@ -18010,12 +18010,12 @@
             return number + output;
         },
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('yo', {
         months: 'Sẹ́rẹ́_Èrèlè_Ẹrẹ̀nà_Ìgbé_Èbibi_Òkùdu_Agẹmo_Ògún_Owewe_Ọ̀wàrà_Bélú_Ọ̀pẹ̀̀'.split(
@@ -18060,12 +18060,12 @@
         dayOfMonthOrdinalParse: /ọjọ́\s\d{1,2}/,
         ordinal: 'ọjọ́ %d',
         week: {
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('zh-cn', {
         months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split(
@@ -18099,7 +18099,7 @@
             } else if (meridiem === '下午' || meridiem === '晚上') {
                 return hour + 12;
             } else {
-                // '中午'
+                /* '中午'*/
                 return hour >= 11 ? hour : hour + 12;
             }
         },
@@ -18174,13 +18174,13 @@
             yy: '%d 年',
         },
         week: {
-            // GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效
-            dow: 1, // Monday is the first day of the week.
-            doy: 4, // The week that contains Jan 4th is the first week of the year.
+            /* GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效*/
+            dow: 1, /* Monday is the first day of the week.*/
+            doy: 4, /* The week that contains Jan 4th is the first week of the year.*/
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('zh-hk', {
         months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split(
@@ -18275,7 +18275,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('zh-mo', {
         months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split(
@@ -18370,7 +18370,7 @@
         },
     });
 
-    //! moment.js locale configuration
+    /*! moment.js locale configuration*/
 
     hooks.defineLocale('zh-tw', {
         months: '一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月'.split(
