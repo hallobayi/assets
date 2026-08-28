@@ -495,3 +495,85 @@ $(function() {
     "use strict";
     $.MainApp.init();
 })(window.jQuery);
+/* ===================================================================
+   Sinkronisasi + pemulihan token CSRF untuk semua request AJAX
+   -------------------------------------------------------------------
+   Masalah yang diperbaiki: tiap halaman meng-cache token CSRF hasil render
+   (variabel tokenHash di masing-masing file JS). Begitu hash CSRF di session
+   berganti — login ulang di tab lain, session lama kadaluarsa — semua tab yang
+   masih terbuka memakai token basi dan tiap POST-nya dibalas 403
+   ("DataTables warning: ... Ajax error"). Respons 403 tidak membawa header
+   X-CSRF-TOKEN, jadi halaman itu tidak pernah tahu token barunya dan rusak
+   terus sampai di-reload manual.
+
+   Tiga lapis penanganan:
+   1. ajaxSend     - token selalu diambil ulang dari input[name=csrf_test_name]
+                     (satu sumber kebenaran), menimpa nilai yang sudah di-cache
+                     lewat beforeSend. jQuery mengganti (bukan menggandakan)
+                     header dengan nama sama selama masih sebelum send().
+   2. ajaxComplete - tiap respons yang membawa X-CSRF-TOKEN memperbarui input
+                     tersebut, sehingga request berikutnya selalu pakai yang baru.
+   3. ajaxError    - sekali kena 403, ambil token yang berlaku lewat GET
+                     csrf/token (GET tidak diperiksa filter CSRF), lalu ulangi
+                     request yang gagal satu kali saja.
+   =================================================================== */
+$(function () {
+	function csrfInput() {
+		return $("input[name=csrf_test_name]");
+	}
+
+	function csrfAmbil() {
+		return csrfInput().first().val() || "";
+	}
+
+	function csrfSimpan(nilai) {
+		if (nilai) {
+			csrfInput().val(nilai);
+		}
+	}
+
+	$(document).ajaxSend(function (event, xhr, settings) {
+		if (settings.crossDomain) return;
+
+		var token = csrfAmbil();
+		if (token) {
+			xhr.setRequestHeader("X-CSRF-TOKEN", token);
+		}
+	});
+
+	$(document).ajaxComplete(function (event, xhr) {
+		try {
+			csrfSimpan(xhr.getResponseHeader("X-CSRF-TOKEN"));
+		} catch (e) {
+			/* sebagian transport tidak mengizinkan baca header, abaikan */
+		}
+	});
+
+	$(document).ajaxError(function (event, xhr, settings) {
+		if (xhr.status !== 403 || settings.crossDomain || settings.csrfDiulang)
+			return;
+		if ((settings.type || "GET").toUpperCase() === "GET") return;
+
+		/* tandai dulu supaya tidak jadi loop kalau token barunya pun ditolak */
+		settings.csrfDiulang = true;
+
+		$.get(base_url + "csrf/token", function (resp) {
+			var data = typeof resp === "string" ? JSON.parse(resp) : resp;
+			if (!data || !data.value) return;
+
+			csrfSimpan(data.value);
+			$.ajax(settings);
+		});
+	});
+
+	/* DataTables: ganti alert bawaan ("DataTables warning: ... Ajax error")
+	   jadi pesan console saja. Kegagalan sesaat karena token basi sudah
+	   ditangani retry di atas, dan popup itu tidak berarti apa-apa buat user. */
+	if ($.fn.dataTable) {
+		$.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
+			if (window.console && console.warn) {
+				console.warn(message);
+			}
+		};
+	}
+});
