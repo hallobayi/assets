@@ -78,7 +78,7 @@ $(document).ready(function() {
 		});
 	}
 
-	/* 2. Grafik Pendapatan Harian (Total Pendaftaran & Total Jasa Dokter) */
+	/* 2. Grafik Pendapatan Harian (Total Pendaftaran, Total Jenis Layanan & Total Jasa Dokter) */
 	var ctxBar = document.getElementById('chart-bar-perbandingan');
 	if (ctxBar) {
 		var barChart = new Chart(ctxBar.getContext('2d'), {
@@ -91,6 +91,17 @@ $(document).ready(function() {
 						data: dataPendapatanHarian.count || [],
 						backgroundColor: 'rgba(54, 162, 235, 0.65)',
 						borderColor: 'rgb(54, 162, 235)',
+						borderWidth: 1,
+						borderRadius: 4,
+						yAxisID: 'y',
+						type: 'bar',
+						order: 3
+					},
+					{
+						label: 'Total Jenis Layanan',
+						data: dataPendapatanHarian.layanan || [],
+						backgroundColor: 'rgba(75, 192, 192, 0.65)',
+						borderColor: 'rgb(75, 192, 192)',
 						borderWidth: 1,
 						borderRadius: 4,
 						yAxisID: 'y',
@@ -137,7 +148,7 @@ $(document).ready(function() {
 						beginAtZero: true,
 						title: {
 							display: true,
-							text: 'Total Pendaftaran'
+							text: 'Jumlah Pendaftaran / Layanan'
 						},
 						ticks: {
 							precision: 0,
@@ -178,10 +189,16 @@ $(document).ready(function() {
 							label: function(context) {
 								var label = context.dataset.label || '';
 								var value = context.parsed.y || 0;
-								if (context.datasetIndex === 1) {
+								if (label.indexOf('Rp') !== -1 || label.indexOf('Jasa') !== -1) {
 									return label + ': Rp ' + fmtRibuan(value);
 								}
-								return label + ': ' + fmtRibuan(value) + ' Pasien';
+								if (label === 'Total Pendaftaran') {
+									return label + ': ' + fmtRibuan(value) + ' Pasien';
+								}
+								if (label === 'Total Jenis Layanan') {
+									return label + ': ' + fmtRibuan(value) + ' Layanan';
+								}
+								return label + ': ' + fmtRibuan(value);
 							}
 						}
 					}
@@ -199,7 +216,8 @@ $(document).ready(function() {
 				if (data) {
 					barChart.data.labels = data.labels || [];
 					barChart.data.datasets[0].data = data.count || [];
-					barChart.data.datasets[1].data = data.nilai || [];
+					barChart.data.datasets[1].data = data.layanan || [];
+					barChart.data.datasets[2].data = data.nilai || [];
 					barChart.update();
 				}
 			});
