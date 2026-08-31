@@ -262,7 +262,8 @@ $(document).ready(function() {
 						'',
 						escHtmlDk(item.nama_pasien),
 						escHtmlDk(item.nomor_rm),
-						escHtmlDk(item.tgl_kembali_label)
+						escHtmlDk(item.tgl_kembali_label),
+						escHtmlDk(item.estimasi_hari)
 					]);
 				});
 				rencanaDt.draw();
