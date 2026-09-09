@@ -47,13 +47,31 @@ jQuery(document).ready(function () {
       },
       columns: typeof column === "object" ? column : "",
       fnRowCallback: function (nRow, aoData, c) {
-        /* Kolom Stok Berjalan - warna merah bila <= stok_minimal */
+        /* Kolom Foto Obat (Index 1) */
+        if (aoData["foto_obat"]) {
+          if (!String(aoData["foto_obat"]).startsWith("<img")) {
+            var value = aoData["foto_obat"];
+            var html =
+              '<img src="' +
+              base_url +
+              "files/foto-obat/thumbnail/" +
+              value +
+              '" width="64px" height="64px" class="image" alt="' +
+              value +
+              '" onerror="this.src=\'' +
+              base_url +
+              'images/foto/noimage.png\'" />';
+            $("td", nRow).eq(1).html(html);
+          }
+        }
+
+        /* Kolom Stok Berjalan (Index 9) - warna merah bila <= stok_minimal */
         var stokBerjalan = parseFloat(aoData["stok_berjalan"]) || 0;
         var stokMinimal = parseFloat(aoData["stok_minimal"]) || 0;
 
         if (stokBerjalan <= 0) {
           $("td", nRow)
-            .eq(10)
+            .eq(9)
             .html(
               '<span class="badge bg-danger">Habis (' +
                 stokBerjalan +
@@ -61,7 +79,7 @@ jQuery(document).ready(function () {
             );
         } else if (stokBerjalan <= stokMinimal) {
           $("td", nRow)
-            .eq(10)
+            .eq(9)
             .html(
               '<span class="badge bg-warning text-dark">Hampir Habis (' +
                 stokBerjalan +
@@ -69,32 +87,20 @@ jQuery(document).ready(function () {
             );
         }
 
-        /* Kolom Harga Beli - format rupiah */
+        /* Kolom Harga Beli (Index 6) - format rupiah */
         if (aoData["harga_beli_satuan"]) {
           var hargaBeli = parseInt(aoData["harga_beli_satuan"]);
           $("td", nRow)
-            .eq(7)
+            .eq(6)
             .html("Rp " + hargaBeli.toLocaleString("id-ID"));
         }
 
-        /* Kolom Harga Jual - format rupiah */
+        /* Kolom Harga Jual (Index 7) - format rupiah */
         if (aoData["harga_jual_satuan"]) {
           var hargaJual = parseInt(aoData["harga_jual_satuan"]);
           $("td", nRow)
-            .eq(8)
+            .eq(7)
             .html("Rp " + hargaJual.toLocaleString("id-ID"));
-        }
-
-        /* Kolom Tipe - badge */
-        var tipe = aoData["tipe_barang"];
-        if (tipe === "alkes") {
-          $("td", nRow)
-            .eq(3)
-            .html('<span class="badge bg-info">' + tipe + "</span>");
-        } else {
-          $("td", nRow)
-            .eq(3)
-            .html('<span class="badge bg-primary">' + tipe + "</span>");
         }
       },
       initComplete: function (settings, json) {
