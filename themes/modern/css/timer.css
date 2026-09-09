@@ -1,0 +1,51 @@
+.session-timer-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+.session-timer-badge {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  cursor: default;
+  user-select: none;
+}
+.session-timer-badge.is-warning {
+  background: #fff3cd !important;
+  border-color: #ffe69c !important;
+  color: #664d03 !important;
+}
+.session-timer-badge.is-danger {
+  background: #f8d7da !important;
+  border-color: #f1aeb5 !important;
+  color: #58151c !important;
+  animation: pulse-danger 1.5s infinite;
+}
+[data-bs-theme="dark"] .session-timer-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e9ecef;
+}
+[data-bs-theme="dark"] .session-timer-badge.is-warning {
+  background: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.4) !important;
+  color: #ffda6a !important;
+}
+[data-bs-theme="dark"] .session-timer-badge.is-danger {
+  background: rgba(220, 53, 69, 0.25) !important;
+  border-color: rgba(220, 53, 69, 0.5) !important;
+  color: #ea868f !important;
+}
+@keyframes pulse-danger {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

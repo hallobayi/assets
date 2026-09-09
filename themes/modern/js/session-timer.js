@@ -148,22 +148,60 @@
     window.simhaiShowSessionExpiredPopup = showSessionExpiredModal;
 
     /**
-     * Cek waktu kedaluwarsa sesi secara periodik
+     * Hitung mundur dan perbarui tampilan timer di header setiap detik
      */
-    function checkExpiration() {
+    function updateCountdownTimer() {
         var now = Math.floor(Date.now() / 1000);
-        if (now >= config.expiresAt) {
+        var remaining = Math.max(0, config.expiresAt - now);
+
+        var timerDisplay = document.getElementById('sessionCountdownTimer');
+        var timerContainer = document.getElementById('sessionTimerContainer');
+        var timerIcon = document.getElementById('sessionTimerIcon');
+
+        if (timerDisplay) {
+            var hours = Math.floor(remaining / 3600);
+            var minutes = Math.floor((remaining % 3600) / 60);
+            var seconds = remaining % 60;
+            var formatted = 
+                (hours < 10 ? '0' : '') + hours + ':' +
+                (minutes < 10 ? '0' : '') + minutes + ':' +
+                (seconds < 10 ? '0' : '') + seconds;
+
+            timerDisplay.textContent = formatted;
+        }
+
+        if (timerContainer) {
+            if (remaining <= 900) { // <= 15 menit: bahaya (merah & berkedip)
+                if (!timerContainer.classList.contains('is-danger')) {
+                    timerContainer.classList.remove('is-warning');
+                    timerContainer.classList.add('is-danger');
+                }
+                if (timerIcon) timerIcon.className = 'bi bi-hourglass-bottom me-1 text-danger';
+            } else if (remaining <= 3600) { // <= 1 jam: peringatan (kuning)
+                if (!timerContainer.classList.contains('is-warning')) {
+                    timerContainer.classList.remove('is-danger');
+                    timerContainer.classList.add('is-warning');
+                }
+                if (timerIcon) timerIcon.className = 'bi bi-hourglass-split me-1 text-warning';
+            } else {
+                timerContainer.classList.remove('is-warning', 'is-danger');
+                if (timerIcon) timerIcon.className = 'bi bi-clock-history me-1 text-primary';
+            }
+        }
+
+        if (remaining <= 0) {
             showSessionExpiredModal();
         }
     }
 
-    // Jalankan pengecekan setiap 10 detik
-    checkInterval = setInterval(checkExpiration, 10000);
+    // Jalankan hitung mundur setiap 1 detik
+    checkInterval = setInterval(updateCountdownTimer, 1000);
+    updateCountdownTimer();
 
     // Cek saat tab browser aktif kembali setelah diminimalkan / sleep
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') {
-            checkExpiration();
+            updateCountdownTimer();
         }
     });
 
