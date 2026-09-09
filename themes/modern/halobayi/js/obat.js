@@ -30,7 +30,16 @@ jQuery(document).ready(function () {
       ajax: {
         url: url,
         type: "POST",
-        data: { csrf_test_name: tokenHash },
+        data: function (d) {
+          d.csrf_test_name = $("input[name=csrf_test_name]").val() || tokenHash;
+        },
+        dataSrc: function (json) {
+          if (json.csrf && json.csrf.value) {
+            tokenHash = json.csrf.value;
+            $("input[name=csrf_test_name]").val(tokenHash);
+          }
+          return json.data ?? [];
+        },
       },
       oLanguage: {
         sLengthMenu: "_MENU_ baris per halaman",
@@ -123,6 +132,158 @@ jQuery(document).ready(function () {
     }
 
     const table = $("#table-result").DataTable(settings);
+
+    /* ============================================================
+     * DELETE OBAT - Popup Konfirmasi & Soft Delete via AJAX
+     * ============================================================ */
+    $("#table-result").on("click", ".btn-delete", function (e) {
+      e.preventDefault();
+      const $btn = $(this);
+      const id = $btn.attr("data-id");
+      const namaObat = $btn.attr("data-nama") || "obat ini";
+      const deleteTitle =
+        $btn.attr("data-delete-title") ||
+        "Apakah Anda yakin ingin menghapus data obat: <strong>" +
+          namaObat +
+          "</strong>?";
+
+      function executeDelete() {
+        const currentToken =
+          $("input[name=csrf_test_name]").val() || tokenHash || "";
+
+        $.ajax({
+          type: "POST",
+          url: base_url + "master/farmasi/ajaxDeleteData",
+          data: {
+            id: id,
+            csrf_test_name: currentToken,
+          },
+          dataType: "json",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", currentToken);
+          },
+          success: function (data) {
+            if (data.csrf && data.csrf.value) {
+              tokenHash = data.csrf.value;
+              $("input[name=csrf_test_name]").val(tokenHash);
+            }
+
+            if (data.status === "ok") {
+              if (typeof Swal !== "undefined") {
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2500,
+                  timerProgressBar: true,
+                  iconColor: "white",
+                  customClass: {
+                    popup: "bg-success text-light toast p-2",
+                  },
+                  didOpen: (toast) => {
+                    toast.addEventListener("mouseenter", Swal.stopTimer);
+                    toast.addEventListener("mouseleave", Swal.resumeTimer);
+                  },
+                });
+                Toast.fire({
+                  html:
+                    '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
+                    (data.message || "Data obat berhasil dihapus") +
+                    "</div>",
+                });
+              } else {
+                alert(data.message || "Data obat berhasil dihapus");
+              }
+
+              // Update statistik ringkasan di atas tabel jika ada
+              if (data.stats) {
+                if ($("#total-alkes-obat").length)
+                  $("#total-alkes-obat").text(data.stats.totalObatAll);
+                if ($("#total-obat").length)
+                  $("#total-obat").text(data.stats.totalObat);
+                if ($("#stok-minimum").length)
+                  $("#stok-minimum").text(data.stats.stokMinimum);
+                if ($("#obat-habis").length)
+                  $("#obat-habis").text(data.stats.obatHabis);
+              }
+
+              // Reload DataTables tanpa berpindah halaman
+              table.ajax.reload(null, false);
+            } else {
+              if (typeof Swal !== "undefined") {
+                Swal.fire({
+                  icon: "error",
+                  title: "Gagal Menghapus",
+                  text: data.message || "Data obat gagal dihapus",
+                });
+              } else {
+                alert(data.message || "Data obat gagal dihapus");
+              }
+            }
+          },
+          error: function (xhr) {
+            if (typeof Swal !== "undefined") {
+              Swal.fire({
+                icon: "error",
+                title: "Terjadi Kesalahan",
+                text: "Gagal memproses permintaan ke server. Silakan coba lagi.",
+              });
+            } else {
+              alert("Gagal memproses permintaan ke server.");
+            }
+            console.error(xhr.responseText);
+          },
+        });
+      }
+
+      // Popup konfirmasi: gunakan Swal.fire jika tersedia, fallback ke bootbox / confirm
+      if (typeof Swal !== "undefined") {
+        Swal.fire({
+          title: "Konfirmasi Hapus",
+          html: deleteTitle,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#dc3545",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: '<i class="fas fa-trash pe-1"></i> Ya, Hapus',
+          cancelButtonText: '<i class="fas fa-times pe-1"></i> Batal',
+          reverseButtons: true,
+          focusCancel: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            executeDelete();
+          }
+        });
+      } else if (typeof bootbox !== "undefined") {
+        bootbox.confirm({
+          title: "Konfirmasi Hapus",
+          message: deleteTitle,
+          buttons: {
+            confirm: {
+              label: '<i class="fas fa-trash pe-1"></i> Hapus',
+              className: "btn-danger",
+            },
+            cancel: {
+              label: '<i class="fas fa-times pe-1"></i> Batal',
+              className: "btn-secondary",
+            },
+          },
+          callback: function (confirmed) {
+            if (confirmed) {
+              executeDelete();
+            }
+          },
+        });
+      } else {
+        if (
+          confirm(
+            "Apakah Anda yakin ingin menghapus data obat " + namaObat + " ?",
+          )
+        ) {
+          executeDelete();
+        }
+      }
+    });
   }
 
   /* ============================================================
