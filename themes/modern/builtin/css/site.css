@@ -64,7 +64,9 @@ a:hover {
 
 header {
     background: #3598dc;
-    z-index: 3;
+    /* Di atas sidebar (10) dan konten, di bawah modal bootstrap (1055),
+       supaya dropdown typeahead cari pasien tidak tertimpa isi halaman. */
+    z-index: 1030;
     position: fixed;
     width: 100%;
     height: 62px;
@@ -575,8 +577,11 @@ header .nav-account .dropdown-menu.show {
     display: table-cell;
 }
 
+/* Jangan pakai opacity di sini: span ini membungkus input cari pasien beserta
+   dropdown typeahead-nya, sehingga hover bikin dropdown menerawang sekaligus
+   membuat stacking context baru yang menaruhnya di bawah konten halaman. */
 #mobile-menu-btn-dua:hover {
-    opacity: 0.8;
+    color: #ffffff;
 }
 
 #mobile-menu-btn-dua-right {

@@ -62,7 +62,7 @@ $(function() {
                 while (i--) {
                     return_list[i] = {
                         id: data[i].id_pasien,
-                        value: data[i].nomor_rm + " - " + data[i].nama_pasien + " - " + data[i].alamat,
+                        value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
                         tgl_lahir_ibu: data[i].tgl_lahir_ibu
@@ -85,10 +85,6 @@ $(function() {
     }
 
     /* source: https://stackoverflow.com/a/30340490*/
-    /* TODO:*/
-    /* https://stackoverflow.com/questions/11269439/how-to-include-csrf-from-codeigniter-into-ajax-data*/
-    /* https://stackoverflow.com/questions/25930653/can-i-listen-to-a-specific-element-on-ajaxcomplete-instead-of-document*/
-    /* https://stackoverflow.com/questions/38502548/codeigniter-csrf-valid-for-only-one-time-ajax-request*/
     
     $('.no_rm').typeahead({
         hint: true,
@@ -128,7 +124,7 @@ $(function() {
                 while (i--) {
                     return_list[i] = {
                         id: data[i].id_pasien,
-                        value: data[i].nomor_rm + " - " + data[i].nama_pasien + " - " + data[i].alamat,
+                        value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
                         tgl_lahir_ibu: $.date(data[i].tgl_lahir_ibu),
