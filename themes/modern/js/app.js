@@ -23,6 +23,16 @@ $(function() {
     /* source: https://stackoverflow.com/a/67184094*/
     var tokenHash=$("input[name=csrf_test_name]").val();
 
+    /* Saran pasien tampil dua baris: nomor RM + nama di atas, alamat di bawah. */
+    function suggestionPasien(item) {
+        var utama  = (item.no_rm_format || item.no_rm || '-') + ' - ' + (item.nama || '-');
+        var alamat = item.alamat || '-';
+        return '<div class="tt-pasien">'
+            + '<div class="tt-pasien-utama">' + utama + '</div>'
+            + '<div class="tt-pasien-alamat">' + alamat + '</div>'
+            + '</div>';
+    }
+
     /* source: https://stackoverflow.com/a/30340490*/
     $('#no_rm_header').typeahead({
         hint: true,
@@ -39,9 +49,7 @@ $(function() {
             empty: [
                 '<div class="empty">Data Pasien Tidak Ada!</div>'
             ].join('\n'),
-            suggestion: function (item){
-                return '<div>' + item.value + '</div>'
-            }
+            suggestion: suggestionPasien
         },
         source: function (query, processSync, processAsync) {
         /* processSync(['This suggestion appears immediately', 'This one too']);*/
@@ -63,6 +71,8 @@ $(function() {
                     return_list[i] = {
                         id: data[i].id_pasien,
                         value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
+                        no_rm_format: data[i].nomor_rm_format,
+                        alamat: data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
                         tgl_lahir_ibu: data[i].tgl_lahir_ibu
@@ -101,9 +111,7 @@ $(function() {
             empty: [
                 '<div class="d-flex justify-content-center">Data Pasien Tidak Ada! .:: <a target="_blank" class="tambah-pasien-off-dulu" href="'+base_url+'master/pasien/add">&nbsp;<i class="fas fa-plus"></i> Tambah Pasien&nbsp;</a>::. </div>'
             ].join('\n'),
-            suggestion: function (item){
-                return '<div>' + item.value + '</div>'
-            }
+            suggestion: suggestionPasien
         },
         source: function (query, processSync, processAsync) {
         /* processSync(['This suggestion appears immediately', 'This one too']);*/
@@ -125,6 +133,8 @@ $(function() {
                     return_list[i] = {
                         id: data[i].id_pasien,
                         value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
+                        no_rm_format: data[i].nomor_rm_format,
+                        alamat: data[i].alamat,
                         no_rm: data[i].nomor_rm,
                         nama: data[i].nama_pasien,
                         tgl_lahir_ibu: $.date(data[i].tgl_lahir_ibu),
