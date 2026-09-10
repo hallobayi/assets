@@ -1,6 +1,6 @@
 /**
- * SIMHAI Session 24-Hour Expiration & Swal2 Re-Login Monitor
- * Memantau durasi sesi login 24 jam dan menampilkan popup Swal2 login ulang saat kedaluwarsa.
+ * SIMHAI Session 9-Hour Expiration & Swal2 Re-Login Monitor
+ * Memantau durasi sesi login 9 jam dan menampilkan popup Swal2 login ulang saat kedaluwarsa.
  */
 (function () {
     'use strict';
@@ -14,7 +14,7 @@
     var checkInterval = null;
 
     /**
-     * Tampilkan popup login Swal2 ketika sesi 24 jam habis
+     * Tampilkan popup login Swal2 ketika sesi 9 jam habis
      */
     function showSessionExpiredModal(customMessage) {
         if (isPopupOpen) {
@@ -29,10 +29,10 @@
 
         isPopupOpen = true;
 
-        var messageText = customMessage || 'Sesi login Anda telah habis karena telah melewati <strong>24 jam</strong>. Silakan masukkan password untuk melanjutkan tanpa kehilangan pekerjaan Anda:';
+        var messageText = customMessage || 'Sesi login Anda telah habis karena telah melewati <strong>9 jam</strong>. Silakan masukkan password untuk melanjutkan tanpa kehilangan pekerjaan Anda:';
 
         Swal.fire({
-            title: '<span style="font-size: 1.25rem; font-weight: 700; color: #b02a37;"><i class="bi bi-clock-history me-2"></i>Sesi Login Berakhir (24 Jam)</span>',
+            title: '<span style="font-size: 1.25rem; font-weight: 700; color: #b02a37;"><i class="bi bi-clock-history me-2"></i>Sesi Login Berakhir (9 Jam)</span>',
             html: `
                 <div class="text-start" style="font-size: 0.92rem;">
                     <div class="alert alert-warning py-2 px-3 mb-3" style="font-size: 0.88rem;">
@@ -134,7 +134,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Login Berhasil!',
-                    text: 'Sesi login diperpanjang untuk 24 jam ke depan.',
+                    text: 'Sesi login diperpanjang untuk 9 jam ke depan.',
                     timer: 2000,
                     showConfirmButton: false
                 });
