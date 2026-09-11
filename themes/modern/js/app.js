@@ -27,6 +27,10 @@ $(function() {
     function suggestionPasien(item) {
         var utama  = (item.no_rm_format || item.no_rm || '-') + ' - ' + (item.nama || '-');
         var alamat = item.alamat || '-';
+        /* Tgl lahir ibu ikut tampil supaya hasil pencarian "301289" bisa dicek mata */
+        if (item.tgl_lahir) {
+            alamat += ' &middot; lahir ' + item.tgl_lahir;
+        }
         var html   = '<div class="tt-pasien">'
             + '<div class="tt-pasien-utama">' + utama + '</div>'
             + '<div class="tt-pasien-alamat">' + alamat + '</div>';
