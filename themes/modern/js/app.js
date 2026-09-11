@@ -23,70 +23,123 @@ $(function() {
     /* source: https://stackoverflow.com/a/67184094*/
     var tokenHash=$("input[name=csrf_test_name]").val();
 
-    /* Saran pasien tampil dua baris: nomor RM + nama di atas, alamat di bawah. */
+    /* Saran pasien tampil dua/ tiga baris: nomor RM + nama, alamat, lalu ringkasan riwayat. */
     function suggestionPasien(item) {
         var utama  = (item.no_rm_format || item.no_rm || '-') + ' - ' + (item.nama || '-');
         var alamat = item.alamat || '-';
-        return '<div class="tt-pasien">'
+        var html   = '<div class="tt-pasien">'
             + '<div class="tt-pasien-utama">' + utama + '</div>'
-            + '<div class="tt-pasien-alamat">' + alamat + '</div>'
-            + '</div>';
+            + '<div class="tt-pasien-alamat">' + alamat + '</div>';
+
+        /* Baris riwayat hanya ada bila sumbernya pendaftaran/typeahead */
+        if (item.jml_kunjungan > 0) {
+            html += '<div class="tt-pasien-riwayat">' + item.jml_kunjungan + 'x daftar'
+                + (item.kunjungan_terakhir ? ' &middot; terakhir ' + item.kunjungan_terakhir : '')
+                + (item.layanan_terakhir ? ' &middot; ' + item.layanan_terakhir : '')
+                + '</div>';
+        } else if (item.jml_kunjungan === 0) {
+            html += '<div class="tt-pasien-riwayat">Pasien baru, belum pernah mendaftar</div>';
+        }
+
+        return html + '</div>';
+    }
+
+    /* Satu baris JSON pasien -> datum typeahead. Field riwayat undefined kalau
+       sumbernya master/pasien/typeahead yang memang tidak mengirimkannya. */
+    function datumPasien(row) {
+        return {
+            id: row.id_pasien,
+            value: (row.nomor_rm_format || row.nomor_rm) + " - " + row.nama_pasien + " - " + row.alamat,
+            no_rm_format: row.nomor_rm_format,
+            alamat: row.alamat,
+            no_rm: row.nomor_rm,
+            nama: row.nama_pasien,
+            tgl_lahir_ibu: row.tgl_lahir_ibu,
+            tgl_lahir: row.tgl_lahir_ibu ? $.date(row.tgl_lahir_ibu) : '',
+            no_wa: row.no_wa,
+            jml_kunjungan: typeof row.jml_kunjungan === 'undefined' ? undefined : parseInt(row.jml_kunjungan, 10),
+            kunjungan_terakhir: row.kunjungan_terakhir ? $.date(row.kunjungan_terakhir) : '',
+            layanan_terakhir: row.layanan_terakhir,
+            tp_terakhir: row.tp_terakhir ? $.date(row.tp_terakhir) : ''
+        };
     }
 
     /* source: https://stackoverflow.com/a/30340490*/
-    $('#no_rm_header').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1
-    },
-    {
-        display: function(item){
-            return item.no_rm 
-        },
-        limit: 12,
-        async: true,
-        templates: {
-            empty: [
-                '<div class="empty">Data Pasien Tidak Ada!</div>'
-            ].join('\n'),
-            suggestion: suggestionPasien
-        },
-        source: function (query, processSync, processAsync) {
-        /* processSync(['This suggestion appears immediately', 'This one too']);*/
-          return $.ajax({
-            url: base_url + 'master/pasien/typeahead',
-            dataType: "json",
-            type: "POST",
-            data: {
-                max_rows: 15,
-                q:query
-            },
-            beforeSend: function (xhr) 
-            {       
-            xhr.setRequestHeader('X-CSRF-Token' , tokenHash);       
-            },
-            success: function (data) {
-                var return_list = [], i = data.length;
-                while (i--) {
-                    return_list[i] = {
-                        id: data[i].id_pasien,
-                        value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
-                        no_rm_format: data[i].nomor_rm_format,
-                        alamat: data[i].alamat,
-                        no_rm: data[i].nomor_rm,
-                        nama: data[i].nama_pasien,
-                        tgl_lahir_ibu: data[i].tgl_lahir_ibu
-                    };
-                }    
-              /* in this example, json is simply an array of strings*/
-              return processAsync(return_list);
-            }
-          });
+    /* Pemasang typeahead pasien yang dipakai bersama oleh kotak cari di header
+       dan kolom No RM form pendaftaran. Yang berbeda cuma URL sumber data
+       (bisa dioper lewat atribut data-typeahead-url), teks saat kosong, dan
+       aksi ketika saran dipilih. */
+    function initTypeaheadPasien($input, opsi) {
+        if ($input.length === 0) {
+            return;
         }
-    }).on('typeahead:selected', onSelectedNomorRmHeader).on('typeahead:asyncrequest', function(e) {
-        $(e.target).addClass('sLoading');
-    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
-        $(e.target).removeClass('sLoading');
+
+        var url = $input.data('typeahead-url') || opsi.url;
+
+        // Debounce + batalkan request sebelumnya: tanpa ini tiap ketukan langsung
+        // POST ke server dan diproses berurutan (session lock), jadi mengetik
+        // "siti" = 4 request beruntun. minLength 2 karena 1 huruf hasilnya
+        // terlalu umum untuk berguna.
+        var debounceMs = 300, timerKetik = null, xhrAktif = null;
+
+        $input.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            display: function(item){
+                return item.no_rm
+            },
+            limit: 12,
+            async: true,
+            templates: {
+                empty: [opsi.empty].join('\n'),
+                suggestion: suggestionPasien
+            },
+            source: function (query, processSync, processAsync) {
+              if (timerKetik) clearTimeout(timerKetik);
+              if (xhrAktif && xhrAktif.readyState !== 4) xhrAktif.abort();
+              timerKetik = setTimeout(function () {
+                xhrAktif = $.ajax({
+                url: base_url + url,
+                dataType: "json",
+                type: "POST",
+                data: {
+                    max_rows: 15,
+                    q:query
+                },
+                beforeSend: function (xhr)
+                {
+                xhr.setRequestHeader('X-CSRF-Token' , tokenHash);
+                },
+                success: function (data) {
+                    var return_list = [], i = data.length;
+                    while (i--) {
+                        return_list[i] = datumPasien(data[i]);
+                    }
+                  return processAsync(return_list);
+                }
+                });
+              }, debounceMs);
+            }
+        }).on('typeahead:selected', opsi.onSelected).on('typeahead:asyncrequest', function(e) {
+            $(e.target).addClass('sLoading');
+        }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
+            $(e.target).removeClass('sLoading');
+        });
+    }
+
+    initTypeaheadPasien($('#no_rm_header'), {
+        url: 'master/pasien/typeahead',
+        empty: '<div class="empty">Data Pasien Tidak Ada!</div>',
+        onSelected: onSelectedNomorRmHeader
+    });
+
+    initTypeaheadPasien($('.no_rm'), {
+        url: 'master/pasien/typeahead',
+        empty: '<div class="d-flex justify-content-center">Data Pasien Tidak Ada! .:: <a target="_blank" class="tambah-pasien-off-dulu" href="'+base_url+'master/pasien/add">&nbsp;<i class="fas fa-plus"></i> Tambah Pasien&nbsp;</a>::. </div>',
+        onSelected: onSelectedNomorRm
     });
 
     /* source: https://stackoverflow.com/a/19540313*/
@@ -94,71 +147,58 @@ $(function() {
         window.location = base_url+'master/pasien/profile/'+datum.no_rm;
     }
 
-    /* source: https://stackoverflow.com/a/30340490*/
-    
-    $('.no_rm').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1
-    },
-    {
-        display: function(item){
-            return item.no_rm 
-        },
-        limit: 12,
-        async: true,
-        templates: {
-            empty: [
-                '<div class="d-flex justify-content-center">Data Pasien Tidak Ada! .:: <a target="_blank" class="tambah-pasien-off-dulu" href="'+base_url+'master/pasien/add">&nbsp;<i class="fas fa-plus"></i> Tambah Pasien&nbsp;</a>::. </div>'
-            ].join('\n'),
-            suggestion: suggestionPasien
-        },
-        source: function (query, processSync, processAsync) {
-        /* processSync(['This suggestion appears immediately', 'This one too']);*/
-          return $.ajax({
-            url: base_url + 'master/pasien/typeahead',
-            dataType: "json",
-            type: "POST",
-            data: {
-                max_rows: 15,
-                q:query
-            },
-            beforeSend: function (xhr) 
-            {       
-            xhr.setRequestHeader('X-CSRF-Token' , tokenHash);       
-            },
-            success: function (data) {
-                var return_list = [], i = data.length;
-                while (i--) {
-                    return_list[i] = {
-                        id: data[i].id_pasien,
-                        value: (data[i].nomor_rm_format || data[i].nomor_rm) + " - " + data[i].nama_pasien + " - " + data[i].alamat,
-                        no_rm_format: data[i].nomor_rm_format,
-                        alamat: data[i].alamat,
-                        no_rm: data[i].nomor_rm,
-                        nama: data[i].nama_pasien,
-                        tgl_lahir_ibu: $.date(data[i].tgl_lahir_ibu),
-                        no_wa: data[i].no_wa,
-                    };
-                }    
-              /* in this example, json is simply an array of strings*/
-              return processAsync(return_list);
-            }
-          });
-        }
-    }).on('typeahead:selected', onSelectedNomorRm).on('typeahead:asyncrequest', function(e) {
-        $(e.target).addClass('sLoading');
-    }).on('typeahead:asynccancel typeahead:asyncreceive', function(e) {
-        $(e.target).removeClass('sLoading');
-    });
-
     /* source: https://stackoverflow.com/a/19540313*/
     function onSelectedNomorRm($e, datum) {
         $('#nama_ibu').val(datum.nama);
-        $('#tanggal_lahir_ibu').val(datum.tgl_lahir_ibu);
+        $('#tanggal_lahir_ibu').val(datum.tgl_lahir);
         $('#no_wa').val(datum.no_wa);
         $("#nama_pasien_span").data('id', datum.nama);
-        $('span[data-id="nama_pasien"]').attr('data-id', datum.nama); 
+        $('span[data-id="nama_pasien"]').attr('data-id', datum.nama);
+
+        /* TP dari pendaftaran terakhir pasien ini. Sengaja lewat .change() supaya
+           HPHT dan usia kehamilan ikut dihitung ulang oleh pendaftaran.js. */
+        if (datum.tp_terakhir) {
+            $('.tp').val(datum.tp_terakhir).trigger('change');
+        }
+
+        /* Tampilkan pendaftaran terakhir milik pasien yang dipilih */
+        muatRiwayatPendaftaran($(this).data('riwayat-target'), datum.no_rm);
+    }
+
+    /* Panel pendaftaran terakhir di form pendaftaran. Isinya dirender server
+       (Pendaftaran::ajaxRiwayatPendaftaran) supaya markupnya satu sumber dengan
+       yang tampil saat halaman pertama kali dibuka. */
+    function muatRiwayatPendaftaran(selector, noRm) {
+        var $panel = $(selector || '#riwayat-pendaftaran');
+
+        if ($panel.length === 0 || !noRm) {
+            return;
+        }
+
+        var $isi = $panel.find('#riwayat-pendaftaran-isi');
+        $isi.html('<div class="text-center py-3">'
+            + '<div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Memuat...</span></div>'
+            + '<small class="d-block mt-1 text-muted">Memuat pendaftaran terakhir...</small>'
+            + '</div>');
+
+        $.ajax({
+            url: $panel.data('url'),
+            type: 'POST',
+            data: {
+                no_rm: noRm
+            },
+            beforeSend: function (xhr)
+            {
+            xhr.setRequestHeader('X-CSRF-Token' , tokenHash);
+            },
+            success: function(html) {
+                $isi.html(html);
+                $panel.find('.collapse').addClass('show');
+            },
+            error: function() {
+                $isi.html('<div class="text-center text-danger py-3">Data pendaftaran terakhir gagal dimuat.</div>');
+            }
+        });
     }
 
     /* Show Popup Pasien New*/
