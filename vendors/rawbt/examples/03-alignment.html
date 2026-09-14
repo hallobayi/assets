@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 03 - Text Alignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: #4F81BD;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #3d6a99;
+        }
+
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .preview {
+            background: #fff;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .preview-left {
+            text-align: left;
+        }
+
+        .preview-center {
+            text-align: center;
+        }
+
+        .preview-right {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🖨️ RawBT Example 03 - Text Alignment</h1>
+
+    <h3>Preview:</h3>
+    <div class="preview">
+        <div class="preview-left">Left aligned text</div>
+        <div class="preview-center">Center aligned text</div>
+        <div class="preview-right">Right aligned text</div>
+    </div>
+
+    <h3>Code:</h3>
+    <div class="code">// Left alignment
+        job.align('left'); // or job.align(0);
+        job.text('Left aligned text');
+
+        // Center alignment
+        job.align('center'); // or job.align(1);
+        job.text('Center aligned text');
+
+        // Right alignment
+        job.align('right'); // or job.align(2);
+        job.text('Right aligned text');</div>
+
+    <button class="btn" onclick="printAlignment()">🖨️ Print Alignment Demo</button>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function printAlignment() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]); // Initialize
+
+            // Header
+            job.align('center');
+            job.bold(true);
+            job.text('=== ALIGNMENT DEMO ===');
+            job.bold(false);
+            job.newLine();
+
+            // Left aligned
+            job.align('left');
+            job.text('This is LEFT aligned');
+            job.text('All text stays on the left');
+            job.newLine();
+
+            // Center aligned
+            job.align('center');
+            job.text('This is CENTER aligned');
+            job.text('Text is centered');
+            job.newLine();
+
+            // Right aligned
+            job.align('right');
+            job.text('This is RIGHT aligned');
+            job.text('Text stays on the right');
+            job.newLine();
+
+            // Mixed example
+            job.align('center');
+            job.bold(true);
+            job.text('--- RECEIPT EXAMPLE ---');
+            job.bold(false);
+            job.newLine();
+
+            job.align('left');
+            job.text('Item                Price');
+            job.text('------------------------');
+            job.text('Coffee              $3.50');
+            job.text('Sandwich            $5.00');
+            job.text('------------------------');
+
+            job.align('right');
+            job.bold(true);
+            job.text('TOTAL: $8.50');
+            job.bold(false);
+
+            job.align('center');
+            job.newLine();
+            job.text('Thank you!');
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+    </script>
+</body>
+
+</html>

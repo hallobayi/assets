@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 06 - Cash Drawer Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 20px 40px;
+            font-size: 18px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h3 {
+            margin-top: 25px;
+            color: #555;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>💰 RawBT Example 06 - Cash Drawer Control</h1>
+
+    <div class="warning">
+        <strong>⚠️ Important:</strong> Cash drawer must be connected to the printer's RJ11/RJ12 port. Not all printers
+        support cash drawer triggering.
+    </div>
+
+    <h3>Open Cash Drawer:</h3>
+    <div style="text-align: center; margin: 30px 0;">
+        <button class="btn" onclick="openDrawer()">💰 OPEN DRAWER</button>
+    </div>
+
+    <h3>Methods:</h3>
+    <div class="code">// Method 1: Using job function
+        job.openDrawer();
+
+        // Method 2: With parameters
+        job.openDrawer(0, 50, 200); // pin, on-time, off-time
+
+        // Method 3: Raw ESC/POS command
+        job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+        // ESC p m t1 t2
+        // 0x1B 0x70 = Command
+        // 0x00 = Pin 0 (or 0x01 for Pin 1)
+        // 0x19 = On time (25ms × 25 = 625ms)
+        // 0xFA = Off time (250ms × 250 = 62.5s)</div>
+
+    <h3>ESC/POS Drawer Commands:</h3>
+    <table>
+        <tr>
+            <th>Command</th>
+            <th>Bytes</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>ESC p 0</td>
+            <td><code>1B 70 00 19 FA</code></td>
+            <td>Open drawer (Pin 0)</td>
+        </tr>
+        <tr>
+            <td>ESC p 1</td>
+            <td><code>1B 70 01 19 FA</code></td>
+            <td>Open drawer (Pin 1)</td>
+        </tr>
+    </table>
+
+    <h3>Try Different Pins:</h3>
+    <div>
+        <button class="btn btn-danger" onclick="openDrawerPin0()">Open Pin 0</button>
+        <button class="btn btn-danger" onclick="openDrawerPin1()">Open Pin 1</button>
+    </div>
+
+    <div class="info">
+        <strong>💡 Tip:</strong> If Pin 0 doesn't work, try Pin 1. Some cash drawers are connected to different pins.
+    </div>
+
+    <h3>Open Before/After Print:</h3>
+    <div>
+        <button class="btn" onclick="openBeforePrint()">Open → Then Print</button>
+        <button class="btn" onclick="openAfterPrint()">Print → Then Open</button>
+    </div>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function openDrawer() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Open cash drawer using raw command
+            job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+
+            RawBtTransport.send(driver.getData(job));
+            alert('Cash drawer command sent!');
+        }
+
+        function openDrawerPin0() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Pin 0
+            job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+
+            RawBtTransport.send(driver.getData(job));
+            alert('Pin 0 drawer command sent!');
+        }
+
+        function openDrawerPin1() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Pin 1
+            job.raw([0x1B, 0x70, 0x01, 0x19, 0xFA]);
+
+            RawBtTransport.send(driver.getData(job));
+            alert('Pin 1 drawer command sent!');
+        }
+
+        function openBeforePrint() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Open drawer FIRST
+            job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+
+            // Then print
+            job.raw([0x1B, 0x40]); // Initialize
+            job.align('center');
+            job.text('Drawer opened BEFORE print');
+            job.text('Date: ' + new Date().toLocaleString());
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function openAfterPrint() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Print first
+            job.raw([0x1B, 0x40]); // Initialize
+            job.align('center');
+            job.text('Drawer opens AFTER print');
+            job.text('Date: ' + new Date().toLocaleString());
+            job.feed(3);
+            job.cut();
+
+            // Then open drawer
+            job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+
+            RawBtTransport.send(driver.getData(job));
+        }
+    </script>
+</body>
+
+</html>

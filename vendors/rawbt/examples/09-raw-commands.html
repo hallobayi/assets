@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 09 - Raw ESC/POS Commands</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #4F81BD;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #3d6a99;
+        }
+
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h3 {
+            margin-top: 25px;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f5f5;
+        }
+
+        .hex {
+            font-family: monospace;
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 RawBT Example 09 - Raw ESC/POS Commands</h1>
+
+    <div class="note">
+        <strong>⚡ Advanced:</strong> This example shows how to send raw ESC/POS commands directly to the printer. Useful
+        for features not covered by the library's high-level API.
+    </div>
+
+    <h3>Sending Raw Commands</h3>
+    <div class="code">// Using raw() method with byte array
+        job.raw([0x1B, 0x40]); // Initialize printer
+
+        // Multiple bytes
+        job.raw([0x1B, 0x61, 0x01]); // Center align
+
+        // You can also build complex commands
+        const ESC = 0x1B;
+        const GS = 0x1D;
+        job.raw([ESC, 0x45, 0x01]); // Bold on</div>
+
+    <h3>Common ESC/POS Commands Reference</h3>
+    <table>
+        <tr>
+            <th>Function</th>
+            <th>Command</th>
+            <th>Bytes (Hex)</th>
+            <th>Try</th>
+        </tr>
+        <tr>
+            <td>Initialize Printer</td>
+            <td>ESC @</td>
+            <td><span class="hex">1B 40</span></td>
+            <td><button class="btn" onclick="sendCommand([0x1B,0x40])">Test</button></td>
+        </tr>
+        <tr>
+            <td>Line Feed</td>
+            <td>LF</td>
+            <td><span class="hex">0A</span></td>
+            <td><button class="btn" onclick="sendCommand([0x0A])">Test</button></td>
+        </tr>
+        <tr>
+            <td>Feed N Lines</td>
+            <td>ESC d n</td>
+            <td><span class="hex">1B 64 05</span></td>
+            <td><button class="btn" onclick="sendCommand([0x1B,0x64,0x05])">Test (5)</button></td>
+        </tr>
+        <tr>
+            <td>Align Left</td>
+            <td>ESC a 0</td>
+            <td><span class="hex">1B 61 00</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x61,0x00],'Left')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Align Center</td>
+            <td>ESC a 1</td>
+            <td><span class="hex">1B 61 01</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x61,0x01],'Center')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Align Right</td>
+            <td>ESC a 2</td>
+            <td><span class="hex">1B 61 02</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x61,0x02],'Right')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Bold On</td>
+            <td>ESC E 1</td>
+            <td><span class="hex">1B 45 01</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x45,0x01],'BOLD')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Bold Off</td>
+            <td>ESC E 0</td>
+            <td><span class="hex">1B 45 00</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x45,0x00],'Normal')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Underline On</td>
+            <td>ESC - 1</td>
+            <td><span class="hex">1B 2D 01</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x2D,0x01],'Underline')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Underline Off</td>
+            <td>ESC - 0</td>
+            <td><span class="hex">1B 2D 00</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1B,0x2D,0x00],'Normal')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Double Height</td>
+            <td>GS ! n</td>
+            <td><span class="hex">1D 21 10</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1D,0x21,0x10],'Tall')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Double Width</td>
+            <td>GS ! n</td>
+            <td><span class="hex">1D 21 20</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1D,0x21,0x20],'Wide')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Double Both</td>
+            <td>GS ! n</td>
+            <td><span class="hex">1D 21 30</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1D,0x21,0x30],'BIG')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Normal Size</td>
+            <td>GS ! 0</td>
+            <td><span class="hex">1D 21 00</span></td>
+            <td><button class="btn" onclick="sendWithText([0x1D,0x21,0x00],'Normal')">Test</button></td>
+        </tr>
+        <tr>
+            <td>Full Cut</td>
+            <td>GS V 0</td>
+            <td><span class="hex">1D 56 00</span></td>
+            <td><button class="btn" onclick="sendCommand([0x1D,0x56,0x00])">Cut</button></td>
+        </tr>
+        <tr>
+            <td>Partial Cut</td>
+            <td>GS V 1</td>
+            <td><span class="hex">1D 56 01</span></td>
+            <td><button class="btn" onclick="sendCommand([0x1D,0x56,0x01])">Cut</button></td>
+        </tr>
+        <tr>
+            <td>Open Drawer</td>
+            <td>ESC p 0</td>
+            <td><span class="hex">1B 70 00 19 FA</span></td>
+            <td><button class="btn" onclick="sendCommand([0x1B,0x70,0x00,0x19,0xFA])">Open</button></td>
+        </tr>
+    </table>
+
+    <h3>Custom Command Input</h3>
+    <input type="text" id="customCmd" placeholder="Enter hex bytes: 1B 40 1B 61 01"
+        style="width: 300px; padding: 10px; font-family: monospace;">
+    <button class="btn" onclick="sendCustom()">Send Custom</button>
+
+    <h3>Text Size Formula</h3>
+    <div class="code">// GS ! n - where n = (width-1)*16 + (height-1)
+        // Examples:
+        // 1x1 (normal): n = (1-1)*16 + (1-1) = 0x00
+        // 2x2: n = (2-1)*16 + (2-1) = 16 + 1 = 0x11
+        // 3x3: n = (3-1)*16 + (3-1) = 32 + 2 = 0x22
+        // 2x1 (wide only): n = (2-1)*16 + (1-1) = 0x10
+        // 1x2 (tall only): n = (1-1)*16 + (2-1) = 0x01
+
+        job.raw([0x1D, 0x21, 0x11]); // 2x2 size</div>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function sendCommand(bytes) {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]); // Initialize first
+            job.raw(bytes);
+            job.text('Command sent: ' + bytes.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' '));
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function sendWithText(bytes, text) {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]); // Initialize
+            job.raw(bytes);        // Apply format
+            job.text(text);        // Print text
+            job.raw([0x1B, 0x45, 0x00]); // Reset bold
+            job.raw([0x1B, 0x2D, 0x00]); // Reset underline
+            job.raw([0x1D, 0x21, 0x00]); // Reset size
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function sendCustom() {
+            const input = document.getElementById('customCmd').value.trim();
+            if (!input) {
+                alert('Enter hex bytes separated by spaces');
+                return;
+            }
+
+            try {
+                const bytes = input.split(/\s+/).map(hex => parseInt(hex, 16));
+                if (bytes.some(isNaN)) throw new Error('Invalid hex');
+
+                const job = new PosPrinterJob();
+                const driver = new EscPosDriver();
+
+                job.raw([0x1B, 0x40]);
+                job.raw(bytes);
+                job.text('Custom: ' + input);
+                job.feed(3);
+                job.cut();
+
+                RawBtTransport.send(driver.getData(job));
+                alert('Sent: ' + bytes.map(b => '0x' + b.toString(16).toUpperCase()).join(', '));
+            } catch (e) {
+                alert('Invalid hex format. Example: 1B 40 1B 61 01');
+            }
+        }
+    </script>
+</body>
+
+</html>

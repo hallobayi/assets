@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 05 - QR Code Printing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 14px;
+            background: #4F81BD;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #3d6a99;
+        }
+
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h3 {
+            margin-top: 25px;
+            color: #555;
+        }
+
+        .note {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input[type="range"] {
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🖨️ RawBT Example 05 - QR Code Printing</h1>
+
+    <div class="note">
+        <strong>💡 Tip:</strong> QR codes are great for storing URLs, invoice numbers, or any text data that can be
+        scanned with a phone!
+    </div>
+
+    <h3>Basic Usage:</h3>
+    <div class="code">// Simple QR code
+        job.qrCode('https://example.com');
+
+        // With size (1-16)
+        job.qrCode('https://example.com', 6);</div>
+
+    <h3>Quick Examples:</h3>
+    <div>
+        <button class="btn" onclick="printURL()">🌐 Print URL</button>
+        <button class="btn" onclick="printInvoice()">🧾 Print Invoice ID</button>
+        <button class="btn" onclick="printWifi()">📶 Print WiFi</button>
+        <button class="btn" onclick="printVCard()">👤 Print Contact</button>
+    </div>
+
+    <h3>Custom QR Code:</h3>
+    <input type="text" id="qrData" placeholder="Enter any text or URL" value="https://github.com">
+
+    <div style="margin: 15px 0;">
+        <label>Size: <span id="sizeValue">6</span></label><br>
+        <input type="range" id="qrSize" min="3" max="12" value="6"
+            onchange="document.getElementById('sizeValue').textContent = this.value">
+    </div>
+
+    <button class="btn" onclick="printCustom()">🖨️ Print Custom QR Code</button>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function printURL() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]);
+
+            job.align('center');
+            job.bold(true);
+            job.text('Scan to visit website');
+            job.bold(false);
+            job.newLine();
+
+            job.qrCode('https://github.com', 6);
+
+            job.newLine();
+            job.text('github.com');
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function printInvoice() {
+            const invoiceId = 'INV-' + Date.now();
+
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]);
+
+            job.align('center');
+            job.bold(true);
+            job.textSize(2, 2);
+            job.text('INVOICE');
+            job.textSize(1, 1);
+            job.bold(false);
+            job.newLine();
+
+            job.text('Scan for details:');
+            job.qrCode(invoiceId, 5);
+
+            job.newLine();
+            job.text(invoiceId);
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function printWifi() {
+            // WiFi QR format: WIFI:T:WPA;S:NetworkName;P:Password;;
+            const wifiData = 'WIFI:T:WPA;S:MyWiFi;P:password123;;';
+
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]);
+
+            job.align('center');
+            job.bold(true);
+            job.text('WiFi Connection');
+            job.bold(false);
+            job.newLine();
+
+            job.text('Scan to connect:');
+            job.qrCode(wifiData, 6);
+
+            job.newLine();
+            job.text('Network: MyWiFi');
+            job.text('Password: password123');
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function printVCard() {
+            // vCard format
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+N:Doe;John
+FN:John Doe
+TEL:+1234567890
+EMAIL:john@example.com
+END:VCARD`;
+
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]);
+
+            job.align('center');
+            job.bold(true);
+            job.text('Contact Card');
+            job.bold(false);
+            job.newLine();
+
+            job.text('Scan to add contact:');
+            job.qrCode(vcard, 5);
+
+            job.newLine();
+            job.text('John Doe');
+            job.text('+1234567890');
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+
+        function printCustom() {
+            const data = document.getElementById('qrData').value;
+            const size = parseInt(document.getElementById('qrSize').value);
+
+            if (!data) {
+                alert('Please enter data for QR code');
+                return;
+            }
+
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            job.raw([0x1B, 0x40]);
+
+            job.align('center');
+            job.text('Custom QR Code');
+            job.text('Size: ' + size);
+            job.newLine();
+
+            job.qrCode(data, size);
+
+            job.newLine();
+            if (data.length > 40) {
+                job.text(data.substring(0, 40) + '...');
+            } else {
+                job.text(data);
+            }
+
+            job.feed(3);
+            job.cut();
+
+            RawBtTransport.send(driver.getData(job));
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 01 - Basic Print</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #4F81BD;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #3d6a99;
+        }
+
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🖨️ RawBT Example 01 - Basic Print</h1>
+
+    <div class="note">
+        <strong>📱 Requirement:</strong> Install RawBT app on your Android device and connect to a thermal printer.
+    </div>
+
+    <h3>Code Example:</h3>
+    <div class="code">const job = new PosPrinterJob();
+        const driver = new EscPosDriver();
+
+        // Simple text
+        job.text('Hello World!');
+        job.text('This is a basic print test.');
+        job.text('');
+        job.text('RawBT JavaScript Library');
+
+        // Feed and cut
+        job.feed(3);
+        job.cut();
+
+        // Send to printer
+        RawBtTransport.send(driver.getData(job));</div>
+
+    <button class="btn" onclick="printBasic()">🖨️ Print Basic Text</button>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function printBasic() {
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Initialize printer
+            job.raw([0x1B, 0x40]);
+
+            // Simple text
+            job.text('Hello World!');
+            job.text('This is a basic print test.');
+            job.text('');
+            job.text('RawBT JavaScript Library');
+            job.text('');
+            job.text('Date: ' + new Date().toLocaleString());
+
+            // Feed and cut
+            job.feed(3);
+            job.cut();
+
+            // Send to printer
+            RawBtTransport.send(driver.getData(job));
+
+            alert('Print job sent to RawBT!');
+        }
+    </script>
+</body>
+
+</html>

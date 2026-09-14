@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT Example 08 - Complete Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #218838;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .receipt-preview {
+            background: white;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .receipt-preview h2 {
+            text-align: center;
+            margin: 0 0 5px;
+            font-size: 16px;
+        }
+
+        .receipt-preview .subtitle {
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .receipt-preview hr {
+            border: none;
+            border-top: 1px dashed #333;
+            margin: 10px 0;
+        }
+
+        .receipt-preview .item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .receipt-preview .total {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .receipt-preview .qr {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .receipt-preview .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #eee;
+            border: 1px solid #ccc;
+            margin: 0 auto;
+            line-height: 80px;
+            font-size: 10px;
+        }
+
+        .options {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .options input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧾 RawBT Example 08 - Complete Receipt</h1>
+
+    <div class="receipt-preview">
+        <h2>MY STORE</h2>
+        <div class="subtitle">Jl. Example No. 123</div>
+        <div class="subtitle">Tel: 021-12345678</div>
+        <hr>
+        <div>Date: 23/12/2024 15:30</div>
+        <div>Cashier: Admin</div>
+        <hr>
+        <div class="item"><span>Coffee x2</span><span>$7.00</span></div>
+        <div class="item"><span>Sandwich x1</span><span>$5.50</span></div>
+        <div class="item"><span>Cake x1</span><span>$4.00</span></div>
+        <hr>
+        <div class="item"><span>Subtotal</span><span>$16.50</span></div>
+        <div class="item"><span>Tax (10%)</span><span>$1.65</span></div>
+        <hr>
+        <div class="item total"><span>TOTAL</span><span>$18.15</span></div>
+        <div class="item"><span>Cash</span><span>$20.00</span></div>
+        <div class="item"><span>Change</span><span>$1.85</span></div>
+        <hr>
+        <div class="qr">
+            <div class="qr-placeholder">[QR CODE]</div>
+        </div>
+        <div style="text-align: center; font-size: 10px;">
+            Thank you for shopping!<br>
+            See you again!
+        </div>
+    </div>
+
+    <div class="options">
+        <h3>Print Options:</h3>
+        <label><input type="checkbox" id="optQR" checked> Include QR Code</label>
+        <label><input type="checkbox" id="optDrawer"> Open Cash Drawer</label>
+        <label><input type="checkbox" id="optCut" checked> Cut Paper</label>
+    </div>
+
+    <div style="text-align: center;">
+        <button class="btn" onclick="printReceipt()">🖨️ Print Receipt</button>
+    </div>
+
+    <script src="../iconv-lite.bundle.js"></script>
+    <script src="../app.js"></script>
+    <script>
+        function printReceipt() {
+            const includeQR = document.getElementById('optQR').checked;
+            const openDrawer = document.getElementById('optDrawer').checked;
+            const cutPaper = document.getElementById('optCut').checked;
+
+            const job = new PosPrinterJob();
+            const driver = new EscPosDriver();
+
+            // Initialize printer
+            job.raw([0x1B, 0x40]);
+
+            // Open drawer before print
+            if (openDrawer) {
+                job.raw([0x1B, 0x70, 0x00, 0x19, 0xFA]);
+            }
+
+            // === HEADER ===
+            job.align('center');
+            job.bold(true);
+            job.textSize(2, 2);
+            job.text('MY STORE');
+            job.textSize(1, 1);
+            job.bold(false);
+            job.text('Jl. Example No. 123');
+            job.text('Tel: 021-12345678');
+            job.newLine();
+
+            // Separator
+            job.text('================================');
+
+            // Date & Cashier
+            job.align('left');
+            job.text('Date  : ' + new Date().toLocaleString('id-ID'));
+            job.text('Cashier: Admin');
+            job.text('--------------------------------');
+
+            // === ITEMS ===
+            const items = [
+                { name: 'Coffee', qty: 2, price: 3.50 },
+                { name: 'Sandwich', qty: 1, price: 5.50 },
+                { name: 'Cake', qty: 1, price: 4.00 }
+            ];
+
+            let subtotal = 0;
+            items.forEach(item => {
+                const total = item.qty * item.price;
+                subtotal += total;
+
+                const line = `${item.name}`.padEnd(16) +
+                    `x${item.qty}`.padStart(4) +
+                    `$${total.toFixed(2)}`.padStart(12);
+                job.text(line);
+            });
+
+            job.text('--------------------------------');
+
+            // === TOTALS ===
+            const tax = subtotal * 0.10;
+            const grandTotal = subtotal + tax;
+            const cash = 20.00;
+            const change = cash - grandTotal;
+
+            job.text('Subtotal'.padEnd(20) + `$${subtotal.toFixed(2)}`.padStart(12));
+            job.text('Tax (10%)'.padEnd(20) + `$${tax.toFixed(2)}`.padStart(12));
+            job.text('================================');
+
+            job.bold(true);
+            job.textSize(1, 2);
+            job.text('TOTAL'.padEnd(16) + `$${grandTotal.toFixed(2)}`.padStart(16));
+            job.textSize(1, 1);
+            job.bold(false);
+
+            job.text('--------------------------------');
+            job.text('Cash'.padEnd(20) + `$${cash.toFixed(2)}`.padStart(12));
+
+            job.bold(true);
+            job.text('Change'.padEnd(20) + `$${change.toFixed(2)}`.padStart(12));
+            job.bold(false);
+
+            job.text('================================');
+
+            // === QR CODE ===
+            if (includeQR) {
+                job.align('center');
+                job.newLine();
+                const invoiceId = 'INV-' + Date.now();
+                job.qrCode(invoiceId, 5);
+                job.text(invoiceId);
+            }
+
+            // === FOOTER ===
+            job.align('center');
+            job.newLine();
+            job.text('Thank you for shopping!');
+            job.text('See you again!');
+            job.newLine();
+            job.text('www.mystore.com');
+
+            // Feed and cut
+            job.feed(3);
+            if (cutPaper) {
+                job.cut();
+            }
+
+            // Send to printer
+            RawBtTransport.send(driver.getData(job));
+            alert('Receipt sent to printer!');
+        }
+    </script>
+</body>
+
+</html>

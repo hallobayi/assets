@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawBT JavaScript Library - Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: white;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖨️ RawBT JavaScript Library</h1>
+            <p>Unofficial documentation & examples for thermal printing via RawBT Android app</p>
+        </div>
+
+        <div class="examples">
+            <a href="examples/01-basic-print.html" class="card">
+                <div class="icon">📄</div>
+                <h3>01. Basic Print</h3>
+                <p>Simple text printing - Learn the fundamentals of sending text to the printer.</p>
+            </a>
+
+            <a href="examples/02-formatting.html" class="card">
+                <div class="icon">✨</div>
+                <h3>02. Text Formatting</h3>
+                <p>Bold, underline, and various text sizes to make your prints stand out.</p>
+            </a>
+
+            <a href="examples/03-alignment.html" class="card">
+                <div class="icon">↔️</div>
+                <h3>03. Text Alignment</h3>
+                <p>Left, center, and right alignment for professional-looking receipts.</p>
+            </a>
+
+            <a href="examples/04-barcode.html" class="card">
+                <div class="icon">📊</div>
+                <h3>04. Barcode Printing</h3>
+                <p>Print CODE128, EAN13, UPC-A, CODE39, and other barcode formats.</p>
+            </a>
+
+            <a href="examples/05-qrcode.html" class="card">
+                <div class="icon">📱</div>
+                <h3>05. QR Code Printing</h3>
+                <p>Generate QR codes for URLs, WiFi credentials, vCards, and more.</p>
+            </a>
+
+            <a href="examples/06-cash-drawer.html" class="card">
+                <div class="icon">💰</div>
+                <h3>06. Cash Drawer<span class="badge">Popular</span></h3>
+                <p>Open cash drawer via printer - essential for POS systems.</p>
+            </a>
+
+            <a href="examples/07-paper-cut.html" class="card">
+                <div class="icon">✂️</div>
+                <h3>07. Paper Cut</h3>
+                <p>Full cut and partial cut options for printers with auto-cutter.</p>
+            </a>
+
+            <a href="examples/08-receipt.html" class="card">
+                <div class="icon">🧾</div>
+                <h3>08. Complete Receipt<span class="badge">Popular</span></h3>
+                <p>Full receipt example with header, items, totals, QR code, and footer.</p>
+            </a>
+
+            <a href="examples/09-raw-commands.html" class="card">
+                <div class="icon">🔧</div>
+                <h3>09. Raw ESC/POS<span class="badge">Advanced</span></h3>
+                <p>Direct ESC/POS command reference - for full printer control.</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>
+                📱 Requires <a href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter"
+                    target="_blank">RawBT app</a> on Android device<br>
+                📖 <a href="README.md">Full Documentation</a> |
+                ⭐ <a href="https://github.com" target="_blank">Star on GitHub</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
