@@ -1,0 +1,64 @@
+# Sinkronisasi vendors/rawbt dari https://github.com/hallobayi/rawbt-js-library
+# Jalan tiap hari; jika ada perubahan di upstream, buka PR ke branch main.
+name: Sync rawbt-js-library
+
+on:
+  schedule:
+    # 19:00 UTC = 02:00 WIB
+    - cron: "0 19 * * *"
+  # Bisa dijalankan manual dari tab Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: "sync-rawbt"
+  cancel-in-progress: false
+
+env:
+  UPSTREAM_REPO: hallobayi/rawbt-js-library
+  UPSTREAM_BRANCH: main
+  TARGET_DIR: vendors/rawbt
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout assets
+        uses: actions/checkout@v4
+
+      - name: Checkout upstream
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: ${{ env.UPSTREAM_BRANCH }}
+          path: .upstream
+          fetch-depth: 1
+
+      - name: Copy upstream into target dir
+        id: copy
+        run: |
+          UPSTREAM_SHA=$(git -C .upstream rev-parse --short HEAD)
+          echo "sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+
+          rm -rf "$TARGET_DIR"
+          mkdir -p "$TARGET_DIR"
+          rsync -a --exclude='.git' --exclude='.github' .upstream/ "$TARGET_DIR"/
+          rm -rf .upstream
+
+      - name: Create pull request if changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: sync/rawbt-js-library
+          delete-branch: true
+          commit-message: "chore(vendors): sync rawbt-js-library to ${{ steps.copy.outputs.sha }}"
+          title: "chore(vendors): sync rawbt-js-library (${{ steps.copy.outputs.sha }})"
+          body: |
+            Sinkronisasi otomatis `${{ env.TARGET_DIR }}` dari
+            https://github.com/${{ env.UPSTREAM_REPO }}/commit/${{ steps.copy.outputs.sha }}
+
+            Dibuat oleh workflow `sync-rawbt.yml`.
+          labels: dependencies
+          add-paths: ${{ env.TARGET_DIR }}
