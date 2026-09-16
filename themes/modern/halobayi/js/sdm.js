@@ -63,11 +63,13 @@ $(document).ready(function () {
       jadwalMeta = { pegawai: [], shift: [] };
     }
     var pegawaiList = jadwalMeta.pegawai || [];
+    var jadwalTerbaca = false;
     var shiftList = jadwalMeta.shift || [];
 
     var urlSdm = current_url.replace(/jadwal-pegawai.*$/, "");
     var urlDataJadwal = urlSdm + "data-jadwal-pegawai";
     var urlSimpanJadwal = urlSdm + "save-jadwal-pegawai";
+    var urlSimpanShift = urlSdm + "save-shift-jadwal";
 
     var pad2 = function (angka) {
       return (angka < 10 ? "0" : "") + angka;
@@ -91,6 +93,17 @@ $(document).ready(function () {
 
     var cabangDipilih = function (periode) {
       return !!periode.kode_cabang && periode.kode_cabang !== "9999";
+    };
+
+    /* notie v3: alert(type, message, seconds) */
+    var notieAlert = function (tipe, pesan, detik) {
+      if (typeof notie === "undefined" || typeof notie.alert !== "function") {
+        if (tipe === "error" && typeof Swal !== "undefined") {
+          Swal.fire("Error!", pesan, "error");
+        }
+        return;
+      }
+      notie.alert(tipe, pesan, detik || 2);
     };
 
     var infoJadwal = function (pesan, tipe) {
@@ -141,7 +154,8 @@ $(document).ready(function () {
         ' name="shift_' + minggu + "_" + escHtml(nik) + "_" + iso + '"' +
         ' data-nik="' + escHtml(nik) + '"' +
         ' data-tanggal="' + iso + '"' +
-        ' data-minggu="' + minggu + '">';
+        ' data-minggu="' + minggu + '"' +
+        ' data-tersimpan="' + escHtml(terpilih || "") + '">';
       html += '<option value="">-</option>';
       shiftList.forEach(function (shift) {
         html +=
@@ -160,6 +174,15 @@ $(document).ready(function () {
       if (!pegawaiList.length) {
         $jadwalPegawaiTables.html(
           '<div class="alert alert-warning mb-0">Belum ada pegawai (bidan) aktif untuk dijadwalkan.</div>'
+        );
+        return;
+      }
+
+      /* Tanpa master shift, dropdown hanya berisi "-" dan grid tidak ada gunanya */
+      if (!shiftList.length) {
+        $jadwalPegawaiTables.html(
+          '<div class="alert alert-warning mb-0">Master shift masih kosong, dropdown tidak punya pilihan. ' +
+            'Isi dulu di <a href="' + urlSdm + 'shift" class="alert-link">Master Shift</a>.</div>'
         );
         return;
       }
@@ -244,6 +267,8 @@ $(document).ready(function () {
     var muatJadwal = function () {
       var periode = periodeJadwal();
 
+      jadwalTerbaca = false;
+
       if (!cabangDipilih(periode)) {
         renderJadwalPegawaiWeeks({});
         infoJadwal("Pilih cabang terlebih dulu sebelum menyimpan jadwal.", "warning");
@@ -258,6 +283,7 @@ $(document).ready(function () {
           var jumlah = 0;
 
           if (resp && resp.status === "ok") {
+            jadwalTerbaca = true;
             (resp.data || []).forEach(function (row) {
               if (!row.kode_shift) return;
               nilai[row.nik + "|" + row.tanggal] = row.kode_shift;
@@ -301,6 +327,15 @@ $(document).ready(function () {
         return;
       }
 
+      if (!jadwalTerbaca) {
+        Swal.fire(
+          "Jadwal belum termuat",
+          "Jadwal tersimpan belum berhasil dibaca dari server. Muat ulang halaman dulu supaya data lama tidak tertimpa.",
+          "warning"
+        );
+        return;
+      }
+
       $btnTampilkanJadwalPegawai.prop("disabled", true);
 
       $.ajax({
@@ -340,6 +375,64 @@ $(document).ready(function () {
         })
         .always(function () {
           $btnTampilkanJadwalPegawai.prop("disabled", false);
+        });
+    };
+
+    var simpanShift = function ($select) {
+      var periode = periodeJadwal();
+      var sebelumnya = $select.attr("data-tersimpan") || "";
+
+      if (!cabangDipilih(periode)) {
+        $select.val(sebelumnya);
+        tandaiLibur($select);
+        notieAlert("warning", "Pilih cabang dulu sebelum mengubah shift.");
+        return;
+      }
+
+      var kode = $select.val() || "";
+      if (kode === sebelumnya) return;
+
+      $select.prop("disabled", true);
+
+      $.ajax({
+        url: urlSimpanShift,
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify({
+          bulan: periode.bulan,
+          tahun: periode.tahun,
+          kode_cabang: periode.kode_cabang,
+          minggu_ke: parseInt($select.attr("data-minggu"), 10),
+          nik: String($select.attr("data-nik")),
+          tanggal: String($select.attr("data-tanggal")),
+          kode_shift: kode,
+        }),
+      })
+        .done(function (resp) {
+          if (resp && resp.status === "ok") {
+            $select.attr("data-tersimpan", kode);
+            notieAlert("success", resp.message);
+          } else {
+            $select.val(sebelumnya);
+            tandaiLibur($select);
+            notieAlert("error", (resp && resp.message) || "Shift gagal disimpan", 3);
+          }
+        })
+        .fail(function (xhr) {
+          var pesan = "Shift gagal disimpan";
+          try {
+            var json = JSON.parse(xhr.responseText);
+            if (json && json.message) pesan = json.message;
+          } catch (e) {
+            /* response bukan JSON, pakai pesan default */
+          }
+          $select.val(sebelumnya);
+          tandaiLibur($select);
+          notieAlert("error", pesan, 3);
+        })
+        .always(function () {
+          $select.prop("disabled", false);
         });
     };
 
