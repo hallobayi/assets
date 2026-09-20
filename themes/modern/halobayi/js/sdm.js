@@ -67,9 +67,10 @@ $(document).ready(function () {
     var shiftList = jadwalMeta.shift || [];
 
     var urlSdm = current_url.replace(/jadwal-pegawai.*$/, "");
-    var urlDataJadwal = urlSdm + "data-jadwal-pegawai";
-    var urlSimpanJadwal = urlSdm + "save-jadwal-pegawai";
-    var urlSimpanShift = urlSdm + "save-shift-jadwal";
+    var urlDataJadwal    = urlSdm + "data-jadwal-pegawai";
+    var urlSimpanJadwal  = urlSdm + "save-jadwal-pegawai";
+    var urlSimpanShift   = urlSdm + "save-shift-jadwal";
+    var urlSortJadwal    = urlSdm + "sort-jadwal-pegawai";
 
     var pad2 = function (angka) {
       return (angka < 10 ? "0" : "") + angka;
@@ -167,9 +168,12 @@ $(document).ready(function () {
       return html;
     };
 
-    var renderJadwalPegawaiWeeks = function (tersimpan) {
+    var urutanMingguCache = {};
+
+    var renderJadwalPegawaiWeeks = function (tersimpan, urutanMinggu) {
       var periode = periodeJadwal();
       var nilai = tersimpan || {};
+      var urutanData = urutanMinggu || urutanMingguCache || {};
 
       if (!pegawaiList.length) {
         $jadwalPegawaiTables.html(
@@ -192,26 +196,43 @@ $(document).ready(function () {
 
       weeks.forEach(function (week, idx) {
         var minggu = idx + 1;
+        var mapUrutan = urutanData[minggu] || {};
+
+        // Buat salinan pegawaiList lalu urutkan sesuai data urutan tersimpan
+        var weekPegawaiList = pegawaiList.slice();
+        if (Object.keys(mapUrutan).length > 0) {
+          weekPegawaiList.sort(function (a, b) {
+            var uA = typeof mapUrutan[a.nik] !== "undefined" ? mapUrutan[a.nik] : 9999;
+            var uB = typeof mapUrutan[b.nik] !== "undefined" ? mapUrutan[b.nik] : 9999;
+            if (uA !== uB) {
+              return uA - uB;
+            }
+            return 0;
+          });
+        }
+
         html += '<div class="mb-4" data-minggu="' + minggu + '">';
         html += '<div class="fw-bold text-secondary mb-1">Minggu ke-' + minggu + "</div>";
         html += '<table class="table table-bordered border-dark text-center align-middle fw-bold">';
         html += "<thead>";
-        html += '<tr style="background-color: #f2aeb1;"><th>Hari</th>';
+        html += '<tr style="background-color: #f2aeb1;"><th style="width:36px"></th><th>Nama Pegawai</th>';
         hariNames.forEach(function (hari) {
           html += "<th>" + hari + "</th>";
         });
         html += "</tr>";
-        html += '<tr style="background-color: #f2aeb1;"><th>Tanggal</th>';
+        html += '<tr style="background-color: #f2aeb1;"><th></th><th>Tanggal</th>';
         week.forEach(function (hari) {
           html += hari.inBulan
             ? "<th>" + hari.tanggal + "</th>"
             : '<th class="text-muted bg-light">-</th>';
         });
         html += "</tr>";
-        html += "</thead><tbody>";
+        html += "</thead>";
+        html += '<tbody class="sortable-tbody" data-minggu="' + minggu + '">';
 
-        pegawaiList.forEach(function (pegawai) {
-          html += '<tr data-nik="' + escHtml(pegawai.nik) + '">';
+        weekPegawaiList.forEach(function (pegawai, urutan) {
+          html += '<tr data-nik="' + escHtml(pegawai.nik) + '" data-urutan="' + urutan + '">';
+          html += '<td class="text-center p-1"><span class="drag-handle" title="Seret untuk mengubah urutan">&#8942;</span></td>';
           html += '<td class="text-start">' + escHtml(pegawai.nama) + "</td>";
           week.forEach(function (hari) {
             if (!hari.inBulan) {
@@ -233,6 +254,70 @@ $(document).ready(function () {
       $jadwalPegawaiTables.find("select.shift-jadwal").each(function () {
         tandaiLibur($(this));
       });
+
+      /* Inisialisasi SortableJS pada setiap tbody minggu */
+      $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
+        var tbody = this;
+        if (typeof Sortable === "undefined") {
+          console.warn("Sortable library is not loaded");
+          return;
+        }
+
+        Sortable.create(tbody, {
+          handle: ".drag-handle",
+          animation: 150,
+          ghostClass: "sortable-ghost",
+          chosenClass: "sortable-chosen",
+          dragClass: "sortable-drag",
+          onEnd: function (evt) {
+            var mingguKe = parseInt($(tbody).attr("data-minggu"), 10);
+            var periode  = periodeJadwal();
+
+            if (!cabangDipilih(periode)) {
+              notieAlert("warning", "Pilih cabang dulu sebelum mengubah urutan.");
+              return;
+            }
+
+            /* Kumpulkan urutan baru */
+            var urutanBaru = [];
+            if (!urutanMingguCache[mingguKe]) {
+              urutanMingguCache[mingguKe] = {};
+            }
+
+            $(tbody).find("tr[data-nik]").each(function (i) {
+              var nik = String($(this).attr("data-nik"));
+              urutanBaru.push({ nik: nik, urutan: i });
+              $(this).attr("data-urutan", i);
+              urutanMingguCache[mingguKe][nik] = i;
+            });
+
+            /* Kirim ke server */
+            $.ajax({
+              url: urlSortJadwal,
+              type: "POST",
+              contentType: "application/json",
+              dataType: "json",
+              data: JSON.stringify({
+                bulan:      periode.bulan,
+                tahun:      periode.tahun,
+                kode_cabang: periode.kode_cabang,
+                minggu_ke:  mingguKe,
+                urutan:     urutanBaru,
+              }),
+            })
+              .done(function (resp) {
+                if (resp && (resp.status === "ok" || resp.status === "info")) {
+                  notieAlert(resp.status === "ok" ? "success" : "info", resp.message || "Urutan berhasil disimpan");
+                } else {
+                  notieAlert("error", (resp && resp.message) || "Gagal menyimpan urutan", 3);
+                }
+              })
+              .fail(function () {
+                notieAlert("error", "Terjadi kesalahan saat menyimpan urutan", 3);
+              });
+          },
+        });
+      });
     };
 
     /* Semua minggu ikut dikirim (termasuk yang kosong) supaya shift yang
@@ -241,13 +326,31 @@ $(document).ready(function () {
       var weeks = [];
       var indeks = {};
 
+      // Kumpulkan urutan baris per minggu
+      $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
+        var $tbody = $(this);
+        var minggu = parseInt($tbody.attr("data-minggu"), 10);
+        if (!minggu) return;
+
+        if (!indeks[minggu]) {
+          indeks[minggu] = { minggu_ke: minggu, items: [], urutan: [] };
+          weeks.push(indeks[minggu]);
+        }
+
+        $tbody.find("tr[data-nik]").each(function (idx) {
+          var nik = String($(this).attr("data-nik"));
+          indeks[minggu].urutan.push({ nik: nik, urutan: idx });
+        });
+      });
+
+      // Kumpulkan shift terpilih
       $jadwalPegawaiTables.find("select.shift-jadwal").each(function () {
         var $select = $(this);
         var minggu = parseInt($select.attr("data-minggu"), 10);
         if (!minggu) return;
 
         if (!indeks[minggu]) {
-          indeks[minggu] = { minggu_ke: minggu, items: [] };
+          indeks[minggu] = { minggu_ke: minggu, items: [], urutan: [] };
           weeks.push(indeks[minggu]);
         }
 
@@ -258,6 +361,7 @@ $(document).ready(function () {
           nik: String($select.attr("data-nik")),
           tanggal: String($select.attr("data-tanggal")),
           kode_shift: kode,
+          urutan: parseInt($select.closest("tr").attr("data-urutan") || 0, 10),
         });
       });
 
@@ -270,7 +374,7 @@ $(document).ready(function () {
       jadwalTerbaca = false;
 
       if (!cabangDipilih(periode)) {
-        renderJadwalPegawaiWeeks({});
+        renderJadwalPegawaiWeeks({}, {});
         infoJadwal("Pilih cabang terlebih dulu sebelum menyimpan jadwal.", "warning");
         return;
       }
@@ -280,15 +384,23 @@ $(document).ready(function () {
       $.getJSON(urlDataJadwal, periode)
         .done(function (resp) {
           var nilai = {};
+          var urutanMinggu = {};
           var jumlah = 0;
 
           if (resp && resp.status === "ok") {
             jadwalTerbaca = true;
             (resp.data || []).forEach(function (row) {
+              if (row.minggu_ke && row.nik && typeof row.urutan !== "undefined") {
+                if (!urutanMinggu[row.minggu_ke]) {
+                  urutanMinggu[row.minggu_ke] = {};
+                }
+                urutanMinggu[row.minggu_ke][row.nik] = parseInt(row.urutan, 10);
+              }
               if (!row.kode_shift) return;
               nilai[row.nik + "|" + row.tanggal] = row.kode_shift;
               jumlah++;
             });
+            urutanMingguCache = urutanMinggu;
             infoJadwal(
               jumlah
                 ? "Menampilkan " + jumlah + " shift yang sudah tersimpan untuk periode ini."
@@ -299,10 +411,10 @@ $(document).ready(function () {
             infoJadwal((resp && resp.message) || "Jadwal tersimpan tidak bisa dimuat.", "warning");
           }
 
-          renderJadwalPegawaiWeeks(nilai);
+          renderJadwalPegawaiWeeks(nilai, urutanMinggu);
         })
         .fail(function () {
-          renderJadwalPegawaiWeeks({});
+          renderJadwalPegawaiWeeks({}, {});
           infoJadwal("Gagal memuat jadwal tersimpan.", "warning");
         });
     };
@@ -438,6 +550,7 @@ $(document).ready(function () {
 
     $jadwalPegawaiTables.on("change", "select.shift-jadwal", function () {
       tandaiLibur($(this));
+      simpanShift($(this));
     });
 
     $('select[name="bulan"], select[name="tahun"], select[name="cabang"]').on("change", muatJadwal);
