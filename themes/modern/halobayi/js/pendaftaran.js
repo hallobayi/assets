@@ -15,19 +15,27 @@ jQuery(document).ready(function () {
 
     $(".jadwal_dokter, .nik_dokter").prop("disabled", true);
 
-    $(".select2, .cabang")
-      .select2({
-        placeholder: "Select an option",
-        theme: "bootstrap-5",
-        allowClear: false,
-      })
-      .on("select2:opening", function (e) {
-        $(this)
-          .data("select2")
-          .$dropdown.find(":input.select2-search__field")
-          .attr("placeholder", "Ketik atau Klik Pilihan")
-          .focus();
-      });
+    /* Layanan memakai <select multiple name="layanan[]">, jadi select2 perlu
+       closeOnSelect:false supaya dropdown tidak menutup sendiri tiap kali satu
+       layanan dipilih. Untuk select tunggal opsinya tetap seperti semula. */
+    $(".select2, .cabang").each(function () {
+      const multi = $(this).prop("multiple");
+
+      $(this)
+        .select2({
+          placeholder: multi ? "Pilih satu atau lebih layanan" : "Select an option",
+          theme: "bootstrap-5",
+          allowClear: !multi,
+          closeOnSelect: !multi,
+        })
+        .on("select2:opening", function (e) {
+          $(this)
+            .data("select2")
+            .$dropdown.find(":input.select2-search__field")
+            .attr("placeholder", "Ketik atau Klik Pilihan")
+            .focus();
+        });
+    });
   }
 
   let dataTablesPendaftaran = "";
