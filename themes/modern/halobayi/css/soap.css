@@ -87,11 +87,22 @@
 .soap-quicknav a:hover,
 .soap-quicknav a.active { background: #e033cf; color: #fff; border-color: #e033cf; }
 
+.soap-quicknav a.soap-quicknav-resume {
+    color: #0d6efd;
+    border-color: #cfe0ff;
+}
+
+.soap-quicknav a.soap-quicknav-resume:hover {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
 /* Quick-nav versi sidebar: sticky tepat di bawah bar "Riwayat Pendaftaran Pasien".
-   Header theme fixed = 62px, bar #riwayat-pasien sticky di top:62px (tinggi ±52px),
-   jadi quicknav menempel di ±118px agar tidak tertutup keduanya. */
+   Header theme fixed = 62px, bar #riwayat-pasien sticky di top:62px (tinggi Â±52px),
+   jadi quicknav menempel di Â±118px agar tidak tertutup keduanya. */
 .soap-quicknav-side {
-    top: 118px;                /* 62px header + ±52px bar riwayat + jarak kecil */
+    top: 118px;                /* 62px header + Â±52px bar riwayat + jarak kecil */
     z-index: 7;
     margin: .25rem 0 .75rem;
     padding: .55rem .6rem;
