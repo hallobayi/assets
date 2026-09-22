@@ -289,6 +289,78 @@ jQuery(document).ready(function () {
   dataTablesRiwayatObat = $("#tabel-riwayatobat").DataTable(settingsObat);
   dataTablesRiwayatObat.columns.adjust().draw();
 
+  /* ============================================================
+   * LAYANAN / TINDAKAN DATATABLES
+   * Daftar tindakan pada satu pendaftaran (form "Tambah Tindakan/Layanan").
+   * Tabelnya hanya ada di form layanan, jadi seluruh blok dijaga dengan
+   * pengecekan keberadaan elemen supaya form lain tidak ikut kena request.
+   * ============================================================ */
+  let dataTablesRiwayatLayanan = null;
+  let settingsLayanan = null;
+
+  if ($("#tabel-riwayatlayanan").length) {
+    const columnLayanan =
+      typeof $("#riwayatlayanan-column").html() === "string"
+        ? $.parseJSON($("#riwayatlayanan-column").html())
+        : [];
+    const settingLayananView =
+      typeof $("#riwayatlayanan-setting").html() === "string"
+        ? $.parseJSON($("#riwayatlayanan-setting").html())
+        : {};
+
+    settingsLayanan = {
+      processing: true,
+      serverSide: true,
+      scrollX: true,
+      order: [settingLayananView.order || [1, "desc"]],
+      columnDefs: settingLayananView.columnDefs || [],
+      ajax: {
+        url: $("#riwayatlayanan-url").text(),
+        type: "POST",
+        data: { csrf_test_name: tokenHash },
+      },
+      oLanguage: {
+        sLengthMenu: "_MENU_ records per page",
+        sSearch: "Cari <span style='color:#F00;'>(Tekan Enter)</span>: _INPUT_",
+        sEmptyTable: "Belum ada tindakan/layanan pada registrasi ini",
+        sZeroRecords: "Tindakan/layanan tidak ditemukan",
+      },
+      columns: columnLayanan,
+      initComplete: function () {
+        /* Cari baru jalan setelah Enter supaya tidak membanjiri server. */
+        /* source: https://stackoverflow.com/a/30937415 */
+        $(this)
+          .closest(".dataTables_wrapper")
+          .find(".dataTables_filter input")
+          .unbind()
+          .bind("keyup", function (e) {
+            if (e.keyCode == 13) {
+              dataTablesRiwayatLayanan.search(this.value).draw();
+            }
+          });
+      },
+    };
+
+    dataTablesRiwayatLayanan = $("#tabel-riwayatlayanan").DataTable(
+      settingsLayanan,
+    );
+    dataTablesRiwayatLayanan.columns.adjust().draw();
+  }
+
+  /* Muat ulang isi tabel layanan setelah simpan/hapus.
+     Paging sengaja dipertahankan (reload/load dengan resetPaging = false). */
+  function reloadTabelLayanan(urlAjax) {
+    if (!dataTablesRiwayatLayanan) return;
+
+    if (urlAjax) {
+      settingsLayanan.ajax.url = urlAjax;
+      dataTablesRiwayatLayanan.ajax.url(urlAjax).load(null, false);
+      return;
+    }
+
+    dataTablesRiwayatLayanan.ajax.reload(null, false);
+  }
+
   /* Ada Bugs di CSRF Token */
   $("#riwayat-soap-tab").click(function () {
     let urlSoap = $("#riwayatsoap-url").html();
@@ -907,6 +979,248 @@ jQuery(document).ready(function () {
       error: function (jqXHR, textStatus, errorThrown) {
         /* Handle errors here */
         console.log("ERRORS: " + textStatus + " - " + errorThrown);
+      },
+    });
+  });
+
+  /* ============================================================
+   * FORM TAMBAH TINDAKAN/LAYANAN
+   * Typeahead master tindakan + simpan + hapus baris layanan.
+   * ============================================================ */
+
+  /* Notifikasi ringkas dengan warna mengikuti status jawaban server. */
+  function toastLayanan(pesan, sukses) {
+    Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: sukses ? 3500 : 5500,
+      timerProgressBar: true,
+      iconColor: "white",
+      customClass: {
+        popup: (sukses ? "bg-success" : "bg-danger") + " text-light toast p-2",
+      },
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    }).fire({
+      html:
+        '<div class="toast-content"><i class="far ' +
+        (sukses ? "fa-check-circle" : "fa-times-circle") +
+        ' me-2"></i> ' +
+        pesan +
+        "</div>",
+    });
+  }
+
+  /* Nama yang benar-benar dipilih dari daftar saran (bukan ketikan bebas). */
+  let namaLayananTerpilih = "";
+
+  /* Kosongkan isian form setelah tersimpan supaya tidak terkirim dobel.
+     Dipanggil juga saat nama diketik ulang: kode lama harus ikut hilang. */
+  function resetFormLayanan(kosongkanNama) {
+    namaLayananTerpilih = "";
+
+    if (kosongkanNama !== false) {
+      if (typeof $("#nama_layanan").typeahead === "function") {
+        $("#nama_layanan").typeahead("val", "");
+      } else {
+        $("#nama_layanan").val("");
+      }
+    }
+
+    $("#kode_tindakan_layanan").val("");
+    $("#kode_tindakan_format").val("");
+  }
+
+  /* Checklist "Tindakan Lab" menentukan sumber typeahead:
+     dicentang  -> master tindakan jenis eksternal (laboratorium)
+     tidak      -> jenis internal (layanan klinik) */
+  function jenisTindakanLayanan() {
+    return $("#is_lab").is(":checked") ? "eksternal" : "internal";
+  }
+
+  /* Ganti checklist = ganti daftar sumber, jadi pilihan lama dibuang supaya
+     tidak tersimpan kode dari daftar yang sudah tidak berlaku. */
+  $(document).on("change", "#is_lab", function () {
+    resetFormLayanan();
+    $("#nama_layanan").focus();
+  });
+
+  if ($(".nama_layanan").length) {
+    $(".nama_layanan")
+      .typeahead(
+        {
+          hint: true,
+          highlight: true,
+          minLength: 1,
+        },
+        {
+          display: function (item) {
+            return item.nama_tindakan;
+          },
+          limit: 12,
+          async: true,
+          templates: {
+            /* Sebutkan daftar mana yang dicari, supaya jelas kalau hasil kosong
+               karena checklist Tindakan Lab salah posisi. */
+            empty: function () {
+              return (
+                '<div class="empty">Tindakan ' +
+                (jenisTindakanLayanan() === "eksternal"
+                  ? "laboratorium"
+                  : "klinik") +
+                " tidak ditemukan!</div>"
+              );
+            },
+            suggestion: function (item) {
+              /* value berisi nama dari master, jadi di-escape lewat .text(). */
+              return $("<div>").text(item.value).prop("outerHTML");
+            },
+          },
+          source: function (query, processSync, processAsync) {
+            return $.ajax({
+              url: base_url + "master/rekammedis/tindakan-typeahead",
+              dataType: "json",
+              type: "POST",
+              data: {
+                max_rows: 15,
+                q: query,
+                jenis: jenisTindakanLayanan(),
+                kode_cabang: $("#kode_cabang_layanan").val() || "",
+                csrf_test_name: tokenHash,
+              },
+              beforeSend: function (xhr) {
+                xhr.setRequestHeader("csrf_test_name", tokenHash);
+              },
+              success: function (data) {
+                var return_list = [],
+                  i = data.length;
+                while (i--) {
+                  /* Tarif sengaja tidak ditampilkan di form ini. */
+                  return_list[i] = {
+                    kode_tindakan: data[i].kode_tindakan,
+                    nama_tindakan: data[i].nama_tindakan,
+                    value:
+                      data[i].kode_tindakan + " - " + data[i].nama_tindakan,
+                  };
+                }
+                return processAsync(return_list);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                console.log("ERRORS: " + textStatus + " - " + errorThrown);
+                return processAsync([]);
+              },
+            });
+          },
+        },
+      )
+      .on("typeahead:selected typeahead:autocompleted", function (e, datum) {
+        namaLayananTerpilih = datum.nama_tindakan;
+
+        $("#kode_tindakan_layanan").val(datum.kode_tindakan);
+        $("#kode_tindakan_format").val(datum.kode_tindakan);
+      })
+      /* Nama diubah lagi setelah memilih = pilihan lama tidak berlaku.
+         Kodenya dibuang supaya tidak tersimpan layanan yang salah. */
+      .on("input", function () {
+        /* false = jangan ikut menghapus teks yang sedang diketik. */
+        if ($(this).val() !== namaLayananTerpilih) resetFormLayanan(false);
+      });
+  }
+
+  $(".simpan-tindakan-layanan").submit(function (e) {
+    e.preventDefault();
+
+    var $form = $(this);
+
+    /* Kode kosong berarti nama diketik manual tanpa memilih saran. */
+    if (!$("#kode_tindakan_layanan").val()) {
+      toastLayanan(
+        "Pilih tindakan/layanan dari daftar saran yang muncul",
+        false,
+      );
+      return;
+    }
+
+    var postData = $form.serializeArray();
+    postData.push({ name: "csrf_test_name", value: tokenHash });
+
+    $form.find("button[type=submit], button:not([type])").prop("disabled", true);
+
+    $.ajax({
+      url: module_url + "/ajaxSubmitTindakanLayanan",
+      type: "POST",
+      cache: false,
+      dataType: "json",
+      data: $.param(postData),
+      success: function (data) {
+        if (data.status !== "success") {
+          toastLayanan(data.message, false);
+          return;
+        }
+
+        reloadTabelLayanan(data.urlAjax);
+        resetFormLayanan();
+        toastLayanan(data.message, true);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        /* Handle errors here */
+        console.log("ERRORS: " + textStatus + " - " + errorThrown);
+        toastLayanan("Gagal menyimpan layanan: " + textStatus, false);
+      },
+      complete: function () {
+        $form
+          .find("button[type=submit], button:not([type])")
+          .prop("disabled", false);
+      },
+    });
+  });
+
+  /* Tombol hapus dipasang delegated: barisnya digambar ulang tiap draw. */
+  $(document).on("click", ".hapus-layanan", function (e) {
+    e.preventDefault();
+
+    var id = $(this).data("id");
+    var nama = $(this).data("nama");
+
+    bootbox.confirm({
+      title: "Hapus Layanan",
+      /* Nama berasal dari master data dan disisipkan sebagai HTML, jadi
+         di-escape dulu lewat .text(). */
+      message:
+        "Apakah Anda yakin ingin menghapus layanan <b>" +
+        $("<div>").text(nama).html() +
+        "</b> ?",
+      buttons: {
+        cancel: { label: "Batal", className: "btn-secondary" },
+        confirm: { label: "Hapus", className: "btn-danger" },
+      },
+      callback: function (setuju) {
+        if (!setuju) return;
+
+        $.ajax({
+          url: module_url + "/ajaxHapusLayanan",
+          type: "POST",
+          cache: false,
+          dataType: "json",
+          data: { id: id, csrf_test_name: tokenHash },
+          success: function (data) {
+            if (data.status !== "success") {
+              toastLayanan(data.message, false);
+              return;
+            }
+
+            reloadTabelLayanan(data.urlAjax);
+            toastLayanan(data.message, true);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            /* Handle errors here */
+            console.log("ERRORS: " + textStatus + " - " + errorThrown);
+            toastLayanan("Gagal menghapus layanan: " + textStatus, false);
+          },
+        });
       },
     });
   });
