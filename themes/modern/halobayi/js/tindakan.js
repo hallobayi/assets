@@ -1028,40 +1028,40 @@ jQuery(document).ready(function () {
               success: function (data) {
                 console.log(data);
 
-				/* Update CSRF token di semua form */
-				if (data.csrf_test_name) {
-					$('input[name="csrf_test_name"]').val(data.csrf_test_name);
-				}
+              /* Update CSRF token di semua form */
+              if (data.csrf_test_name) {
+                $('input[name="csrf_test_name"]').val(data.csrf_test_name);
+              }
 
-                if (data.message.status == "ok") {
-                  $bootbox.modal("hide");
-                  const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 2500,
-                    timerProgressBar: true,
-                    iconColor: "white",
-                    customClass: {
-                      popup: "bg-success text-light toast p-2",
-                    },
-                    didOpen: (toast) => {
-                      toast.addEventListener("mouseenter", Swal.stopTimer);
-                      toast.addEventListener("mouseleave", Swal.resumeTimer);
-                    },
-                  });
-                  Toast.fire({
-                    html:
-                      '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
-                      data.message.message +
-                      "</div>",
-                  });
+              if (data.message.status == "ok") {
+                $bootbox.modal("hide");
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2500,
+                  timerProgressBar: true,
+                  iconColor: "white",
+                  customClass: {
+                    popup: "bg-success text-light toast p-2",
+                  },
+                  didOpen: (toast) => {
+                    toast.addEventListener("mouseenter", Swal.stopTimer);
+                    toast.addEventListener("mouseleave", Swal.resumeTimer);
+                  },
+                });
+                Toast.fire({
+                  html:
+                    '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
+                    data.message.message +
+                    "</div>",
+                });
 
-                  if (data.message.urlAjax == 'location.reload()') {
-						location.reload();
-				  }
+                if (data.message.urlAjax == 'location.reload()') {
+                  location.reload();
+                }
 				  
-                } else {
+              } else {
                   $button_submit.find("i").remove();
                   $button.prop("disabled", false);
                   $bootbox
@@ -1081,10 +1081,10 @@ jQuery(document).ready(function () {
                 var errorMsg = "Terjadi kesalahan pada server";
                 try {
                   var response = JSON.parse(xhr.responseText);
-				  /* Update CSRF token jika dikirim di response error */
-				  if (response.csrf_test_name) {
-					$('input[name="csrf_test_name"]').val(response.csrf_test_name);
-				  }
+                  /* Update CSRF token jika dikirim di response error */
+                  if (response.csrf_test_name) {
+                    $('input[name="csrf_test_name"]').val(response.csrf_test_name);
+                  }
                   if (response.message && response.message.message) {
                     errorMsg = response.message.message;
                   }
