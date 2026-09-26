@@ -74,22 +74,22 @@ jQuery(document).ready(function () {
           }
         }
 
-        /* Kolom Stok Berjalan (Index 9) - warna merah bila <= stok_minimal */
-        var stokBerjalan = parseFloat(aoData["stok_berjalan"]) || 0;
+        /* Kolom Stok (Index 8) = total batch_obat.stok - merah bila habis, kuning bila <= stok_minimal */
+var stokBerjalan = parseFloat(aoData["stok_berjalan"]) || 0;
         var stokMinimal = parseFloat(aoData["stok_minimal"]) || 0;
 
         if (stokBerjalan <= 0) {
           $("td", nRow)
-            .eq(9)
-            .html(
+            .eq(8)
+.html(
               '<span class="badge bg-danger">Habis (' +
                 stokBerjalan +
                 ")</span>",
             );
         } else if (stokBerjalan <= stokMinimal) {
           $("td", nRow)
-            .eq(9)
-            .html(
+            .eq(8)
+.html(
               '<span class="badge bg-warning text-dark">Hampir Habis (' +
                 stokBerjalan +
                 ")</span>",

@@ -22,14 +22,7 @@ $().ready(function(){
         hargaJualSatuanFormat.value = formatRupiah(this.value, 'Rp. ');
     });
 
-    var stokAwal = document.getElementById('field-stok_awal');
-
-    var rupiahTotal = document.getElementById('field-nilai_total');
-    $('#field-stok_awal').change(function(){
-        rupiahTotal.value = parseInt(hargaBeliSatuan.value) * parseInt(stokAwal.value);
-    });
-
-    $('.expired_date').flatpickr({
+$('.expired_date').flatpickr({
         dateFormat: "d-m-Y"
     });
 });
