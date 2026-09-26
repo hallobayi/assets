@@ -9,64 +9,28 @@ jQuery(document).ready(function () {
   if ($("#table-opname").length === 0) {
     return;
   }
-  console.log("Init Module Stok Opname Obat");
 
-  var tokenHash = $("input[name=csrf_test_name]").val();
+  var TOAST_TIMER = 3000;
 
-  function csrfToken() {
-    return $("input[name=csrf_test_name]").val() || tokenHash || "";
-  }
+  /* Helper bersama ada di crud-datatables.js; call site di bawah tidak berubah. */
+  var csrfToken = FarmasiCrud.csrfToken;
+  var syncCsrf = FarmasiCrud.syncCsrf;
+  var errorPopup = FarmasiCrud.errorPopup;
 
-  function syncCsrf(json) {
-    if (json && json.csrf && json.csrf.value) {
-      tokenHash = json.csrf.value;
-      $("input[name=csrf_test_name]").val(tokenHash);
-    }
-  }
-
+  /* Durasi toast berbeda antar modul, jadi dibungkus per modul. */
   function toast(message, ok) {
-    if (typeof Swal === "undefined") {
-      alert(message);
-      return;
-    }
-    Swal.mixin({
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      iconColor: "white",
-      customClass: {
-        popup: (ok ? "bg-success" : "bg-danger") + " text-light toast p-2",
-      },
-      didOpen: function (t) {
-        t.addEventListener("mouseenter", Swal.stopTimer);
-        t.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    }).fire({
-      html:
-        '<div class="toast-content"><i class="far ' +
-        (ok ? "fa-check-circle" : "fa-times-circle") +
-        ' me-2"></i> ' +
-        message +
-        "</div>",
-    });
+    FarmasiCrud.toast(message, ok, TOAST_TIMER);
   }
 
-  function errorPopup(title, text) {
-    if (typeof Swal !== "undefined") {
-      Swal.fire({ icon: "error", title: title, text: text });
-    } else {
-      alert(text);
-    }
-  }
-
+  /* Kartu ringkasan: id elemen -> key di respons stats */
+  var STAT_MAP = {
+    "#stat-total-mutasi": "totalMutasi",
+    "#stat-masuk": "masukBulanIni",
+    "#stat-keluar": "keluarBulanIni",
+    "#stat-opname": "opnameBulanIni",
+  };
   function updateStats(stats) {
-    if (!stats) return;
-    $("#stat-total-mutasi").text(stats.totalMutasi);
-    $("#stat-masuk").text(stats.masukBulanIni);
-    $("#stat-keluar").text(stats.keluarBulanIni);
-    $("#stat-opname").text(stats.opnameBulanIni);
+    FarmasiCrud.updateStats(STAT_MAP, stats);
   }
 
   /* ============================================================
@@ -81,7 +45,7 @@ jQuery(document).ready(function () {
   if (hasSelect2) {
     $("#filter-id-obat").select2({
       theme: "bootstrap-5",
-      width: "style",
+      width: "100%",
       placeholder: "-- Semua Obat --",
       allowClear: true,
     });
@@ -121,86 +85,39 @@ jQuery(document).ready(function () {
   /* ============================================================
    * DATATABLES
    * ============================================================ */
-  var column = $.parseJSON($("#dt-opname-column").html() || "[]");
-  var url = $("#dt-opname-url").text();
-
-  var settings = {
-    processing: true,
-    serverSide: true,
-    scrollX: true,
-    ajax: {
-      url: url,
-      type: "POST",
-      data: function (d) {
-        d.csrf_test_name = csrfToken();
+  var table = $("#table-opname").DataTable(
+    FarmasiCrud.tableSettings({
+      spanPrefix: "dt-opname",
+      zeroRecords: "Riwayat mutasi tidak ditemukan",
+      loadErrorMessage: "Gagal memuat riwayat mutasi dari server.",
+      filters: function (d) {
         d.filter_id_obat = $("#filter-id-obat").val() || "";
         d.filter_tipe = $("#filter-tipe").val() || "";
         d.filter_referensi = $("#filter-referensi").val() || "";
         d.filter_tgl_dari = $("#filter-tgl-dari").val() || "";
         d.filter_tgl_sampai = $("#filter-tgl-sampai").val() || "";
       },
-      dataSrc: function (json) {
-        syncCsrf(json);
-        if (json.status === "error" && json.message) {
-          errorPopup("Gagal Memuat Data", json.message);
-        }
-        return json.data || [];
+      rowCallback: function (nRow, aoData) {
+        /* Jumlah (index 5): +N hijau untuk masuk, -N merah untuk keluar */
+        var jumlah = parseInt(aoData["jumlah"]) || 0;
+        var masuk = aoData["tipe_raw"] === "masuk";
+        $("td", nRow)
+          .eq(5)
+          .addClass("text-end fw-bold " + (masuk ? "text-success" : "text-danger"))
+          .text((masuk ? "+" : "-") + jumlah);
+        $("td", nRow).eq(6).addClass("text-end");
+        $("td", nRow).eq(7).addClass("text-end fw-bold");
       },
-      error: function (xhr) {
-        console.error(xhr.responseText);
-        errorPopup("Terjadi Kesalahan", "Gagal memuat riwayat mutasi dari server.");
-      },
-    },
-    oLanguage: {
-      sLengthMenu: "_MENU_ baris per halaman",
-      sSearch: "Cari: _INPUT_",
-      sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-      sInfoEmpty: "Tidak ada data",
-      sInfoFiltered: "(disaring dari _MAX_ total data)",
-      sZeroRecords: "Riwayat mutasi tidak ditemukan",
-      sProcessing: "Memuat...",
-      oPaginate: {
-        sFirst: "Pertama",
-        sPrevious: "Sebelumnya",
-        sNext: "Selanjutnya",
-        sLast: "Terakhir",
-      },
-    },
-    columns: column,
-    fnRowCallback: function (nRow, aoData) {
-      /* Jumlah (index 5): +N hijau untuk masuk, -N merah untuk keluar */
-      var jumlah = parseInt(aoData["jumlah"]) || 0;
-      var masuk = aoData["tipe_raw"] === "masuk";
-      $("td", nRow)
-        .eq(5)
-        .addClass("text-end fw-bold " + (masuk ? "text-success" : "text-danger"))
-        .text((masuk ? "+" : "-") + jumlah);
-      $("td", nRow).eq(6).addClass("text-end");
-      $("td", nRow).eq(7).addClass("text-end fw-bold");
-    },
-    initComplete: function () {
-      /* Cari hanya saat tekan Enter */
-      var $input = $("#table-opname_filter input");
-      $input.unbind();
-      $input.bind("keyup", function (e) {
-        if (e.keyCode == 13) {
-          table.search(this.value).draw();
-        }
-      });
-    },
-  };
+    }),
+  );
 
-  var addSetting = $("#dt-opname-setting").html();
-  if (addSetting) {
-    addSetting = $.parseJSON(addSetting);
-    for (var k in addSetting) {
-      settings[k] = addSetting[k];
-    }
-  }
-
-  var table = $("#table-opname").DataTable(settings);
+  FarmasiCrud.bindEnterSearch("#table-opname", table);
 
   $("#filter-id-obat, #filter-tipe, #filter-referensi").on("change", function () {
+    table.ajax.reload();
+  });
+
+  $("#btn-cari-filter").on("click", function () {
     table.ajax.reload();
   });
 
@@ -222,21 +139,13 @@ jQuery(document).ready(function () {
   var $selBatch = $("#opname-id-batch");
   var batchXhr = null;
 
+  /* Wrapper: helper bersama menerima $form dan hasSelect2 sebagai argumen. */
   function clearErrors() {
-    $form.find(".is-invalid").removeClass("is-invalid");
-    $form.find(".invalid-feedback").text("").hide();
+    FarmasiCrud.clearErrors($form);
   }
 
   function showErrors(errors) {
-    clearErrors();
-    $.each(errors || {}, function (field, msg) {
-      var $el = $form.find('[name="' + field + '"]');
-      $el.addClass("is-invalid");
-      if (hasSelect2 && $el.hasClass("select2-hidden-accessible")) {
-        $el.next(".select2").find(".select2-selection").addClass("is-invalid");
-      }
-      $("#err-" + field).text(msg).show();
-    });
+    FarmasiCrud.showErrors($form, errors, hasSelect2);
   }
 
   function setSelect($sel, val) {

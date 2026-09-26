@@ -1,5 +1,7 @@
 $().ready(function(){
 
+    console.log('Init Module Farmasi');
+
     /* Field Harga Beli Satuan*/
     var hargaBeliSatuan = document.getElementById('field-harga_beli_satuan');
     var hargaBeliSatuanFormat = document.getElementById('field-harga_beli_satuan_format');
@@ -27,5 +29,8 @@ $().ready(function(){
         rupiahTotal.value = parseInt(hargaBeliSatuan.value) * parseInt(stokAwal.value);
     });
 
+    $('.expired_date').flatpickr({
+        dateFormat: "d-m-Y"
+    });
 });
 

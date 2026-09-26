@@ -9,65 +9,29 @@ jQuery(document).ready(function () {
   if ($("#table-stok-obat").length === 0) {
     return;
   }
-  console.log("Init Module Stok Obat (Batch)");
 
-  var tokenHash = $("input[name=csrf_test_name]").val();
+  var TOAST_TIMER = 2500;
 
-  function csrfToken() {
-    return $("input[name=csrf_test_name]").val() || tokenHash || "";
-  }
+  /* Helper bersama ada di crud-datatables.js; call site di bawah tidak berubah. */
+  var csrfToken = FarmasiCrud.csrfToken;
+  var syncCsrf = FarmasiCrud.syncCsrf;
+  var errorPopup = FarmasiCrud.errorPopup;
 
-  function syncCsrf(json) {
-    if (json && json.csrf && json.csrf.value) {
-      tokenHash = json.csrf.value;
-      $("input[name=csrf_test_name]").val(tokenHash);
-    }
-  }
-
+  /* Durasi toast berbeda antar modul, jadi dibungkus per modul. */
   function toast(message, ok) {
-    if (typeof Swal === "undefined") {
-      alert(message);
-      return;
-    }
-    Swal.mixin({
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 2500,
-      timerProgressBar: true,
-      iconColor: "white",
-      customClass: {
-        popup: (ok ? "bg-success" : "bg-danger") + " text-light toast p-2",
-      },
-      didOpen: function (t) {
-        t.addEventListener("mouseenter", Swal.stopTimer);
-        t.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    }).fire({
-      html:
-        '<div class="toast-content"><i class="far ' +
-        (ok ? "fa-check-circle" : "fa-times-circle") +
-        ' me-2"></i> ' +
-        message +
-        "</div>",
-    });
+    FarmasiCrud.toast(message, ok, TOAST_TIMER);
   }
 
-  function errorPopup(title, text) {
-    if (typeof Swal !== "undefined") {
-      Swal.fire({ icon: "error", title: title, text: text });
-    } else {
-      alert(text);
-    }
-  }
-
+  /* Kartu ringkasan: id elemen -> key di respons stats */
+  var STAT_MAP = {
+    "#stat-total-batch": "totalBatch",
+    "#stat-total-stok": "totalStok",
+    "#stat-hampir": "hampirKadaluarsa",
+    "#stat-kadaluarsa": "kadaluarsa",
+    "#stat-kosong": "kosong",
+  };
   function updateStats(stats) {
-    if (!stats) return;
-    $("#stat-total-batch").text(stats.totalBatch);
-    $("#stat-total-stok").text(stats.totalStok);
-    $("#stat-hampir").text(stats.hampirKadaluarsa);
-    $("#stat-kadaluarsa").text(stats.kadaluarsa);
-    $("#stat-kosong").text(stats.kosong);
+    FarmasiCrud.updateStats(STAT_MAP, stats);
   }
 
   /* ============================================================
@@ -83,7 +47,7 @@ jQuery(document).ready(function () {
   if (hasSelect2) {
     $("#filter-id-obat").select2({
       theme: "bootstrap-5",
-      width: "style",
+      width: "100%",
       placeholder: "-- Semua Obat --",
       allowClear: true,
     });
@@ -114,89 +78,48 @@ jQuery(document).ready(function () {
   /* ============================================================
    * DATATABLES
    * ============================================================ */
-  var column = $.parseJSON($("#dt-stok-column").html() || "[]");
-  var url = $("#dt-stok-url").text();
-
-  var settings = {
-    processing: true,
-    serverSide: true,
-    scrollX: true,
-    ajax: {
-      url: url,
-      type: "POST",
-      data: function (d) {
-        d.csrf_test_name = csrfToken();
+  var table = $("#table-stok-obat").DataTable(
+    FarmasiCrud.tableSettings({
+      spanPrefix: "dt-stok",
+      zeroRecords: "Data batch tidak ditemukan",
+      loadErrorMessage: "Gagal memuat data batch dari server.",
+      filters: function (d) {
         d.filter_id_obat = $("#filter-id-obat").val() || "";
         d.filter_status = $("#filter-status").val() || "";
       },
-      dataSrc: function (json) {
-        syncCsrf(json);
-        if (json.status === "error" && json.message) {
-          errorPopup("Gagal Memuat Data", json.message);
+      rowCallback: function (nRow, aoData) {
+        /* Kolom Stok (index 5): tandai bila kosong */
+        var stok = parseInt(aoData["stok"]) || 0;
+        if (stok <= 0) {
+          $("td", nRow)
+            .eq(5)
+            .html('<span class="badge bg-secondary">0</span>');
+        } else {
+          $("td", nRow).eq(5).addClass("text-end fw-bold");
         }
-        return json.data || [];
-      },
-      error: function (xhr) {
-        console.error(xhr.responseText);
-        errorPopup("Terjadi Kesalahan", "Gagal memuat data batch dari server.");
-      },
-    },
-    oLanguage: {
-      sLengthMenu: "_MENU_ baris per halaman",
-      sSearch: "Cari: _INPUT_",
-      sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-      sInfoEmpty: "Tidak ada data",
-      sInfoFiltered: "(disaring dari _MAX_ total data)",
-      sZeroRecords: "Data batch tidak ditemukan",
-      sProcessing: "Memuat...",
-      oPaginate: {
-        sFirst: "Pertama",
-        sPrevious: "Sebelumnya",
-        sNext: "Selanjutnya",
-        sLast: "Terakhir",
-      },
-    },
-    columns: column,
-    fnRowCallback: function (nRow, aoData) {
-      /* Kolom Stok (index 5): tandai bila kosong */
-      var stok = parseInt(aoData["stok"]) || 0;
-      if (stok <= 0) {
-        $("td", nRow)
-          .eq(5)
-          .html('<span class="badge bg-secondary">0</span>');
-      } else {
-        $("td", nRow).eq(5).addClass("text-end fw-bold");
-      }
-      if (aoData["status_batch_raw"] === "kadaluarsa") {
-        $(nRow).addClass("table-danger");
-      } else if (aoData["status_batch_raw"] === "hampir") {
-        $(nRow).addClass("table-warning");
-      }
-    },
-    initComplete: function () {
-      /* Cari hanya saat tekan Enter */
-      var $input = $("#table-stok-obat_filter input");
-      $input.unbind();
-      $input.bind("keyup", function (e) {
-        if (e.keyCode == 13) {
-          table.search(this.value).draw();
+        if (aoData["status_batch_raw"] === "kadaluarsa") {
+          $(nRow).addClass("table-danger");
+        } else if (aoData["status_batch_raw"] === "hampir") {
+          $(nRow).addClass("table-warning");
         }
-      });
-    },
-  };
+      },
+    }),
+  );
 
-  var addSetting = $("#dt-stok-setting").html();
-  if (addSetting) {
-    addSetting = $.parseJSON(addSetting);
-    for (var k in addSetting) {
-      settings[k] = addSetting[k];
-    }
-  }
-
-  var table = $("#table-stok-obat").DataTable(settings);
+  FarmasiCrud.bindEnterSearch("#table-stok-obat", table);
 
   $("#filter-id-obat, #filter-status").on("change", function () {
     table.ajax.reload();
+  });
+
+  $("#btn-cari-filter").on("click", function () {
+    table.ajax.reload();
+  });
+
+  $("#btn-reset-filter").on("click", function () {
+    $("#filter-id-obat").val("").trigger(hasSelect2 ? "change.select2" : "change");
+    $("#filter-status").val("");
+    table.search("").ajax.reload();
   });
 
   /* ============================================================
@@ -204,26 +127,13 @@ jQuery(document).ready(function () {
    * ============================================================ */
   var $form = $("#form-stok-obat");
 
+  /* Wrapper: helper bersama menerima $form dan hasSelect2 sebagai argumen. */
   function clearErrors() {
-    $form.find(".is-invalid").removeClass("is-invalid");
-    $form.find(".invalid-feedback").text("").hide();
+    FarmasiCrud.clearErrors($form);
   }
 
   function showErrors(errors) {
-    clearErrors();
-    var first = null;
-    $.each(errors || {}, function (field, msg) {
-      var $el = $form.find('[name="' + field + '"]');
-      $el.addClass("is-invalid");
-      if (hasSelect2 && $el.hasClass("select2-hidden-accessible")) {
-        $el.next(".select2").find(".select2-selection").addClass("is-invalid");
-      }
-      if ($el.next(".flatpickr-input, .form-control").length && $el.attr("type") === "hidden") {
-        $el.next().addClass("is-invalid");
-      }
-      $("#err-" + field).text(msg).show();
-      if (!first) first = $el;
-    });
+    FarmasiCrud.showErrors($form, errors, hasSelect2);
   }
 
   function setObat(val) {
@@ -312,15 +222,8 @@ jQuery(document).ready(function () {
 
   $("#btn-add-batch").on("click", function () {
     resetForm();
-    /* Tanggal masuk default hari ini */
-    var today = new Date();
-    var ymd =
-      today.getFullYear() +
-      "-" +
-      String(today.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(today.getDate()).padStart(2, "0");
-    setDate(fpMasuk, $("#batch-tgl-masuk"), ymd);
+    /* Tanggal masuk default hari ini ("today" dikenali flatpickr) */
+    setDate(fpMasuk, $("#batch-tgl-masuk"), "today");
     /* Bila filter obat aktif, pakai sebagai default */
     var filterObat = $("#filter-id-obat").val();
     if (filterObat) setObat(filterObat);
