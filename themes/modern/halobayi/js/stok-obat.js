@@ -86,7 +86,8 @@ jQuery(document).ready(function () {
       filters: function (d) {
         d.filter_id_obat = $("#filter-id-obat").val() || "";
         d.filter_status = $("#filter-status").val() || "";
-      },
+        d.filter_tahun = $("#filter-tahun").val() || "";
+},
       rowCallback: function (nRow, aoData) {
         /* Kolom Stok (index 5): tandai bila kosong */
         var stok = parseInt(aoData["stok"]) || 0;
@@ -108,7 +109,7 @@ jQuery(document).ready(function () {
 
   FarmasiCrud.bindEnterSearch("#table-stok-obat", table);
 
-  $("#filter-id-obat, #filter-status").on("change", function () {
+  $("#filter-id-obat, #filter-status, #filter-tahun").on("change", function () {
     table.ajax.reload();
   });
 
@@ -119,8 +120,9 @@ jQuery(document).ready(function () {
   $("#btn-reset-filter").on("click", function () {
     $("#filter-id-obat").val("").trigger(hasSelect2 ? "change.select2" : "change");
     $("#filter-status").val("");
+    $("#filter-tahun").val("");
     table.search("").ajax.reload();
-  });
+});
 
   /* ============================================================
    * FORM MODAL - Tambah / Edit
