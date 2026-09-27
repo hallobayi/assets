@@ -93,7 +93,91 @@ $(document).ready(function() {
 
     loadKomponenTagihan();
 
+    /* Pilihan setelah tagihan lunas: cetak nota (PDF) atau kirim nota ke WhatsApp pasien*/
+    function pilihanNota(noInvoice, judul, pesan) {
+        if (!noInvoice) {
+            Swal.fire('Nota tidak ditemukan', 'Tagihan sudah lunas, tetapi nomor nota tidak ditemukan.', 'warning');
+            return;
+        }
+        Swal.fire({
+            title: judul || 'Tagihan Sudah Lunas',
+            html: (pesan ? pesan + '<br>' : '') + 'No. Nota: <b>' + $('<div>').text(noInvoice).html() + '</b>',
+            icon: 'success',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            denyButtonColor: '#25D366',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa fa-print"></i> Cetak ke Printer',
+            denyButtonText: '<i class="fab fa-whatsapp"></i> Kirim ke WhatsApp',
+            cancelButtonText: 'Tutup'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                cetakNotaRawbt(noInvoice);
+            } else if (result.isDenied) {
+                kirimNotaWa(noInvoice);
+            }
+        });
+    }
+
+    /* Cetak nota langsung ke printer thermal via aplikasi Android RawBT (lihat vendors/rawbt).
+       Di perangkat non-Android (tanpa RawBT) tetap membuka nota PDF.*/
+    function cetakNotaRawbt(noInvoice) {
+        if (!/android/i.test(navigator.userAgent)) {
+            /* Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker*/
+            window.open(window.location.origin + '/kasir/generateNotaBayar?no_invoice=' + encodeURIComponent(noInvoice), '_blank');
+            return;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: window.location.origin + "/kasir/notaRawbt",
+            data: { no_invoice: noInvoice },
+            dataType: "json",
+            cache: false,
+            success: function(response) {
+                if (!response.status) {
+                    Swal.fire('Gagal!', response.message, 'error');
+                    return;
+                }
+                window.location.href = 'intent:base64,' + response.data + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+            },
+            error: function() {
+                Swal.fire('Error!', 'Terjadi kesalahan saat menyiapkan nota untuk printer.', 'error');
+            }
+        });
+    }
+
+    function kirimNotaWa(noInvoice) {
+        var requestData = { no_invoice: noInvoice };
+        requestData[$('.csrf_token').attr('name')] = $('.csrf_token').val();
+
+        Swal.fire({
+            title: 'Mengirim nota...',
+            allowOutsideClick: false,
+            didOpen: function() { Swal.showLoading(); }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: window.location.origin + "/kasir/kirimNotaWa",
+            data: requestData,
+            dataType: "json",
+            success: function(response) {
+                Swal.fire(response.status ? 'Terkirim!' : 'Gagal!', response.message, response.status ? 'success' : 'error');
+            },
+            error: function() {
+                Swal.fire('Error!', 'Terjadi kesalahan saat mengirim nota ke WhatsApp.', 'error');
+            }
+        });
+    }
+
     $("#konfirmasi-pembayaran").on("click", function() {
+        if ($("#status_bayar_hidden").val() === 'lunas') {
+            pilihanNota($("#no_invoice_hidden").val());
+            return;
+        }
+
         var no_reg = $("#noreg_hidden").val();
         var id_pasien = $("#id_pasien_hidden").val();
         var diskonKlinik = $("#diskonKlinikKalkulasi").val() || 0;
@@ -128,21 +212,11 @@ $(document).ready(function() {
                     dataType: "json",
                     success: function(response) {
                         if (response.status) {
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message,
-                                icon: 'success',
-                                showCancelButton: !!response.url_nota,
-                                confirmButtonColor: '#3085d6',
-                                cancelButtonColor: '#6c757d',
-                                confirmButtonText: response.url_nota ? '<i class="fa fa-print"></i> Cetak Nota' : 'OK',
-                                cancelButtonText: 'Selesai'
-                            }).then((result) => {
-                                /* Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker*/
-                                if (result.isConfirmed && response.url_nota) {
-                                    window.open(response.url_nota, '_blank');
-                                }
-                            });
+                            /* Tandai lunas di halaman supaya klik berikutnya langsung ke pilihan nota*/
+                            $("#status_bayar_hidden").val('lunas');
+                            $("#no_invoice_hidden").val(response.no_invoice);
+                            $("#konfirmasi-pembayaran").html('<i class="fa fa-print"></i> Cetak / Kirim Nota');
+                            pilihanNota(response.no_invoice, 'Berhasil!', response.message);
                         } else {
                             Swal.fire(
                                 'Gagal!',
