@@ -123,7 +123,13 @@ $(document).ready(function() {
     /* Cetak nota langsung ke printer thermal via aplikasi Android RawBT (lihat vendors/rawbt).
        Di perangkat non-Android (tanpa RawBT) tetap membuka nota PDF.*/
     function cetakNotaRawbt(noInvoice) {
-        if (!/android/i.test(navigator.userAgent)) {
+        /* Deteksi Android. Sebagian tablet Android memakai UA "desktop mode" tanpa kata "android",
+           jadi cek juga userAgentData.platform dan indikator Linux+touch sebagai fallback.*/
+        var uaData = navigator.userAgentData;
+        var isAndroid = /android/i.test(navigator.userAgent) ||
+            (uaData && /android/i.test(uaData.platform || '')) ||
+            (/\blinux\b/i.test(navigator.userAgent) && 'ontouchstart' in window && !/windows|macintosh|cros/i.test(navigator.userAgent));
+        if (!isAndroid) {
             /* Buka nota lewat klik tombol (gesture) agar tidak diblokir popup blocker*/
             window.open(window.location.origin + '/kasir/generateNotaBayar?no_invoice=' + encodeURIComponent(noInvoice), '_blank');
             return;
@@ -140,7 +146,16 @@ $(document).ready(function() {
                     Swal.fire('Gagal!', response.message, 'error');
                     return;
                 }
-                window.location.href = 'intent:base64,' + response.data + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+                /* Di PWA standalone, mengganti location.href ke intent: gagal senyap.
+                   Gunakan anchor _blank agar intent diserahkan ke browser/OS.*/
+                var intentUrl = 'intent:base64,' + response.data + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+                var a = document.createElement('a');
+                a.href = intentUrl;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
             },
             error: function() {
                 Swal.fire('Error!', 'Terjadi kesalahan saat menyiapkan nota untuk printer.', 'error');
