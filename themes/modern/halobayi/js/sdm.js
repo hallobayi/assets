@@ -145,8 +145,17 @@ $(document).ready(function () {
       return weeks;
     };
 
+    /* Kode CUTI diambil dari metadata (default C), dipakai penanda cell dan
+       varian pola pada dialog simulasi. */
+    var kodeCuti = String(
+      (jadwalMeta.simulasi && jadwalMeta.simulasi.kode_cuti) || "C"
+    ).toUpperCase();
+
+    /* Hari off ditandai warna supaya kebaca sekilas: libur merah, cuti oranye */
     var tandaiLibur = function ($select) {
-      $select.toggleClass("bg-danger text-white", $select.val() === "L");
+      var kode = $select.val();
+      $select.toggleClass("bg-danger text-white", kode === "L");
+      $select.toggleClass("bg-warning", kode === kodeCuti && kode !== "L");
     };
 
     var buildSelectShift = function (nik, iso, minggu, terpilih) {
@@ -548,12 +557,451 @@ $(document).ready(function () {
         });
     };
 
+    /* ===================================================================
+       Simulasi pola dinas berotasi (rotating roster)
+
+       Pola dasar satu minggu (Senin s.d. Minggu) = L-M-M-S-S-P-P, lalu tiap
+       baris pegawai berikutnya digeser satu hari ke kanan:
+
+         Baris 1 : L  M  M  S  S  P  P
+         Baris 2 : P  L  M  M  S  S  P
+         Baris 3 : P  P  L  M  M  S  S
+         ...      (baris 8 kembali ke Baris 1)
+
+       Rumusnya:
+         kode  = pola[ (nomorHariAbsolut - geser) mod jumlahPola ]
+         geser = indeksPegawai * geserPegawai + nomorMinggu * geserMinggu
+
+       nomorHariAbsolut dihitung dari Senin 5 Januari 1970, indeksPegawai =
+       urutan baris pada tbody (jadi ikut hasil drag-and-drop). Memakai nomor
+       hari absolut, bukan indeks hari dalam minggu, supaya pola yang panjangnya
+       bukan 7 (varian CUTI = siklus 8 hari) tetap maju antar minggu; untuk pola
+       7 hari hasilnya identik karena nomorHariAbsolut mod 7 = indeks hari.
+
+       geserMinggu default 0 supaya deretan hari tiap pegawai bersambung antar
+       minggu dan jumlah shift tiap pegawai persis sama; isi 1 kalau libur juga
+       ingin berpindah tiap minggu.
+
+       Varian CUTI (checkbox pada dialog) menyisipkan kode CUTI setelah L
+       sehingga pegawai dapat dua hari off berurutan. Kode CUTI harus ada di
+       master shift, kalau tidak checkbox-nya dimatikan: detail jadwal disimpan
+       sebagai id_shift sehingga kode di luar master tidak mungkin tersimpan.
+
+       Blok shift di atas sama persis tiap minggu. Yang berputar adalah URUTAN
+       PEGAWAI-nya (checkbox "Putar urutan pegawai"), mengikuti pola jadwal
+       Excel: baris 1 dan baris 3 turun ke dua baris paling bawah, sisanya naik
+       satu. Lihat rotasiUrutanPegawai().
+
+       Hasil simulasi hanya mengisi dropdown di layar, event change TIDAK
+       dipicu sehingga tidak ada auto-save per cell. Penyimpanan tetap lewat
+       tombol Simpan Jadwal.
+       =================================================================== */
+    var $btnSimulasiJadwal = $("#btn-simulasi-jadwal-pegawai");
+    var POLA_BAWAAN = ["L", "M", "M", "SI", "SO", "P", "P"];
+    var POLA_BAWAAN_CUTI = ["L", "C", "M", "M", "SI", "SO", "P", "P"];
+
+    var simulasiConfig = $.extend(
+      {
+        pola: POLA_BAWAAN,
+        pola_cuti: POLA_BAWAAN_CUTI,
+        kode_cuti: kodeCuti,
+        cuti_tersedia: false,
+        url_shift: "",
+        geser_pegawai: 1,
+        geser_minggu: 0,
+      },
+      jadwalMeta.simulasi || {}
+    );
+
+    var polaAtauBawaan = function (pola, bawaan) {
+      return $.isArray(pola) && pola.length ? pola.slice() : bawaan.slice();
+    };
+
+    /* Preset dibekukan di sini karena simulasiConfig.pola ikut berubah
+       mengikuti pola terakhir yang dipakai operator. */
+    var POLA_PRESET = {
+      biasa: polaAtauBawaan(simulasiConfig.pola, POLA_BAWAAN),
+      cuti: polaAtauBawaan(simulasiConfig.pola_cuti, POLA_BAWAAN_CUTI),
+    };
+    simulasiConfig.pola = POLA_PRESET.biasa.slice();
+    simulasiConfig.pakai_cuti = false;
+    simulasiConfig.putar_urutan = true;
+
+    var modPositif = function (n, m) {
+      return ((n % m) + m) % m;
+    };
+
+    /* Nomor hari dan minggu absolut dihitung dari Senin 5 Januari 1970 supaya
+       pola tetap bersambung ketika periode pindah bulan atau tahun. */
+    var ANCHOR_SENIN = Date.UTC(1970, 0, 5);
+    var nomorHariAbsolut = function (d) {
+      var utc = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+      return Math.floor((utc - ANCHOR_SENIN) / 86400000);
+    };
+    var nomorMingguAbsolut = function (d) {
+      return Math.floor(nomorHariAbsolut(d) / 7);
+    };
+
+    var parseIsoDate = function (iso) {
+      var bagian = String(iso || "").split("-");
+      if (bagian.length < 3) return null;
+      var d = new Date(
+        parseInt(bagian[0], 10),
+        parseInt(bagian[1], 10) - 1,
+        parseInt(bagian[2], 10)
+      );
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    /* "L-M-M-SI-SO-P-P" atau "L, M, M, ..." menjadi ["L","M","M",...] */
+    var parsePola = function (teks) {
+      return String(teks || "")
+        .toUpperCase()
+        .split(/[^A-Z0-9]+/)
+        .filter(function (kode) {
+          return kode !== "";
+        });
+    };
+
+    /* Rotasi urutan pegawai antar minggu, persis pola jadwal Excel operator:
+       baris 1 dan baris 3 (indeks 0 dan 2) turun ke dua baris paling bawah,
+       sisanya naik satu.
+
+         urutanBaru = [ lama1, lama3, lama4, lama5, lama6, lama2, lama0 ]
+
+       Dua baris terakhir adalah jatah libur Sabtu dan Minggu, jadi aturan ini
+       yang membuat "semua kebagian libur weekend". Permutasinya satu siklus
+       penuh 7 minggu (0 -> 6 -> 4 -> 2 -> 5 -> 3 -> 1 -> 0), jadi tiap pegawai
+       melewati seluruh baris pola tepat sekali per 7 minggu. */
+    var rotasiUrutanPegawai = function (baris) {
+      if (baris.length < 3) return baris.slice();
+      var sisa = baris.filter(function (_, i) {
+        return i !== 0 && i !== 2;
+      });
+      return sisa.concat([baris[2], baris[0]]);
+    };
+
+    /* Susun ulang <tr> satu tbody mengikuti daftar NIK, sekalian sinkronkan
+       data-urutan yang dibaca kumpulkanJadwal() saat Simpan Jadwal. */
+    var susunUlangBaris = function ($tbody, urutanNik) {
+      var perNik = {};
+      $tbody.find("tr[data-nik]").each(function () {
+        perNik[String($(this).attr("data-nik"))] = this;
+      });
+
+      var mingguKe = parseInt($tbody.attr("data-minggu"), 10);
+      if (mingguKe) urutanMingguCache[mingguKe] = {};
+
+      urutanNik.forEach(function (nik, idx) {
+        var tr = perNik[nik];
+        if (!tr) return;
+        $tbody.append(tr);
+        $(tr).attr("data-urutan", idx);
+        if (mingguKe) urutanMingguCache[mingguKe][nik] = idx;
+      });
+    };
+
+    var kodeShiftTersedia = function () {
+      var set = {};
+      shiftList.forEach(function (shift) {
+        set[shift.kode] = true;
+      });
+      return set;
+    };
+
+    /* Urutan baris per minggu sebelum simulasi memutarnya, supaya tombol
+       Batalkan simulasi bisa mengembalikan grid sepenuhnya. */
+    var urutanSebelumSimulasi = null;
+
+    var batalkanSimulasi = function () {
+      $jadwalPegawaiTables.find("select.shift-simulasi").each(function () {
+        var $select = $(this);
+        $select.val($select.attr("data-tersimpan") || "").removeClass("shift-simulasi");
+        tandaiLibur($select);
+      });
+
+      if (urutanSebelumSimulasi) {
+        $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
+          var $tbody = $(this);
+          var minggu = parseInt($tbody.attr("data-minggu"), 10);
+          if (minggu && urutanSebelumSimulasi[minggu]) {
+            susunUlangBaris($tbody, urutanSebelumSimulasi[minggu]);
+          }
+        });
+        urutanSebelumSimulasi = null;
+      }
+
+      infoJadwal("Simulasi dibatalkan, grid kembali ke jadwal tersimpan.", "light");
+    };
+
+    var terapkanSimulasi = function (opsi) {
+      var diisi = 0;
+      var dilewati = 0;
+      var diputar = 0;
+
+      /* Urutan pegawai diputar lebih dulu karena pengisian shift memakai
+         indeks baris. Minggu pertama dipakai apa adanya (hasil drag operator
+         atau urutan tersimpan), minggu berikutnya hasil rotasi beruntun. */
+      if (opsi.putarUrutan) {
+        var $tbodyMinggu = $jadwalPegawaiTables.find("tbody.sortable-tbody");
+        var urutanNik = [];
+
+        /* Snapshot hanya diambil sekali, jadi simulasi berulang tetap bisa
+           dikembalikan ke urutan asli sebelum simulasi pertama. */
+        if (!urutanSebelumSimulasi) {
+          urutanSebelumSimulasi = {};
+          $tbodyMinggu.each(function () {
+            var minggu = parseInt($(this).attr("data-minggu"), 10);
+            if (!minggu) return;
+            var daftar = [];
+            $(this).find("tr[data-nik]").each(function () {
+              daftar.push(String($(this).attr("data-nik")));
+            });
+            urutanSebelumSimulasi[minggu] = daftar;
+          });
+        }
+
+        $tbodyMinggu.eq(0).find("tr[data-nik]").each(function (idx) {
+          urutanNik.push(String($(this).attr("data-nik")));
+          $(this).attr("data-urutan", idx);
+        });
+
+        for (var w = 1; w < $tbodyMinggu.length; w++) {
+          urutanNik = rotasiUrutanPegawai(urutanNik);
+          susunUlangBaris($tbodyMinggu.eq(w), urutanNik);
+          diputar++;
+        }
+      }
+
+      $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
+        $(this)
+          .find("tr[data-nik]")
+          .each(function (indeksPegawai) {
+            $(this)
+              .find("select.shift-jadwal")
+              .each(function () {
+                var $select = $(this);
+                var tanggal = parseIsoDate($select.attr("data-tanggal"));
+                if (!tanggal) return;
+
+                /* Tanpa opsi timpa, shift yang sudah terisi dibiarkan */
+                if (!opsi.timpa && ($select.val() || "") !== "") {
+                  dilewati++;
+                  return;
+                }
+
+                var geser =
+                  indeksPegawai * opsi.geserPegawai +
+                  nomorMingguAbsolut(tanggal) * opsi.geserMinggu;
+                var kode =
+                  opsi.pola[modPositif(nomorHariAbsolut(tanggal) - geser, opsi.pola.length)];
+
+                /* Kode di luar master shift tidak ada di dropdown, lewati saja */
+                if (!$select.find('option[value="' + kode + '"]').length) {
+                  dilewati++;
+                  return;
+                }
+
+                $select.val(kode).addClass("shift-simulasi");
+                tandaiLibur($select);
+                diisi++;
+              });
+          });
+      });
+
+      var pesanPutar = diputar
+        ? " Urutan pegawai diputar pada " + diputar + " minggu berikutnya."
+        : "";
+
+      if (!diisi) {
+        infoJadwal(
+          "Simulasi tidak mengisi cell apa pun" +
+            (dilewati ? " (" + dilewati + " cell dilewati karena sudah terisi)" : "") +
+            ". Centang <b>Timpa shift yang sudah terisi</b> kalau jadwal lama memang mau ditindas.",
+          "warning"
+        );
+        notieAlert("warning", "Tidak ada cell yang diisi simulasi", 3);
+        return;
+      }
+
+      infoJadwal(
+        "Simulasi mengisi <b>" + diisi + "</b> shift" +
+          (dilewati ? ", " + dilewati + " cell dilewati" : "") +
+          "." + pesanPutar +
+          " Hasil ini <b>belum tersimpan</b>, klik <b>Simpan Jadwal</b> untuk menulis ke database. " +
+          '<button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btn-batal-simulasi">Batalkan simulasi</button>',
+        "warning"
+      );
+      notieAlert("success", diisi + " shift terisi dari simulasi (belum tersimpan)", 3);
+    };
+
+    var dialogSimulasi = function () {
+      if (!$jadwalPegawaiTables.find("select.shift-jadwal").length) {
+        Swal.fire(
+          "Grid belum siap",
+          "Grid jadwal belum terbentuk, pastikan master pegawai dan master shift sudah terisi.",
+          "warning"
+        );
+        return;
+      }
+
+      var periode = periodeJadwal();
+      var daftarKode = shiftList
+        .map(function (shift) {
+          return shift.kode;
+        })
+        .join(", ");
+
+      var html =
+        '<div class="text-start" style="font-size:14px;">' +
+        "<p>Grid diisi dengan pola dinas berotasi: baris pegawai pertama memakai pola dasar, " +
+        "baris berikutnya digeser ke kanan sebanyak <i>geser per pegawai</i> hari.</p>" +
+        '<div class="mb-2">' +
+        '<label class="form-label fw-bold mb-1" for="sim-pola">Pola dasar (Senin s.d. Minggu)</label>' +
+        '<input type="text" class="form-control form-control-sm" id="sim-pola" value="' +
+        escHtml(simulasiConfig.pola.join("-")) +
+        '">' +
+        '<div class="form-text">Kode shift tersedia: ' +
+        escHtml(daftarKode) +
+        "</div>" +
+        "</div>" +
+        '<div class="row g-2 mb-2">' +
+        '<div class="col-6">' +
+        '<label class="form-label fw-bold mb-1" for="sim-geser-pegawai">Geser per pegawai</label>' +
+        '<input type="number" class="form-control form-control-sm" id="sim-geser-pegawai" value="' +
+        escHtml(simulasiConfig.geser_pegawai) +
+        '">' +
+        "</div>" +
+        '<div class="col-6">' +
+        '<label class="form-label fw-bold mb-1" for="sim-geser-minggu">Geser per minggu</label>' +
+        '<input type="number" class="form-control form-control-sm" id="sim-geser-minggu" value="' +
+        escHtml(simulasiConfig.geser_minggu) +
+        '">' +
+        '<div class="form-text">0 = pola bersambung antar minggu</div>' +
+        "</div>" +
+        "</div>" +
+        '<div class="form-check">' +
+        '<input class="form-check-input" type="checkbox" id="sim-cuti"' +
+        (simulasiConfig.cuti_tersedia ? "" : " disabled") +
+        (simulasiConfig.pakai_cuti && simulasiConfig.cuti_tersedia ? " checked" : "") +
+        ">" +
+        '<label class="form-check-label" for="sim-cuti">Sertakan CUTI (' +
+        escHtml(simulasiConfig.kode_cuti) +
+        ") pada pola dasar" +
+        "</label>" +
+        '<div class="form-text">' +
+        (simulasiConfig.cuti_tersedia
+          ? "CUTI disisipkan setelah L, siklus jadi " +
+            POLA_PRESET.cuti.length +
+            " hari sehingga pola ikut bergeser tiap minggu."
+          : "Kode <b>" +
+            escHtml(simulasiConfig.kode_cuti) +
+            "</b> belum ada di Master Shift" +
+            (simulasiConfig.url_shift
+              ? ', tambahkan dulu di <a href="' +
+                escHtml(simulasiConfig.url_shift) +
+                '" target="_blank">Master Shift</a>.'
+              : ".")) +
+        "</div>" +
+        "</div>" +
+        '<div class="form-check">' +
+        '<input class="form-check-input" type="checkbox" id="sim-putar"' +
+        (simulasiConfig.putar_urutan ? " checked" : "") +
+        ">" +
+        '<label class="form-check-label" for="sim-putar">Putar urutan pegawai tiap minggu</label>' +
+        '<div class="form-text">Baris 1 dan 3 turun ke dua baris terakhir (jatah libur ' +
+        "Sabtu dan Minggu), sisanya naik satu. Minggu pertama dipakai apa adanya, " +
+        "siklus penuh 7 minggu.</div>" +
+        "</div>" +
+        '<div class="form-check mb-2">' +
+        '<input class="form-check-input" type="checkbox" id="sim-timpa">' +
+        '<label class="form-check-label" for="sim-timpa">Timpa shift yang sudah terisi</label>' +
+        "</div>" +
+        '<div class="alert alert-warning py-2 mb-0" style="font-size:13px;">' +
+        "Simulasi hanya mengisi grid di layar. Klik <b>Simpan Jadwal</b> untuk menyimpannya." +
+        (cabangDipilih(periode)
+          ? ""
+          : "<br>Cabang belum dipilih, hasil simulasi belum bisa disimpan.") +
+        "</div>" +
+        "</div>";
+
+      Swal.fire({
+        title: "Simulasi Pola Dinas",
+        html: html,
+        width: 580,
+        showCancelButton: true,
+        confirmButtonText: "Terapkan",
+        cancelButtonText: "Batal",
+        focusConfirm: false,
+        customClass: {
+          confirmButton: "btn btn-warning me-2",
+          cancelButton: "btn btn-secondary",
+        },
+        buttonsStyling: false,
+        didOpen: function () {
+          /* Centang CUTI menukar isi field pola dasar ke preset yang sesuai,
+             jadi pola hasil editan manual memang ikut tertimpa. */
+          $("#sim-cuti").on("change", function () {
+            var preset = $(this).is(":checked") ? POLA_PRESET.cuti : POLA_PRESET.biasa;
+            $("#sim-pola").val(preset.join("-"));
+          });
+        },
+        preConfirm: function () {
+          var pola = parsePola($("#sim-pola").val());
+          if (!pola.length) {
+            Swal.showValidationMessage("Pola dasar tidak boleh kosong");
+            return false;
+          }
+
+          var tersedia = kodeShiftTersedia();
+          var asing = pola.filter(function (kode) {
+            return !tersedia[kode];
+          });
+          if (asing.length) {
+            Swal.showValidationMessage("Kode tidak ada di master shift: " + asing.join(", "));
+            return false;
+          }
+
+          return {
+            pola: pola,
+            geserPegawai: parseInt($("#sim-geser-pegawai").val(), 10) || 0,
+            geserMinggu: parseInt($("#sim-geser-minggu").val(), 10) || 0,
+            timpa: $("#sim-timpa").is(":checked"),
+            pakaiCuti: $("#sim-cuti").is(":checked"),
+            putarUrutan: $("#sim-putar").is(":checked"),
+          };
+        },
+      }).then(function (hasil) {
+        if (hasil.isConfirmed && hasil.value) {
+          simulasiConfig.pola = hasil.value.pola;
+          simulasiConfig.pakai_cuti = hasil.value.pakaiCuti;
+          simulasiConfig.putar_urutan = hasil.value.putarUrutan;
+          simulasiConfig.geser_pegawai = hasil.value.geserPegawai;
+          simulasiConfig.geser_minggu = hasil.value.geserMinggu;
+          terapkanSimulasi(hasil.value);
+        }
+      });
+    };
+
     $jadwalPegawaiTables.on("change", "select.shift-jadwal", function () {
+      /* Diubah manual berarti bukan hasil simulasi lagi, dan langsung disimpan */
+      $(this).removeClass("shift-simulasi");
       tandaiLibur($(this));
       simpanShift($(this));
     });
 
-    $('select[name="bulan"], select[name="tahun"], select[name="cabang"]').on("change", muatJadwal);
+    $jadwalPegawaiInfo.on("click", "#btn-batal-simulasi", batalkanSimulasi);
+
+    /* Ganti periode menarik ulang grid dari server, jadi hasil simulasi yang
+       belum disimpan ikut hilang. Beri tahu supaya tidak terasa seperti bug. */
+    $('select[name="bulan"], select[name="tahun"], select[name="cabang"]').on("change", function () {
+      if ($jadwalPegawaiTables.find("select.shift-simulasi").length) {
+        notieAlert("warning", "Periode berubah, hasil simulasi yang belum disimpan dibuang", 4);
+      }
+      muatJadwal();
+    });
+
+    $btnSimulasiJadwal.on("click", dialogSimulasi);
 
     $btnTampilkanJadwalPegawai.on("click", simpanJadwal);
 
