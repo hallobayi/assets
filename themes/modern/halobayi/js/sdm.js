@@ -233,7 +233,7 @@ $(document).ready(function () {
         week.forEach(function (hari) {
           html += hari.inBulan
             ? "<th>" + hari.tanggal + "</th>"
-            : '<th class="text-muted bg-light">-</th>';
+            : '<th class="tgl-luar-bulan">' + hari.tanggal + "</th>";
         });
         html += "</tr>";
         html += "</thead>";
@@ -243,13 +243,13 @@ $(document).ready(function () {
           html += '<tr data-nik="' + escHtml(pegawai.nik) + '" data-urutan="' + urutan + '">';
           html += '<td class="text-center p-1"><span class="drag-handle" title="Seret untuk mengubah urutan">&#8942;</span></td>';
           html += '<td class="text-start">' + escHtml(pegawai.nama) + "</td>";
+          /* Tanggal sisa bulan tetangga ikut bisa diisi: satu minggu dinas
+             dijadwalkan utuh Senin-Minggu seperti jadwal manual. Minggu itu
+             tampil di grid dua bulan, server menjaga agar barisnya tidak
+             kembar (lihat save_jadwal_pegawai di Sdm.php). */
           week.forEach(function (hari) {
-            if (!hari.inBulan) {
-              html += '<td class="bg-light"></td>';
-              return;
-            }
             html +=
-              "<td>" +
+              (hari.inBulan ? "<td>" : '<td class="tgl-luar-bulan">') +
               buildSelectShift(pegawai.nik, hari.iso, minggu, nilai[pegawai.nik + "|" + hari.iso] || "") +
               "</td>";
           });
@@ -626,6 +626,7 @@ $(document).ready(function () {
     simulasiConfig.pola = POLA_PRESET.biasa.slice();
     simulasiConfig.pakai_cuti = false;
     simulasiConfig.putar_urutan = true;
+    simulasiConfig.geser_putaran = 0;
 
     var modPositif = function (n, m) {
       return ((n % m) + m) % m;
@@ -679,6 +680,52 @@ $(document).ready(function () {
         return i !== 0 && i !== 2;
       });
       return sisa.concat([baris[2], baris[0]]);
+    };
+
+    /* Berapa kali rotasi sampai urutan kembali seperti semula. Untuk 7 pegawai
+       hasilnya 7; jumlah lain bisa berbeda (6 pegawai -> 4, 8 pegawai -> 15). */
+    var ordoRotasiCache = {};
+    var ordoRotasiPegawai = function (jumlah) {
+      if (ordoRotasiCache[jumlah]) return ordoRotasiCache[jumlah];
+
+      var awal = [];
+      for (var i = 0; i < jumlah; i++) awal.push(i);
+
+      var kini = awal.slice();
+      var ordo = 1;
+      for (; ordo < 5000; ordo++) {
+        kini = rotasiUrutanPegawai(kini);
+        if (kini.join(",") === awal.join(",")) break;
+      }
+
+      ordoRotasiCache[jumlah] = ordo;
+      return ordo;
+    };
+
+    /* Urutan pegawai untuk satu minggu kalender.
+
+       Diikat ke nomor minggu absolut, bukan ke minggu ke-1 periode yang sedang
+       dibuka. Satu minggu kalender dipakai bersama dua bulan (28 Sep - 4 Okt
+       tampil sebagai minggu 5 di grid September dan minggu 1 di grid Oktober),
+       jadi pengikatan ini yang membuat urutannya sama persis di kedua grid,
+       tidak terotasi dua kali.
+
+       geserPutaran memindahkan fase seluruh rantai, dipakai kalau operator
+       ingin baris pertama jatuh pada pegawai tertentu. */
+    var urutanMingguKalender = function (dasar, senin, geserPutaran) {
+      var ordo = ordoRotasiPegawai(dasar.length);
+      var putaran = modPositif(nomorMingguAbsolut(senin) + (geserPutaran || 0), ordo);
+
+      var hasil = dasar.slice();
+      for (var i = 0; i < putaran; i++) hasil = rotasiUrutanPegawai(hasil);
+      return hasil;
+    };
+
+    /* Tanggal Senin sebuah tbody minggu, dibaca dari cell paling kiri */
+    var seninMingguTbody = function ($tbody) {
+      return parseIsoDate(
+        $tbody.find("tr[data-nik] select.shift-jadwal").first().attr("data-tanggal")
+      );
     };
 
     /* Susun ulang <tr> satu tbody mengikuti daftar NIK, sekalian sinkronkan
@@ -740,11 +787,10 @@ $(document).ready(function () {
       var diputar = 0;
 
       /* Urutan pegawai diputar lebih dulu karena pengisian shift memakai
-         indeks baris. Minggu pertama dipakai apa adanya (hasil drag operator
-         atau urutan tersimpan), minggu berikutnya hasil rotasi beruntun. */
+         indeks baris. Tiap minggu dihitung dari nomor minggu absolutnya, jadi
+         hasilnya sama walau periode yang dibuka berganti bulan. */
       if (opsi.putarUrutan) {
         var $tbodyMinggu = $jadwalPegawaiTables.find("tbody.sortable-tbody");
-        var urutanNik = [];
 
         /* Snapshot hanya diambil sekali, jadi simulasi berulang tetap bisa
            dikembalikan ke urutan asli sebelum simulasi pertama. */
@@ -761,16 +807,18 @@ $(document).ready(function () {
           });
         }
 
-        $tbodyMinggu.eq(0).find("tr[data-nik]").each(function (idx) {
-          urutanNik.push(String($(this).attr("data-nik")));
-          $(this).attr("data-urutan", idx);
+        var dasarNik = pegawaiList.map(function (pegawai) {
+          return String(pegawai.nik);
         });
 
-        for (var w = 1; w < $tbodyMinggu.length; w++) {
-          urutanNik = rotasiUrutanPegawai(urutanNik);
-          susunUlangBaris($tbodyMinggu.eq(w), urutanNik);
+        $tbodyMinggu.each(function () {
+          var $tbody = $(this);
+          var senin = seninMingguTbody($tbody);
+          if (!senin) return;
+
+          susunUlangBaris($tbody, urutanMingguKalender(dasarNik, senin, opsi.geserPutaran));
           diputar++;
-        }
+        });
       }
 
       $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
@@ -809,9 +857,7 @@ $(document).ready(function () {
           });
       });
 
-      var pesanPutar = diputar
-        ? " Urutan pegawai diputar pada " + diputar + " minggu berikutnya."
-        : "";
+      var pesanPutar = diputar ? " Urutan pegawai disusun ulang pada " + diputar + " minggu." : "";
 
       if (!diisi) {
         infoJadwal(
@@ -910,8 +956,17 @@ $(document).ready(function () {
         ">" +
         '<label class="form-check-label" for="sim-putar">Putar urutan pegawai tiap minggu</label>' +
         '<div class="form-text">Baris 1 dan 3 turun ke dua baris terakhir (jatah libur ' +
-        "Sabtu dan Minggu), sisanya naik satu. Minggu pertama dipakai apa adanya, " +
-        "siklus penuh 7 minggu.</div>" +
+        "Sabtu dan Minggu), sisanya naik satu. Urutan dihitung dari nomor minggu " +
+        "kalender, jadi minggu yang dipakai bersama dua bulan tidak terputar dua kali." +
+        "</div>" +
+        '<div class="mt-2">' +
+        '<label class="form-label fw-bold mb-1" for="sim-geser-putaran">Geser putaran urutan</label>' +
+        '<input type="number" class="form-control form-control-sm" id="sim-geser-putaran" value="' +
+        escHtml(simulasiConfig.geser_putaran) +
+        '">' +
+        '<div class="form-text">Naikkan satu per satu sampai baris pertama jatuh ' +
+        "pada pegawai yang diinginkan.</div>" +
+        "</div>" +
         "</div>" +
         '<div class="form-check mb-2">' +
         '<input class="form-check-input" type="checkbox" id="sim-timpa">' +
@@ -969,6 +1024,7 @@ $(document).ready(function () {
             timpa: $("#sim-timpa").is(":checked"),
             pakaiCuti: $("#sim-cuti").is(":checked"),
             putarUrutan: $("#sim-putar").is(":checked"),
+            geserPutaran: parseInt($("#sim-geser-putaran").val(), 10) || 0,
           };
         },
       }).then(function (hasil) {
@@ -976,6 +1032,7 @@ $(document).ready(function () {
           simulasiConfig.pola = hasil.value.pola;
           simulasiConfig.pakai_cuti = hasil.value.pakaiCuti;
           simulasiConfig.putar_urutan = hasil.value.putarUrutan;
+          simulasiConfig.geser_putaran = hasil.value.geserPutaran;
           simulasiConfig.geser_pegawai = hasil.value.geserPegawai;
           simulasiConfig.geser_minggu = hasil.value.geserMinggu;
           terapkanSimulasi(hasil.value);
