@@ -10,27 +10,79 @@ $(document).ready(function() {
         }
     });
 
+    /* Jenis diskon menentukan satuan input: nominal = Rupiah, persentase = % dari tagihan.*/
+    /* Nilai yang dikirim ke server tetap nominal rupiah (diskon*Kalkulasi).*/
+    function jenisDiskonPersentase() {
+        return $("#jenis_diskon").val() === 'persentase';
+    }
+
+    function angkaDiskon(selector) {
+        return parseFloat(String($(selector).val()).replace(/[^0-9]/g, '')) || 0;
+    }
+
+    /* Tulis ulang isi input sesuai satuan yang berlaku (Rp. 10.000 atau 10)*/
+    function formatInputDiskon(el) {
+        if (jenisDiskonPersentase()) {
+            var persen = parseFloat(String(el.value).replace(/[^0-9]/g, '')) || 0;
+            if (persen > 100) persen = 100;
+            el.value = el.value === '' ? '' : String(persen);
+        } else {
+            el.value = formatRupiah(el.value, "Rp. ");
+        }
+    }
+
     function hitungTotalDiskon() {
-        var valKlinik = parseFloat($("#diskonKlinikKalkulasi").val()) || 0;
-        var valDokter = parseFloat($("#diskonDokterKalkulasi").val()) || 0;
-        var totalDiskon = valKlinik + valDokter;
         var totalTagihan = parseFloat($("#totalTagihan").val()) || 0;
+        var persentase = jenisDiskonPersentase();
+        var inputKlinik = angkaDiskon("#diskonKlinik");
+        var inputDokter = angkaDiskon("#diskonDokter");
+        var valKlinik, valDokter;
+
+        if (persentase) {
+            if (inputKlinik > 100) inputKlinik = 100;
+            if (inputDokter > 100) inputDokter = 100;
+            valKlinik = Math.round(totalTagihan * inputKlinik / 100);
+            valDokter = Math.round(totalTagihan * inputDokter / 100);
+        } else {
+            valKlinik = inputKlinik;
+            valDokter = inputDokter;
+        }
+
+        /* Diskon tidak boleh melebihi tagihan: pangkas mulai dari diskon dokter*/
+        if (valKlinik > totalTagihan) valKlinik = totalTagihan;
+        if (valKlinik + valDokter > totalTagihan) valDokter = totalTagihan - valKlinik;
+
+        var totalDiskon = valKlinik + valDokter;
         var totalBayar = totalTagihan - totalDiskon;
 
-        $("#totale").text(totalDiskon > 0 ? formatRupiah(String(totalDiskon), "Rp. ") : "0");
-        $("#footerDiskon").text(totalDiskon > 0 ? formatRupiah(String(totalDiskon), "Rp. ") : "0");
+        $("#diskonKlinikKalkulasi").val(valKlinik);
+        $("#diskonDokterKalkulasi").val(valDokter);
+
+        var teksDiskon = totalDiskon > 0 ? formatRupiah(String(totalDiskon), "Rp. ") : "0";
+        var totalPersen = totalTagihan > 0 ? Math.round(totalDiskon / totalTagihan * 1000) / 10 : 0;
+        $("#totale").text(persentase && totalPersen > 0 ? teksDiskon + ' (' + totalPersen + '%)' : teksDiskon);
+        $("#footerDiskon").text(teksDiskon);
         $("#totalBayar").text(formatRupiah(String(totalBayar), "Rp. "));
     }
 
+    /* Ganti jenis diskon: ubah label satuan dan hitung ulang dari angka yang sudah diketik*/
+    $("#jenis_diskon").on("change", function() {
+        var label = jenisDiskonPersentase() ? '%' : 'Rupiah';
+        $("#satuanDiskonKlinik, #satuanDiskonDokter").text(label);
+        $("#diskonKlinik").attr('placeholder', jenisDiskonPersentase() ? 'Diskon Klinik (%)' : 'Diskon Klinik');
+        $("#diskonDokter").attr('placeholder', jenisDiskonPersentase() ? 'Diskon Dokter (%)' : 'Diskon Dokter');
+        /* Kosongkan isian supaya angka rupiah tidak terbaca sebagai persen (atau sebaliknya)*/
+        $("#diskonKlinik, #diskonDokter").val('');
+        hitungTotalDiskon();
+    }).trigger("change");
+
     $("#diskonKlinik").on("keyup", function() {
-        this.value = formatRupiah(this.value, "Rp. ");
-        $("#diskonKlinikKalkulasi").val(this.value.replace(/[^0-9]/g, '') || '0');
+        formatInputDiskon(this);
         hitungTotalDiskon();
     });
 
     $("#diskonDokter").on("keyup", function() {
-        this.value = formatRupiah(this.value, "Rp. ");
-        $("#diskonDokterKalkulasi").val(this.value.replace(/[^0-9]/g, '') || '0');
+        formatInputDiskon(this);
         hitungTotalDiskon();
     });
 
