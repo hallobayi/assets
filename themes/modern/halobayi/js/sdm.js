@@ -592,6 +592,15 @@ $(document).ready(function () {
        Excel: baris 1 dan baris 3 turun ke dua baris paling bawah, sisanya naik
        satu. Lihat rotasiUrutanPegawai().
 
+       Dropdown "Kecualikan pegawai" pada dialog menahan sebagian pegawai dari
+       simulasi: cell-nya tidak diisi (walau opsi timpa dicentang), barisnya
+       tidak ikut dirotasi dan dipindah ke bawah, dan indeks baris pola hanya
+       dihitung dari pegawai yang ikut. Hasil simulasi sebelumnya yang masih
+       menempel pada mereka (belum tersimpan) dikosongkan kembali, jadi simulasi
+       ulang dengan exclude benar-benar mengeluarkan mereka dari pola. Isi
+       dropdown = daftar pegawai grid (id_jabatan = 2) dari meta
+       #jadwal-pegawai-meta.
+
        Hasil simulasi hanya mengisi dropdown di layar, event change TIDAK
        dipicu sehingga tidak ada auto-save per cell. Penyimpanan tetap lewat
        tombol Simpan Jadwal.
@@ -609,6 +618,7 @@ $(document).ready(function () {
         url_shift: "",
         geser_pegawai: 1,
         geser_minggu: 0,
+        exclude: [],
       },
       jadwalMeta.simulasi || {}
     );
@@ -627,6 +637,22 @@ $(document).ready(function () {
     simulasiConfig.pakai_cuti = false;
     simulasiConfig.putar_urutan = true;
     simulasiConfig.geser_putaran = 0;
+
+    /* NIK yang dikecualikan operator lewat dropdown pada dialog simulasi.
+       Hanya hidup di layar: tidak dikirim ke server dan hilang kalau halaman
+       dimuat ulang, persis seperti pola dan geser di atas. */
+    simulasiConfig.exclude = $.isArray(simulasiConfig.exclude)
+      ? simulasiConfig.exclude.map(String)
+      : [];
+
+    /* { nik: true } dari daftar NIK, supaya cek per baris/cell murah */
+    var petaExclude = function (daftarNik) {
+      var peta = {};
+      (daftarNik || []).forEach(function (nik) {
+        peta[String(nik)] = true;
+      });
+      return peta;
+    };
 
     var modPositif = function (n, m) {
       return ((n % m) + m) % m;
@@ -786,6 +812,33 @@ $(document).ready(function () {
       var dilewati = 0;
       var diputar = 0;
 
+      /* Pegawai yang dikecualikan dilewati sepenuhnya: cell-nya tidak diisi
+         (walau opsi timpa dicentang) dan barisnya tidak ikut dirotasi, jadi
+         jadwal dinas mereka tetap diisi manual. */
+      var dikecualikan = petaExclude(opsi.exclude);
+      var jmlDikecualikan = (opsi.exclude || []).length;
+
+      /* Pegawai yang baru dikecualikan bisa masih memegang hasil simulasi
+         sebelumnya (cell bertanda .shift-simulasi, belum tersimpan). Cell itu
+         dikembalikan ke nilai tersimpan, kalau tidak exclude-nya tidak kelihatan
+         bekerja: cell lama cuma "dilewati karena sudah terisi" sehingga pegawai
+         itu tampak masih ikut pola. Cell yang diubah manual (sudah tersimpan,
+         tanpa kelas .shift-simulasi) tidak disentuh. */
+      var dibersihkan = 0;
+      if (jmlDikecualikan) {
+        $jadwalPegawaiTables.find("tr[data-nik]").each(function () {
+          var $baris = $(this);
+          if (!dikecualikan[String($baris.attr("data-nik"))]) return;
+
+          $baris.find("select.shift-simulasi").each(function () {
+            var $select = $(this);
+            $select.val($select.attr("data-tersimpan") || "").removeClass("shift-simulasi");
+            tandaiLibur($select);
+            dibersihkan++;
+          });
+        });
+      }
+
       /* Urutan pegawai diputar lebih dulu karena pengisian shift memakai
          indeks baris. Tiap minggu dihitung dari nomor minggu absolutnya, jadi
          hasilnya sama walau periode yang dibuka berganti bulan. */
@@ -807,25 +860,51 @@ $(document).ready(function () {
           });
         }
 
-        var dasarNik = pegawaiList.map(function (pegawai) {
-          return String(pegawai.nik);
-        });
+        var dasarNik = pegawaiList
+          .map(function (pegawai) {
+            return String(pegawai.nik);
+          })
+          .filter(function (nik) {
+            return !dikecualikan[nik];
+          });
 
         $tbodyMinggu.each(function () {
           var $tbody = $(this);
           var senin = seninMingguTbody($tbody);
           if (!senin) return;
 
-          susunUlangBaris($tbody, urutanMingguKalender(dasarNik, senin, opsi.geserPutaran));
+          /* Baris pegawai yang dikecualikan ditaruh paling bawah, urutan DOM-nya
+             dipertahankan. Semua baris tetap kebagian data-urutan 0..n sehingga
+             kumpulkanJadwal() pada Simpan Jadwal tidak menemukan urutan kembar. */
+          var nikDikecualikan = [];
+          $tbody.find("tr[data-nik]").each(function () {
+            var nik = String($(this).attr("data-nik"));
+            if (dikecualikan[nik]) nikDikecualikan.push(nik);
+          });
+
+          susunUlangBaris(
+            $tbody,
+            urutanMingguKalender(dasarNik, senin, opsi.geserPutaran).concat(nikDikecualikan)
+          );
           diputar++;
         });
       }
 
       $jadwalPegawaiTables.find("tbody.sortable-tbody").each(function () {
+        /* Indeks baris pola dihitung hanya dari pegawai yang ikut simulasi,
+           jadi mengecualikan seseorang tidak menggeser pola pegawai lain. */
+        var indeksPegawai = -1;
+
         $(this)
           .find("tr[data-nik]")
-          .each(function (indeksPegawai) {
-            $(this)
+          .each(function () {
+            var $baris = $(this);
+            if (dikecualikan[String($baris.attr("data-nik"))]) {
+              return;
+            }
+            indeksPegawai++;
+
+            $baris
               .find("select.shift-jadwal")
               .each(function () {
                 var $select = $(this);
@@ -858,22 +937,39 @@ $(document).ready(function () {
       });
 
       var pesanPutar = diputar ? " Urutan pegawai disusun ulang pada " + diputar + " minggu." : "";
+      var pesanExclude = jmlDikecualikan
+        ? " <b>" + jmlDikecualikan + "</b> pegawai dikecualikan dari simulasi" +
+          (dibersihkan
+            ? " (" + dibersihkan + " cell hasil simulasi sebelumnya dikosongkan kembali)"
+            : "") +
+          "."
+        : "";
 
       if (!diisi) {
         infoJadwal(
           "Simulasi tidak mengisi cell apa pun" +
             (dilewati ? " (" + dilewati + " cell dilewati karena sudah terisi)" : "") +
-            ". Centang <b>Timpa shift yang sudah terisi</b> kalau jadwal lama memang mau ditindas.",
+            ". Centang <b>Timpa shift yang sudah terisi</b> kalau jadwal lama memang mau ditindas." +
+            pesanExclude +
+            (dibersihkan || diputar
+              ? ' <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btn-batal-simulasi">Batalkan simulasi</button>'
+              : ""),
           "warning"
         );
-        notieAlert("warning", "Tidak ada cell yang diisi simulasi", 3);
+        notieAlert(
+          dibersihkan ? "success" : "warning",
+          dibersihkan
+            ? dibersihkan + " cell pegawai yang dikecualikan dikosongkan"
+            : "Tidak ada cell yang diisi simulasi",
+          3
+        );
         return;
       }
 
       infoJadwal(
         "Simulasi mengisi <b>" + diisi + "</b> shift" +
           (dilewati ? ", " + dilewati + " cell dilewati" : "") +
-          "." + pesanPutar +
+          "." + pesanPutar + pesanExclude +
           " Hasil ini <b>belum tersimpan</b>, klik <b>Simpan Jadwal</b> untuk menulis ke database. " +
           '<button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btn-batal-simulasi">Batalkan simulasi</button>',
         "warning"
@@ -897,6 +993,22 @@ $(document).ready(function () {
           return shift.kode;
         })
         .join(", ");
+
+      /* Opsi dropdown "kecualikan pegawai" diambil dari pegawaiList, yaitu
+         pegawai id_jabatan = 2 (bidan) yang memang punya baris di grid, jadi
+         tidak mungkin mengecualikan orang yang tidak dijadwalkan. Pilihan
+         terakhir operator ikut ter-select ulang lewat simulasiConfig.exclude. */
+      var excludeTerpilih = petaExclude(simulasiConfig.exclude);
+      var opsiExclude = pegawaiList
+        .map(function (pegawai) {
+          var nik = String(pegawai.nik);
+          return (
+            '<option value="' + escHtml(nik) + '"' +
+            (excludeTerpilih[nik] ? " selected" : "") + ">" +
+            escHtml(pegawai.nama) + "</option>"
+          );
+        })
+        .join("");
 
       var html =
         '<div class="text-start" style="font-size:14px;">' +
@@ -925,6 +1037,15 @@ $(document).ready(function () {
         '">' +
         '<div class="form-text">0 = pola bersambung antar minggu</div>' +
         "</div>" +
+        "</div>" +
+        '<div class="mb-2">' +
+        '<label class="form-label fw-bold mb-1" for="sim-exclude">Kecualikan pegawai</label>' +
+        '<select class="form-select form-select-sm" id="sim-exclude" multiple size="5">' +
+        opsiExclude +
+        "</select>" +
+        '<div class="form-text">Pegawai yang dipilih tidak diisi shift oleh simulasi dan ' +
+        "urutan barisnya tidak ikut diputar (barisnya dipindah ke paling bawah), " +
+        "jadi jadwal dinasnya tetap diisi manual. Kosongkan kalau semua pegawai ikut.</div>" +
         "</div>" +
         '<div class="form-check">' +
         '<input class="form-check-input" type="checkbox" id="sim-cuti"' +
@@ -994,6 +1115,20 @@ $(document).ready(function () {
         },
         buttonsStyling: false,
         didOpen: function () {
+          /* select2 dipakai supaya daftar pegawai bisa dicari. dropdownParent
+             harus popup Swal: di luar popup, kotak pencarian select2 tidak bisa
+             diklik karena focus trap Swal menahan fokus di dalam popup. Kalau
+             select2 belum termuat, dropdown tetap jalan sebagai select multiple. */
+          if (typeof $.fn.select2 === "function") {
+            $("#sim-exclude").select2({
+              theme: "bootstrap-5",
+              width: "100%",
+              placeholder: "Semua pegawai ikut simulasi",
+              closeOnSelect: false,
+              dropdownParent: $(Swal.getPopup()),
+            });
+          }
+
           /* Centang CUTI menukar isi field pola dasar ke preset yang sesuai,
              jadi pola hasil editan manual memang ikut tertimpa. */
           $("#sim-cuti").on("change", function () {
@@ -1017,8 +1152,18 @@ $(document).ready(function () {
             return false;
           }
 
+          /* Semua pegawai dikecualikan berarti tidak ada yang bisa diisi pola,
+             dan daftar rotasi jadi kosong. Tahan di sini supaya tidak terlihat
+             seperti simulasi yang gagal tanpa sebab. */
+          var exclude = ($("#sim-exclude").val() || []).map(String);
+          if (pegawaiList.length && exclude.length >= pegawaiList.length) {
+            Swal.showValidationMessage("Minimal satu pegawai harus ikut simulasi");
+            return false;
+          }
+
           return {
             pola: pola,
+            exclude: exclude,
             geserPegawai: parseInt($("#sim-geser-pegawai").val(), 10) || 0,
             geserMinggu: parseInt($("#sim-geser-minggu").val(), 10) || 0,
             timpa: $("#sim-timpa").is(":checked"),
@@ -1035,6 +1180,7 @@ $(document).ready(function () {
           simulasiConfig.geser_putaran = hasil.value.geserPutaran;
           simulasiConfig.geser_pegawai = hasil.value.geserPegawai;
           simulasiConfig.geser_minggu = hasil.value.geserMinggu;
+          simulasiConfig.exclude = hasil.value.exclude;
           terapkanSimulasi(hasil.value);
         }
       });
