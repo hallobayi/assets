@@ -1580,7 +1580,7 @@ jQuery(document).ready(function () {
               success: function (data) {
                 console.log(data);
 
-                if (data.message.status == "ok") {
+                if (data.msg.status == "ok") {
                   $bootbox.modal("hide");
                   const Toast = Swal.mixin({
                     toast: true,
@@ -1600,7 +1600,7 @@ jQuery(document).ready(function () {
                   Toast.fire({
                     html:
                       '<div class="toast-content"><i class="far fa-check-circle me-2"></i> ' +
-                      data.message.message +
+                      data.msg.content +
                       "</div>",
                   });
 
@@ -1612,7 +1612,7 @@ jQuery(document).ready(function () {
                     .find(".modal-body")
                     .prepend(
                       '<div class="alert alert-dismissible alert-danger" role="alert">' +
-                        data.message.message +
+                        data.msg.content +
                         '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>',
                     );
                 }
@@ -1625,8 +1625,8 @@ jQuery(document).ready(function () {
                 var errorMsg = "Terjadi kesalahan pada server";
                 try {
                   var response = JSON.parse(xhr.responseText);
-                  if (response.message && response.message.message) {
-                    errorMsg = response.message.message;
+                  if (response.msg && response.msg.content) {
+                    errorMsg = response.msg.content;
                   }
                 } catch (e) {
                   errorMsg = xhr.responseText || errorMsg;

@@ -287,7 +287,7 @@ $(function () {
                 console.log(data);
 
                 $bootbox.modal("hide");
-                if (data.message.status == "ok") {
+                if (data.msg.status == "ok") {
                   const Toast = Swal.mixin({
                     toast: true,
                     position: "top-end",
@@ -318,7 +318,7 @@ $(function () {
 
                   location.reload();
                 } else {
-                  show_alert("Error !!!", data.message, "error");
+                  show_alert("Error !!!", data.msg.content, "error");
                 }
               },
               error: function (xhr) {
@@ -619,7 +619,7 @@ $(function () {
    -------------------------------------------------------------------
    Masalah yang diperbaiki: tiap halaman meng-cache token CSRF hasil render
    (variabel tokenHash di masing-masing file JS). Begitu hash CSRF di session
-   berganti — login ulang di tab lain, session lama kadaluarsa — semua tab yang
+   berganti â€” login ulang di tab lain, session lama kadaluarsa â€” semua tab yang
    masih terbuka memakai token basi dan tiap POST-nya dibalas 403
    ("DataTables warning: ... Ajax error"). Respons 403 tidak membawa header
    X-CSRF-TOKEN, jadi halaman itu tidak pernah tahu token barunya dan rusak
