@@ -24,6 +24,7 @@ Repository ini menyediakan assets statis (JavaScript libraries, CSS frameworks, 
 **Tech Stack:**
 
 - jQuery
+- Alpine.js
 - Bootstrap
 - Font Awesome
 - Custom vendor libraries
@@ -170,6 +171,16 @@ assets_halobayi/
 │   │   ├── css/
 │   │   ├── webfonts/
 │   │   └── js/
+│   ├── alpinejs/
+│   │   ├── cdn.min.js
+│   │   ├── module.esm.min.js
+│   │   ├── csp/
+│   │   │   └── cdn.min.js
+│   │   └── plugins/
+│   │       ├── persist/cdn.min.js
+│   │       ├── collapse/cdn.min.js
+│   │       ├── mask/cdn.min.js
+│   │       └── ...
 │   └── ...
 ├── css/
 │   ├── custom.css
