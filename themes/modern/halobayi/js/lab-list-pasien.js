@@ -51,30 +51,30 @@ jQuery(document).ready(function ($) {
             {
                 extend: 'copy',
                 text: '<i class="far fa-copy me-1"></i> Salin',
-                className: 'btn btn-sm btn-outline-secondary'
+                className: 'btn btn-sm btn-light border'
             },
             {
                 extend: 'excel',
                 text: '<i class="far fa-file-excel me-1 text-success"></i> Excel',
-                className: 'btn btn-sm btn-outline-secondary',
+                className: 'btn btn-sm btn-light border',
                 title: 'Daftar Pasien Laboratorium'
             },
             {
                 extend: 'csv',
                 text: '<i class="far fa-file-alt me-1 text-info"></i> CSV',
-                className: 'btn btn-sm btn-outline-secondary',
+                className: 'btn btn-sm btn-light border',
                 title: 'Daftar Pasien Laboratorium'
             },
             {
                 extend: 'pdf',
                 text: '<i class="far fa-file-pdf me-1 text-danger"></i> PDF',
-                className: 'btn btn-sm btn-outline-secondary',
+                className: 'btn btn-sm btn-light border',
                 title: 'Daftar Pasien Laboratorium'
             },
             {
                 extend: 'print',
                 text: '<i class="fas fa-print me-1 text-primary"></i> Cetak',
-                className: 'btn btn-sm btn-outline-secondary',
+                className: 'btn btn-sm btn-light border',
                 title: 'Daftar Pasien Laboratorium'
             }
         ],
