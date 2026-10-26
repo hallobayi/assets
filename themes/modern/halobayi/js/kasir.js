@@ -86,6 +86,64 @@ $(document).ready(function() {
         hitungTotalDiskon();
     });
 
+    /* State ringkasan tagihan terakhir dari server. Dipakai untuk memutuskan
+       tombol mana yang tampil dan berapa nominal yang masih harus dibayar.
+       Nilai awal diambil dari input tersembunyi (dirender server) supaya tetap
+       benar bila AJAX tagihan gagal. */
+    var tagihanState = {
+        total: 0,
+        terbayar: 0,
+        belum: Number($("#total_belum_hidden").val()) || 0,
+        jumlah_belum: Number($("#jumlah_belum_hidden").val()) || 0,
+        jumlah_terbayar: 0,
+        status_bayar: $("#status_bayar_hidden").val() || '',
+        no_invoice: $("#no_invoice_hidden").val() || ''
+    };
+
+    function rupiah(n) {
+        return formatRupiah(String(Math.round(Number(n) || 0)), "Rp. ");
+    }
+
+    function escHtml(s) {
+        return $('<div>').text(s === null || s === undefined ? '' : String(s)).html();
+    }
+
+    /* Tampilkan / sembunyikan tombol sesuai sisa tagihan.
+       Flag pendaftaran "lunas" saja TIDAK cukup: dokter bisa menambahkan
+       tindakan setelah pasien membayar, dan item itu belum bertanda terbayar.
+       Karena itu penentunya jumlah_belum, bukan status_bayar. */
+    function sinkronTombolBayar() {
+        var adaBelum = tagihanState.jumlah_belum > 0;
+
+        $("#konfirmasi-pembayaran").toggle(adaBelum);
+        $("#cetak-nota").toggle(!!tagihanState.no_invoice);
+
+        if (adaBelum && tagihanState.status_bayar === 'lunas') {
+            if (!$("#badge-tagihan-baru").length) {
+                $("#konfirmasi-pembayaran").append(
+                    ' <span class="badge bg-light text-dark ms-1" id="badge-tagihan-baru"></span>'
+                );
+            }
+            $("#badge-tagihan-baru").text(tagihanState.jumlah_belum + ' item baru');
+        } else {
+            $("#badge-tagihan-baru").remove();
+        }
+    }
+
+    /* Nominal di halaman selalu dihitung dari SISA tagihan, bukan seluruh
+       baris: item yang sudah terbayar tidak boleh ikut didiskon/ditagih. */
+    function renderRingkasan() {
+        $("#ringkasanTotal").text(rupiah(tagihanState.total));
+        $("#ringkasanTerbayar").text(rupiah(tagihanState.terbayar));
+        $("#ringkasanBelum").text(rupiah(tagihanState.belum));
+
+        $("#totalTagihan").val(tagihanState.belum);
+        $("#footerTagihan").text(rupiah(tagihanState.belum));
+
+        hitungTotalDiskon();
+        sinkronTombolBayar();
+    }
+
     /* Memuat detail komponen tagihan (#tb_komponen_tagihan) via AJAX*/
     function loadKomponenTagihan() {
         var $table = $("#tb_komponen_tagihan");
@@ -101,7 +159,7 @@ $(document).ready(function() {
             requestData[csrfName] = csrfHash;
         }
 
-        $tbody.html('<tr><td colspan="7" class="text-center"><i class="fa fa-spin fa-spinner"></i> Memuat data tagihan...</td></tr>');
+        $tbody.html('<tr><td colspan="8" class="text-center"><i class="fa fa-spin fa-spinner"></i> Memuat data tagihan...</td></tr>');
 
         $.ajax({
             type: "POST",
@@ -109,36 +167,72 @@ $(document).ready(function() {
             data: requestData,
             dataType: "json",
             success: function(response) {
-                $tbody.empty();
-                var totalGround = 0;
+                /* Server membalas {status, data, ringkasan, bayar}. Bentuk
+                   array langsung tetap diterima agar tidak pecah bila ada
+                   pemanggil lain. */
+                var rows = [];
+                if (Array.isArray(response)) {
+                    rows = response;
+                } else if (response && Array.isArray(response.data)) {
+                    rows = response.data;
+                }
 
-                if (!response || !response.length) {
-                    $tbody.html('<tr><td colspan="7" class="text-center">Tidak ada data tagihan.</td></tr>');
+                var ringkasan = (response && response.ringkasan) || {};
+                var bayar = (response && response.bayar) || {};
+
+                tagihanState = {
+                    total: Number(ringkasan.total) || 0,
+                    terbayar: Number(ringkasan.terbayar) || 0,
+                    belum: Number(ringkasan.belum) || 0,
+                    jumlah_belum: Number(ringkasan.jumlah_belum) || 0,
+                    jumlah_terbayar: Number(ringkasan.jumlah_terbayar) || 0,
+                    status_bayar: bayar.status_bayar || $("#status_bayar_hidden").val() || '',
+                    no_invoice: bayar.no_invoice || $("#no_invoice_hidden").val() || ''
+                };
+
+                /* Segarkan hidden input agar handler lain memakai data terbaru */
+                $("#status_bayar_hidden").val(tagihanState.status_bayar);
+                $("#no_invoice_hidden").val(tagihanState.no_invoice);
+
+                $tbody.empty();
+
+                if (!rows.length) {
+                    $tbody.html('<tr><td colspan="8" class="text-center">Tidak ada data tagihan.</td></tr>');
                 } else {
-                    $.each(response, function(i, row) {
+                    $.each(rows, function(i, row) {
                         var hargaJual = parseFloat(row.harga_jual) || 0;
                         var total = parseFloat(row.total) || 0;
-                        totalGround += total;
+                        var terbayar = !!row.sudah_terbayar;
 
-                        var tr = '<tr>' +
+                        /* Kolom Keterangan: penanda item mana yang sudah masuk
+                           nota sebelumnya (mis. tindakan lama setelah dokter
+                           menambahkan layanan baru). */
+                        var keterangan = terbayar
+                            ? '<span class="badge bg-success"><i class="fa fa-check"></i> Sudah Terbayar</span>'
+                            : '<span class="badge bg-warning text-dark">Belum Terbayar</span>';
+
+                        if (terbayar && row.no_invoice_terbayar) {
+                            keterangan += '<div class="small text-muted">' + escHtml(row.no_invoice_terbayar) + '</div>';
+                        }
+
+                        var tr = '<tr' + (terbayar ? ' class="table-light text-muted"' : '') + '>' +
                             '<td>' + (i + 1) + '</td>' +
-                            '<td>' + (row.nama_order || '-') + '</td>' +
-                            '<td>' + (row.nama_dokter || '-') + '</td>' +
-                            '<td>' + (row.satuan || '-') + '</td>' +
-                            '<td>' + (row.jml_order || 0) + '</td>' +
-                            '<td>' + formatRupiah(String(hargaJual), "Rp. ") + '</td>' +
-                            '<td>' + formatRupiah(String(total), "Rp. ") + '</td>' +
+                            '<td>' + escHtml(row.nama_order || '-') + '</td>' +
+                            '<td>' + escHtml(row.nama_dokter || '-') + '</td>' +
+                            '<td>' + escHtml(row.satuan || '-') + '</td>' +
+                            '<td>' + escHtml(row.jml_order || 0) + '</td>' +
+                            '<td>' + rupiah(hargaJual) + '</td>' +
+                            '<td>' + rupiah(total) + '</td>' +
+                            '<td>' + keterangan + '</td>' +
                             '</tr>';
                         $tbody.append(tr);
                     });
                 }
 
-                $("#totalTagihan").val(totalGround);
-                $("#footerTagihan").text(formatRupiah(String(totalGround), "Rp. "));
-                hitungTotalDiskon();
+                renderRingkasan();
             },
             error: function(xhr, status, error) {
-                $tbody.html('<tr><td colspan="7" class="text-center text-danger">Gagal memuat data tagihan.</td></tr>');
+                $tbody.html('<tr><td colspan="8" class="text-center text-danger">Gagal memuat data tagihan.</td></tr>');
             }
         });
     }
@@ -239,8 +333,15 @@ $(document).ready(function() {
         });
     }
 
+    /* Tombol cetak/kirim nota selalu tersedia bila pendaftaran sudah pernah
+       dibayar, termasuk saat masih ada tagihan tambahan yang belum dibayar. */
+    $("#cetak-nota").on("click", function() {
+        pilihanNota($("#no_invoice_hidden").val());
+    });
+
     $("#konfirmasi-pembayaran").on("click", function() {
-        if ($("#status_bayar_hidden").val() === 'lunas') {
+        /* Tidak ada sisa tagihan: tidak ada yang perlu dibayar, langsung ke nota. */
+        if (tagihanState.jumlah_belum <= 0) {
             pilihanNota($("#no_invoice_hidden").val());
             return;
         }
@@ -261,9 +362,17 @@ $(document).ready(function() {
         };
         requestData[csrfName] = csrfHash;
 
+        /* Pendaftaran sudah lunas tetapi ada item baru: beri konteks bahwa
+           yang dibayar hanya tagihan tambahan, bukan seluruh tagihan. */
+        var pesanKonfirmasi = "Apakah Anda yakin ingin memproses pembayaran ini?";
+        if (tagihanState.status_bayar === 'lunas' && tagihanState.jumlah_terbayar > 0) {
+            pesanKonfirmasi = "Pendaftaran ini sudah pernah dibayar. Yang diproses sekarang hanya "
+                + tagihanState.jumlah_belum + " item baru sebesar " + rupiah(tagihanState.belum) + ".";
+        }
+
         Swal.fire({
             title: 'Konfirmasi Pembayaran',
-            text: "Apakah Anda yakin ingin memproses pembayaran ini?",
+            text: pesanKonfirmasi,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -282,7 +391,16 @@ $(document).ready(function() {
                             /* Tandai lunas di halaman supaya klik berikutnya langsung ke pilihan nota*/
                             $("#status_bayar_hidden").val('lunas');
                             $("#no_invoice_hidden").val(response.no_invoice);
-                            $("#konfirmasi-pembayaran").html('<i class="fa fa-print"></i> Cetak / Kirim Nota');
+
+                            /* Diskon sudah dipakai pada nota ini; kosongkan agar
+                               tidak ikut terpakai lagi saat ada tagihan berikutnya. */
+                            $("#diskonKlinik, #diskonDokter").val('');
+                            $("#diskonKlinikKalkulasi, #diskonDokterKalkulasi").val(0);
+
+                            /* Muat ulang tabel: item yang baru dibayar harus
+                               berubah keterangannya menjadi "Sudah Terbayar". */
+                            loadKomponenTagihan();
+
                             pilihanNota(response.no_invoice, 'Berhasil!', response.message);
                         } else {
                             Swal.fire(
