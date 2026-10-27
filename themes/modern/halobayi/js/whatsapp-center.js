@@ -297,6 +297,29 @@
       var $progressText = $("#wa-kirim-progress-text");
       var maxTujuan = parseInt($form.data("max-tujuan"), 10) || 50;
 
+      // Sesi pengirim dipilih di #wa-sesi; 0 berarti "sesi aktif / .env".
+      // Nilainya dikirim apa adanya supaya server memakai sesi yang sama untuk
+      // seluruh antrean, bukan mengundi ulang gateway tiap nomor.
+      function sesiTerpilih() {
+        return $("#wa-sesi").val() || "0";
+      }
+
+      // Modul pengirim menentukan dua hal di server: kolom `module` di log dan
+      // sesi mana yang dipakai (modul yang terikat membawa sesinya sendiri).
+      function modulTerpilih() {
+        return $("#wa-modul").val() || "";
+      }
+
+      // Memilih modul yang sudah punya sesi langsung memindahkan pilihan sesi,
+      // supaya operator tidak perlu mencari perangkatnya sendiri.
+      $("#wa-modul").on("change", function () {
+        var sesi = parseInt($(this).find("option:selected").data("sesi"), 10) || 0;
+
+        if (sesi > 0 && $("#wa-sesi option[value='" + sesi + "']").length) {
+          $("#wa-sesi").val(String(sesi));
+        }
+      });
+
       function hitungKarakter() {
         $counter.text($pesan.val().length + " karakter");
       }
@@ -393,7 +416,8 @@
             $.param({
               tujuan: nomor,
               pesan: $pesan.val(),
-              provider: gateway,
+              sesi: sesiTerpilih(),
+              modul: modulTerpilih(),
               footer: $("#wa-footer").is(":checked") ? "1" : "0",
               typing: $("#wa-typing").is(":checked") ? "1" : "0",
               cek_nomor: $("#wa-cek-nomor").is(":checked") ? "1" : "0",
@@ -482,9 +506,14 @@
         sibuk($btnKirim, "Menyiapkan…");
         $btnCek.prop("disabled", true);
 
-        // Kunci gateway sekali. Tanpa ini, pilihan Auto akan mengundi ulang
-        // pada tiap nomor dan batch terpecah ke beberapa gateway.
-        ajaxPost($form.data("gateway-url"), $.param({ provider: $("#wa-provider").val() || "auto" }))
+        // Kunci sesi sekali. Tanpa ini, pilihan Auto akan mengundi ulang
+        // gateway pada tiap nomor dan batch terpecah ke beberapa perangkat.
+        // Modul ikut dikirim supaya server memakai sesi yang terikat ke modul
+        // itu, bukan sesi aktif.
+        ajaxPost(
+          $form.data("gateway-url"),
+          $.param({ sesi: sesiTerpilih(), modul: modulTerpilih() })
+        )
           .done(function (res) {
             if (res.status !== "ok") {
               popup("error", "Gateway tidak siap", esc(res.message || ""));
@@ -493,9 +522,11 @@
               return;
             }
 
-            $("#wa-kirim-gateway").text("Gateway: " + res.gateway);
+            var label = res.label || res.gateway;
 
-            kirimSatuPerSatu(daftar, res.gateway)
+            $("#wa-kirim-gateway").text("Pengirim: " + label);
+
+            kirimSatuPerSatu(daftar, label)
               .done(function (ringkas) {
                 setProgress(ringkas.hasil.length, daftar.length, ringkas.gateway);
 
@@ -554,109 +585,238 @@
   }
 
   // ------------------------------------------------------------------
-  // Sesi & gateway
+  // Sesi & gateway (tabel whatsapp_session)
   // ------------------------------------------------------------------
+  //
+  // Berbeda dari versi sebelumnya, daftar sesi berasal dari database. Halaman
+  // karena itu tetap terbuka walau gateway mati, dan tombol "periksa" hanya
+  // menyegarkan satu baris — tidak perlu memuat ulang seluruh halaman.
 
   var $sesi = $("#wa-sesi-page");
 
   if ($sesi.length) {
     (function ($page) {
-      var $badge = $("#wa-sesi-badge");
-      var $info = $("#wa-sesi-info");
+      var modalEdit = null;
 
-      function setBadge(teks, kelas) {
-        $badge.removeClass().addClass("badge " + kelas).text(teks);
+      function denganParam(url, params) {
+        return url + (url.indexOf("?") === -1 ? "?" : "&") + $.param(params || {});
       }
 
-      // Operasi sesi dikirim bersama provider terpilih. Tanpa ini, provider
-      // Auto mengundi gateway di tiap panggilan sehingga status/QR yang
-      // diperiksa bisa berasal dari gateway yang berbeda dengan pengirim.
-      function urlSesi(base) {
-        var provider = $("#wa-sesi-provider").val() || "auto";
-
-        return base + (base.indexOf("?") === -1 ? "?" : "&") + $.param({ provider: provider });
+      function setBadge(id, teks, kelas) {
+        $("#wa-sesi-badge-" + id).removeClass().addClass("badge " + kelas).text(teks);
       }
 
-      function providerTerpilih() {
-        return $("#wa-sesi-provider").val() || "auto";
+      function muatUlang(pesan) {
+        if (pesan) {
+          toast(true, pesan);
+        }
+
+        window.setTimeout(function () {
+          window.location.reload();
+        }, 700);
       }
 
-      $("#wa-sesi-cek").on("click", function () {
+      function konfirmasi(judul, teks) {
+        var d = $.Deferred();
+
+        if (typeof Swal === "undefined") {
+          d.resolve(window.confirm(judul + "\n\n" + teks));
+          return d.promise();
+        }
+
+        Swal.fire({
+          icon: "question",
+          title: judul,
+          text: teks,
+          showCancelButton: true,
+          confirmButtonText: "Ya",
+          cancelButtonText: "Batal",
+        }).then(function (r) {
+          d.resolve(!!r.isConfirmed);
+        });
+
+        return d.promise();
+      }
+
+      function ambilModal() {
+        if (modalEdit === null && typeof bootstrap !== "undefined") {
+          var el = document.getElementById("wa-sesi-edit-modal");
+
+          if (!el) {
+            return null;
+          }
+
+          // `.content` di tema ini memakai `position:relative; z-index:2`,
+          // sehingga modal yang dirender di dalamnya terkurung pada stacking
+          // context itu. Backdrop Bootstrap (z-index 1050) ditempel ke <body>,
+          // jadi ia menutupi modal: layar hanya menggelap dan formulir tidak
+          // bisa diisi. Memindahkan modal ke <body> membuat z-index-nya (1055)
+          // berlaku terhadap backdrop, bukan terhadap `.content`.
+          if (el.parentNode !== document.body) {
+            document.body.appendChild(el);
+          }
+
+          modalEdit = new bootstrap.Modal(el);
+        }
+
+        return modalEdit;
+      }
+
+      // Satu handler untuk semua tombol baris. Delegasi dipakai karena baris
+      // bisa berubah setelah halaman dimuat ulang sebagian.
+      $page.on("click", ".wa-sesi-aksi", function () {
         var $btn = $(this);
+        var aksi = String($btn.data("aksi") || "");
+        var id = parseInt($btn.data("id"), 10) || 0;
 
-        sibuk($btn, "Memeriksa…");
+        if (aksi === "status") {
+          sibuk($btn, "");
 
-        ajaxGet(urlSesi($page.data("status-url")))
-          .done(function (res) {
-            if (res.status !== "ok") {
-              setBadge("Gagal", "bg-danger");
-              $info.text(res.message || "Gateway tidak menjawab.");
+          ajaxGet(denganParam($page.data("status-url"), { id: id }))
+            .done(function (res) {
+              if (res.status !== "ok") {
+                setBadge(id, "Gagal", "bg-danger");
+                popup("error", "Pemeriksaan gagal", esc(res.message || ""));
+                return;
+              }
+
+              var d = res.data || {};
+
+              setBadge(
+                id,
+                d.connected ? "Tersambung" : d.status || "belum tersambung",
+                d.connected ? "bg-success" : "bg-warning text-dark"
+              );
+
+              toast(true, d.connected ? "Sesi tersambung" : "Status: " + (d.status || "belum tersambung"));
+            })
+            .fail(ajaxError)
+            .always(function () {
+              selesai($btn);
+            });
+
+          return;
+        }
+
+        if (aksi === "qr") {
+          sibuk($btn, "Mengambil QR…");
+
+          ajaxGet(denganParam($page.data("qr-url"), { id: id }))
+            .done(function (res) {
+              if (res.status !== "ok") {
+                popup("info", "QR belum tersedia", esc(res.message || ""));
+                return;
+              }
+
+              if (res.connected) {
+                popup("success", "Sudah tersambung", esc(res.message || "Sesi sudah aktif."));
+                return;
+              }
+
+              $("#wa-sesi-qr-judul").text($btn.closest("tr").find(".fw-semibold").first().text().trim());
+              $("#wa-sesi-qr-img").attr("src", res.qr);
+              $("#wa-sesi-qr-note").html(
+                "QR diambil pukul " +
+                  esc(new Date().toLocaleTimeString()) +
+                  ". Buka WhatsApp &rarr; Perangkat tertaut &rarr; Tautkan perangkat, lalu pindai."
+              );
+              $("#wa-sesi-qr-card").removeClass("d-none");
+            })
+            .fail(ajaxError)
+            .always(function () {
+              selesai($btn);
+            });
+
+          return;
+        }
+
+        if (aksi === "aktifkan") {
+          konfirmasi("Jadikan sesi aktif?", "Seluruh pengiriman otomatis akan lewat sesi ini.").done(function (ya) {
+            if (!ya) {
               return;
             }
 
-            var d = res.data || {};
+            sibuk($btn, "");
 
-            setBadge(
-              d.connected ? "Tersambung" : d.status || "Belum tersambung",
-              d.connected ? "bg-success" : "bg-warning text-dark"
-            );
+            ajaxPost($page.data("aktif-url"), $.param({ id: id }))
+              .done(function (res) {
+                if (res.status !== "ok") {
+                  popup("error", "Gagal", esc(res.message || ""));
+                  return;
+                }
 
-            var baris = [
-              "<div><strong>Provider:</strong> " + esc(d.provider || "-") + "</div>",
-              "<div><strong>ID sesi:</strong> " + esc(d.id || "-") + "</div>",
-              "<div><strong>Status dari gateway:</strong> " + esc(d.status || "-") + "</div>",
-            ];
-
-            if (d.phoneNumber) {
-              baris.push("<div><strong>Nomor:</strong> " + esc(d.phoneNumber) + "</div>");
-            }
-            if (d.profileName) {
-              baris.push("<div><strong>Profil:</strong> " + esc(d.profileName) + "</div>");
-            }
-
-            $info.html(baris.join(""));
-          })
-          .fail(function (xhr) {
-            setBadge("Gagal", "bg-danger");
-            $info.text("Tidak bisa memeriksa status sesi.");
-            ajaxError(xhr);
-          })
-          .always(function () {
-            selesai($btn);
+                muatUlang(res.message || "Sesi aktif dipindahkan.");
+              })
+              .fail(ajaxError)
+              .always(function () {
+                selesai($btn);
+              });
           });
+
+          return;
+        }
+
+        if (aksi === "hapus") {
+          var nama = String($btn.data("nama") || "sesi ini");
+
+          konfirmasi(
+            "Hapus sesi?",
+            "Baris " + nama + " dihapus dari daftar. Sesi di gateway tidak di-logout, jadi masih bisa dimunculkan lagi lewat Sinkron."
+          ).done(function (ya) {
+            if (!ya) {
+              return;
+            }
+
+            sibuk($btn, "");
+
+            ajaxPost($page.data("hapus-url"), $.param({ id: id }))
+              .done(function (res) {
+                if (res.status !== "ok") {
+                  popup("error", "Gagal", esc(res.message || ""));
+                  return;
+                }
+
+                muatUlang(res.message || "Sesi dihapus.");
+              })
+              .fail(ajaxError)
+              .always(function () {
+                selesai($btn);
+              });
+          });
+
+          return;
+        }
+
+        if (aksi === "edit") {
+          $("#wa-sesi-edit-id").val(id);
+          $("#wa-sesi-edit-nama").val(String($btn.data("nama") || ""));
+          $("#wa-sesi-edit-token").val("");
+          $("#wa-sesi-edit-url").val("");
+          $("#wa-sesi-edit-info").text(
+            String($btn.data("provider") || "") + " · " + String($btn.data("sesi") || "")
+          );
+
+          // Centang ulang modul yang sudah terikat ke sesi ini. Nilainya
+          // datang dari atribut data-modul (daftar id dipisah koma).
+          var dipilih = String($btn.data("modul") || "")
+            .split(",")
+            .map(function (v) {
+              return parseInt(v, 10) || 0;
+            });
+
+          $("#wa-sesi-edit-modul input[type=checkbox]").each(function () {
+            $(this).prop("checked", dipilih.indexOf(parseInt(this.value, 10)) > -1);
+          });
+
+          var modal = ambilModal();
+
+          if (modal) {
+            modal.show();
+          }
+        }
       });
 
-      $("#wa-sesi-qr").on("click", function () {
-        var $btn = $(this);
-
-        sibuk($btn, "Mengambil QR…");
-
-        ajaxGet(urlSesi($page.data("qr-url")))
-          .done(function (res) {
-            if (res.status !== "ok") {
-              popup("info", "QR belum tersedia", esc(res.message || ""));
-              return;
-            }
-
-            if (res.connected) {
-              popup("success", "Sudah tersambung", esc(res.message || "Sesi sudah aktif."));
-              return;
-            }
-
-            $("#wa-sesi-qr-img").attr("src", res.qr);
-            $("#wa-sesi-qr-note").html(
-              "QR diambil pukul " +
-                esc(new Date().toLocaleTimeString()) +
-                ". Buka WhatsApp &rarr; Perangkat tertaut &rarr; Tautkan perangkat, lalu pindai."
-            );
-            $("#wa-sesi-qr-card").removeClass("d-none");
-          })
-          .fail(ajaxError)
-          .always(function () {
-            selesai($btn);
-          });
-      });
-
+      // --- buat sesi -----------------------------------------------------
       $("#wa-sesi-buat").on("click", function () {
         var $btn = $(this);
 
@@ -664,7 +824,10 @@
 
         ajaxPost(
           $page.data("buat-url"),
-          $.param({ nama: $("#wa-sesi-nama").val() || "", provider: providerTerpilih() })
+          $.param({
+            nama: $("#wa-sesi-nama").val() || "",
+            provider: $("#wa-sesi-provider-baru").val() || "",
+          })
         )
           .done(function (res) {
             if (res.status !== "ok") {
@@ -672,14 +835,7 @@
               return;
             }
 
-            popup(
-              "success",
-              "Sesi dibuat",
-              esc(res.message || "") +
-                (res.punya_token
-                  ? "<br><small>Gateway menerbitkan token baru. Salin dari dashboard gateway ke <code>.env</code> sebelum mengirim.</small>"
-                  : "")
-            );
+            muatUlang(res.message || "Sesi dibuat.");
           })
           .fail(ajaxError)
           .always(function () {
@@ -687,50 +843,101 @@
           });
       });
 
-      $("#wa-sesi-daftar").on("click", function () {
+      // --- sinkron & impor ----------------------------------------------
+      $("#wa-sesi-sinkron").on("click", function () {
         var $btn = $(this);
 
-        sibuk($btn, "Memuat…");
+        sibuk($btn, "Menyinkronkan…");
 
-        ajaxGet(urlSesi($page.data("daftar-url")))
+        ajaxPost($page.data("sinkron-url"), $.param({ provider: $("#wa-sesi-provider-baru").val() || "" }))
           .done(function (res) {
             if (res.status !== "ok") {
-              popup("error", "Gagal memuat daftar sesi", esc(res.message || ""));
+              popup("error", "Sinkron gagal", esc(res.message || ""));
               return;
             }
 
-            var rows = res.hasil || [];
-            var $tbody = $("#wa-sesi-daftar-body").empty();
-
-            if (!rows.length) {
-              $tbody.append(
-                '<tr><td colspan="5" class="text-center text-muted py-3">Gateway tidak melaporkan sesi apa pun.</td></tr>'
-              );
-            } else {
-              rows.forEach(function (s) {
-                $tbody.append(
-                  '<tr><td class="ps-3">' +
-                    esc(s.provider || "-") +
-                    "</td><td>" +
-                    esc(s.id || "-") +
-                    "</td><td>" +
-                    badgeSesi(s.connected, s.status) +
-                    "</td><td>" +
-                    esc(s.phoneNumber || "-") +
-                    '</td><td class="pe-3">' +
-                    esc(s.profileName || "-") +
-                    "</td></tr>"
-                );
-              });
-            }
-
-            $("#wa-sesi-daftar-count").text(rows.length + " sesi");
-            $("#wa-sesi-daftar-card").removeClass("d-none");
+            muatUlang(res.message || "Sinkron selesai.");
           })
           .fail(ajaxError)
           .always(function () {
             selesai($btn);
           });
+      });
+
+      $("#wa-sesi-impor").on("click", function () {
+        var $btn = $(this);
+
+        sibuk($btn, "Mengimpor…");
+
+        ajaxPost($page.data("impor-url"), "")
+          .done(function (res) {
+            if (res.status !== "ok") {
+              popup("error", "Impor gagal", esc(res.message || ""));
+              return;
+            }
+
+            muatUlang(res.message || "Sesi diimpor dari .env.");
+          })
+          .fail(ajaxError)
+          .always(function () {
+            selesai($btn);
+          });
+      });
+
+      // --- simpan modal ---------------------------------------------------
+      $("#wa-sesi-edit-simpan").on("click", function () {
+        var $btn = $(this);
+
+        sibuk($btn, "Menyimpan…");
+
+        var payload = {
+          id: $("#wa-sesi-edit-id").val(),
+          nama: $("#wa-sesi-edit-nama").val() || "",
+          token: $("#wa-sesi-edit-token").val() || "",
+          url: $("#wa-sesi-edit-url").val() || "",
+        };
+
+        var $modulBox = $("#wa-sesi-edit-modul");
+
+        // Modul hanya dikirim bila daftarnya memang dirender. Penanda
+        // `modul_kirim` diperlukan karena $.param() membuang array kosong —
+        // tanpa penanda itu, "lepas semua modul" tidak bisa dibedakan dari
+        // "formulir tidak punya daftar modul".
+        if ($modulBox.length) {
+          var modul = [];
+
+          $modulBox.find("input[type=checkbox]:checked").each(function () {
+            modul.push(parseInt(this.value, 10) || 0);
+          });
+
+          payload.modul_kirim = "1";
+          payload.modul = modul;
+        }
+
+        ajaxPost($page.data("simpan-url"), $.param(payload))
+          .done(function (res) {
+            if (res.status !== "ok") {
+              popup("error", "Gagal menyimpan", esc(res.message || ""));
+              return;
+            }
+
+            var modal = ambilModal();
+
+            if (modal) {
+              modal.hide();
+            }
+
+            muatUlang(res.message || "Sesi diperbarui.");
+          })
+          .fail(ajaxError)
+          .always(function () {
+            selesai($btn);
+          });
+      });
+
+      // --- QR: tutup ------------------------------------------------------
+      $("#wa-sesi-qr-tutup").on("click", function () {
+        $("#wa-sesi-qr-card").addClass("d-none");
       });
     })($sesi);
   }
