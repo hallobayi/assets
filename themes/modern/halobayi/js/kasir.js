@@ -239,6 +239,36 @@ $(document).ready(function() {
 
     loadKomponenTagihan();
 
+    /* Nomor tagihan memuat tanggal (PL<cabang>/<yymmdd>/<urut>), jadi nomor
+       harus ditanyakan ulang setiap kali tanggal bayar diubah -- kalau tidak,
+       label di halaman menunjuk nomor untuk tanggal hari ini. */
+    function segarkanNomorTagihan() {
+        var $input = $("#tgl_bayar");
+        if (!$input.length) return;
+
+        var no_reg = $("#noreg_hidden").val();
+        var tgl = $input.val();
+        if (!no_reg || !tgl) return;
+
+        var requestData = { no_reg: no_reg, tgl_bayar: tgl };
+        var csrfName = $('.csrf_token').attr('name');
+        if (csrfName) requestData[csrfName] = $('.csrf_token').val();
+
+        $.ajax({
+            type: "POST",
+            url: window.location.origin + "/kasir/ajaxnomortransaksi",
+            data: requestData,
+            dataType: "json",
+            success: function(response) {
+                if (response && response.status && response.nomor_transaksi) {
+                    $("#nomor_tagihan").text(response.nomor_transaksi);
+                }
+            }
+        });
+    }
+
+    $("#tgl_bayar").on("change", segarkanNomorTagihan);
+
     /* Pilihan setelah tagihan lunas: cetak nota (PDF) atau kirim nota ke WhatsApp pasien*/
     function pilihanNota(noInvoice, judul, pesan) {
         if (!noInvoice) {
@@ -350,6 +380,7 @@ $(document).ready(function() {
         var id_pasien = $("#id_pasien_hidden").val();
         var diskonKlinik = $("#diskonKlinikKalkulasi").val() || 0;
         var diskonDokter = $("#diskonDokterKalkulasi").val() || 0;
+        var tglBayar = $("#tgl_bayar").val() || '';
 
         var csrfName = $('.csrf_token').attr('name');
         var csrfHash = $('.csrf_token').val();
@@ -358,7 +389,8 @@ $(document).ready(function() {
             no_reg: no_reg,
             id_pasien: id_pasien,
             diskonKlinik: diskonKlinik,
-            diskonDokter: diskonDokter
+            diskonDokter: diskonDokter,
+            tgl_bayar: tglBayar
         };
         requestData[csrfName] = csrfHash;
 
@@ -370,9 +402,21 @@ $(document).ready(function() {
                 + tagihanState.jumlah_belum + " item baru sebesar " + rupiah(tagihanState.belum) + ".";
         }
 
+        /* Tanggal bayar boleh mundur (backdate). Tampilkan di dialog supaya
+           kasir sadar pembayaran tidak dicatat pada tanggal hari ini. */
+        var tanggalBayar = tglBayar.replace('T', ' ');
+        if (tanggalBayar !== '') {
+            var hariIni = new Date();
+            var tanggalHariIni = hariIni.getFullYear() + '-'
+                + ('0' + (hariIni.getMonth() + 1)).slice(-2) + '-'
+                + ('0' + hariIni.getDate()).slice(-2);
+            var backdate = tanggalBayar.substring(0, 10) !== tanggalHariIni;
+            pesanKonfirmasi += "\n\nTanggal bayar: " + tanggalBayar + (backdate ? " (backdate)" : "");
+        }
+
         Swal.fire({
             title: 'Konfirmasi Pembayaran',
-            text: pesanKonfirmasi,
+            html: pesanKonfirmasi.replace(/\n/g, '<br>'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -401,7 +445,18 @@ $(document).ready(function() {
                                berubah keterangannya menjadi "Sudah Terbayar". */
                             loadKomponenTagihan();
 
-                            pilihanNota(response.no_invoice, 'Berhasil!', response.message);
+                            /* Nomor nota berikutnya ikut berubah setelah nota
+                               ini terpakai (urut per tanggal). */
+                            segarkanNomorTagihan();
+
+                            /* peringatan diisi server bila jejak backdate gagal
+                               ditulis (mis. tabel audit belum dimigrasi). */
+                            var pesanHasil = response.message;
+                            if (response.peringatan) {
+                                pesanHasil += ' ' + response.peringatan;
+                            }
+
+                            pilihanNota(response.no_invoice, 'Berhasil!', pesanHasil);
                         } else {
                             Swal.fire(
                                 'Gagal!',
